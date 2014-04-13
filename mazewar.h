@@ -52,7 +52,6 @@ SOFTWARE.
 
 #include <boost/uuid/uuid_io.hpp>         // streaming operators etc.
 #include <boost/uuid/uuid_generators.hpp> // generators
-#include <boost/uuid/uuid_io.hpp>         // streaming operators etc.
 /* fundamental constants */
 
 #ifndef	TRUE
@@ -281,12 +280,21 @@ typedef	struct {
 	u_long	body[256];
 }					MW244BPacket;
 
+/* Common message header for all messages */
 typedef struct {
 	unsigned char msgType;
 	unsigned char reserved;
 	unsigned char ratId[16];
 	unsigned int msgId;
 } 				PacketHeader;
+
+/* Join message struct */
+typedef struct {
+	struct PacketHeader header;
+	unsigned char len;
+	std::string name;	
+} 				JoinMessage;
+
 
 typedef	struct {
 	short		eventType;

@@ -41,7 +41,6 @@ int main(int argc, char *argv[])
     unsigned char ratId[17];
     memset(ratId, 0, 17);
     boost::uuids::uuid uuid = boost::uuids::random_generator()();
-    std::cout << uuid << std::endl;
 
     memcpy(ratId, &uuid, 16);
     printf("ratId:");
@@ -49,6 +48,12 @@ int main(int argc, char *argv[])
     	printf("%x", ratId[i]);
     }
     printf("\n");	
+
+    JoinMessage join;
+    join.header.msgType = 0xE0;
+    join.len = 5;
+
+    std::cout << "Test Join message: " << join.len << " " << join.header.msgType;
 
     MazeInit(argc, argv);
 
