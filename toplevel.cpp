@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 
     unsigned char ratId[17];
     memset(ratId, 0, 17);
-    boost::uuids:uuid u;
+    boost::uuids::uuid u;
     memcpy(&u, ratId, 16);
 
     printf("ratId: %s\n", ratId);
