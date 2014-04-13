@@ -38,6 +38,13 @@ int main(int argc, char *argv[])
     strncpy(M->myName_, ratName, NAMESIZE);
     free(ratName);
 
+    unsigned char ratId[17];
+    memset(ratId, 0, 17);
+    boost::uuids:uuid u;
+    memcpy(&u, ratId, 16);
+
+    printf("ratId: %s\n", ratId);
+
     MazeInit(argc, argv);
 
     NewPosition(M);
