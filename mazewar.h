@@ -270,7 +270,7 @@ extern MazewarInstance::Ptr M;
 #define JNRS 	0xE1        /* Join Response Message type */
 #define KPLV 	0xE2		/* KeepAlive Message type */
 #define LEAV	0xE3		/* Leave Message type */
-#define HIT 	0xE4		/* Hit Message type */
+#define HITM 	0xE4		/* Hit Message type */
 #define HTRS 	0xE5		/* Hit Response Message type */
 
 #define UUID_SIZE	16 		/* UUID size for ratId */
@@ -288,12 +288,16 @@ typedef struct _PacketHeader {
 	unsigned char reserved;
 	unsigned char ratId[UUID_SIZE];
 	unsigned int msgId;
+
+	_PacketHeader(void) : msgType(0), reserved(0), msgId(0) {}
 } 	PacketHeader;
 
 /* Join message struct */
 typedef struct _JoinMessage : _PacketHeader {
 	unsigned char len;
 	std::string name;	
+
+	_JoinMessage(void) : msgType(JOIN), len(0) {}
 } 	JoinMessage;
 
 /* Join Response message struct */
@@ -301,6 +305,8 @@ typedef struct _JoinResponseMessage : _PacketHeader {
 	unsigned char senderId[UUID_SIZE];
 	unsigned char len;
 	std::string name;
+
+	_JoinResponseMessage(void) : msgType(JNRS), len(0) {}	
 } 	JoinResponseMessage;
 
 /* KeepAlive message struct */
@@ -313,22 +319,31 @@ typedef struct _KeepAliveMessage : _PacketHeader {
 	unsigned char missilePosX;
 	unsigned char missilePosY;
 	unsigned int missileSeqNum;
+
+	_KeepAliveMessage(void) : msgType(KPLV), ratPosX(0), ratPosY(0), ratDir(0), score(0)
+						, missileFlag(0), missilePosX(0), missilePosY(0), missileSeqNum(0) {}
 }	KeepAliveMessage;
 
 /* Leave message struct */
 typedef struct _LeaveMessage : _PacketHeader {
+	_LeaveMessage(void) : msgType(LEAV)
 }	LeaveMessage;
 
 /* Hit message struct */
 typedef struct _HitMessage : _PacketHeader {
 	unsigned char shooterId[UUID_SIZE];
 	unsigned int missileSeqNum;
+
+	_HitMessage(void) : msgType(HITM), missileSeqNum(0) {}
+
 }	HitMessage;
 
 /* Hit Response message struct */
 typedef struct _HitResponseMessage : _PacketHeader {
 	unsigned char victimId[UUID_SIZE];
 	unsigned int missileSeqNum;
+
+	_HitResponseMessage(void) : msgType(HTRS), missileSeqNum(0) {}
 }	HitResponseMessage;
 
 

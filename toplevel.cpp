@@ -50,10 +50,9 @@ int main(int argc, char *argv[])
     printf("\n");	
 
     JoinMessage join;
-    join.header.msgType = 0xE0;
     join.len = 5;
 
-    printf("Test Join Message len: %x, messageType: %x\n", join.len, join.header.msgType);
+    printf("Test Join Message len: %x, messageType: %x\n", join.len, join.msgType);
 
     MazeInit(argc, argv);
 
