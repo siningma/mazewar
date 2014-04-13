@@ -36,23 +36,11 @@ int main(int argc, char *argv[])
     M = MazewarInstance::mazewarInstanceNew(string(ratName));
     MazewarInstance* a = M.ptr();
     strncpy(M->myName_, ratName, NAMESIZE);
-    free(ratName);
+    free(ratName);	
 
-    unsigned char ratId[17];
-    memset(ratId, 0, 17);
-    boost::uuids::uuid uuid = boost::uuids::random_generator()();
+    JoinMessage join(0, "sma");
 
-    memcpy(ratId, &uuid, 16);
-    printf("ratId:");
-    for (int i =0 ; i < 16; i++) {
-    	printf("%x", ratId[i]);
-    }
-    printf("\n");	
-
-    JoinMessage join;
-    join.len = 5;
-
-    printf("Test Join Message len: %x, messageType: %x\n", join.len, join.msgType);
+    printf("Test Join Message name: %s, messageType: %x\n", join.name, join.header.msgType);
 
     MazeInit(argc, argv);
 

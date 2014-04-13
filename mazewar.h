@@ -284,40 +284,63 @@ typedef	struct {
 
 /* Common message header for all messages */
 typedef struct _PacketHeader {
-	unsigned char msgType;
-	unsigned char reserved;
-	unsigned char ratId[UUID_SIZE];
-	unsigned int msgId;
+	unsigned char msgType_;
+	unsigned char reserved_;
+	unsigned char ratId_[UUID_SIZE + 1];
+	unsigned int msgId_;
+
+	_PacketHeader(unsigned char msgType, unsigned int msgId) : reserved_(0) {
+		msgType_ = msgType;
+		msgId_ = msgId;
+
+		// generate random UUID
+	    memset(ratId_, 0, UUID_SIZE + 1);
+	    boost::uuids::uuid uuid = boost::uuids::random_generator()();
+	    memcpy(ratId_, &uuid, UUID_SIZE);
+	    printf("ratId:");
+	    for (int i =0 ; i < UUID_SIZE; i++) {
+	    	printf("%x", ratId_[i]);
+	    }
+	    printf("\n");
+	}
 } PacketHeader;
 
 /* Join message struct */
 class JoinMessage {
-protected:
+public:
 	PacketHeader header;
 
 	unsigned char len_;
 	std::string name_;	
 
-public:
-	JoinMessage(void) : header.msgType(JOIN), len_(0) {}
+	JoinMessage(unsigned int msgId, std::string name) {
+		header(JOIN, msgId);
+		len_ = name.length();
+		name_ = name;
+	}
 };
 
 /* Join Response message struct */
 class JoinResponseMessage {
-protected:
+public:
 	PacketHeader header;
 
-	unsigned char senderId_[UUID_SIZE];
+	unsigned char senderId_[UUID_SIZE + 1];
 	unsigned char len_;
 	std::string name_;
 
-public:
-	JoinResponseMessage(void) : header.msgType(JNRS), len_(0) {}	
+	JoinResponseMessage(unsigned int msgId, std::string name, unsigned char* senderId) {
+		header(JNRS, msgId);
+		len_ = name.length();
+		name_ = name;
+		memset(senderId_, 0, UUID_SIZE + 1);
+		memcpy(senderId_, senderId, UUID_SIZE);	
+	}	
 };
 
 /* KeepAlive message struct */
 class KeepAliveMessage : public PacketHeader {
-protected:
+public:
 	PacketHeader header;
 
 	unsigned char ratPosX_;
@@ -329,42 +352,60 @@ protected:
 	unsigned char missilePosY_;
 	unsigned int missileSeqNum_;
 
-public:
-	KeepAliveMessage(void) : header.msgType(KPLV), ratPosX_(0), ratPosY_(0), ratDir_(0), score_(0)
-						, missileFlag_(0), missilePosX_(0), missilePosY_(0), missileSeqNum_(0) {}
+	KeepAliveMessage(unsigned int msgId, unsigned char ratPosX, unsigned char ratPosY, unsigned char ratDir, int score,
+					unsigned char missileFlag = 0, unsigned char missilePosX = 0, unsigned char missilePosY = 0, unsigned char missileSeqNum = 0) {
+		header(KPLV, msgId);
+		ratPosX_ = ratPosX;
+		ratPosY_ = ratPosY;
+		ratDir_ = ratDir;
+		score_ = score;
+		missileFlag_ = missileFlag;
+		missilePosX_ = missilePosX;
+		missilePosY_ = missilePosY;
+		missileSeqNum_ = missileSeqNum;
+	}
 };
 
 /* Leave message struct */
 class LeaveMessage : public PacketHeader {
-protected:
+public:
 	PacketHeader header;
 
-public:
-	LeaveMessage(void) : header.msgType(LEAV)
+	LeaveMessage(unsigned int msgId) {
+		header(LEAV, msgId);
+	}
 };
 
 /* Hit message struct */
 class HitMessage : public PacketHeader {
-protected:
+public:
 	PacketHeader header;
 
 	unsigned char shooterId_[UUID_SIZE];
 	unsigned int missileSeqNum_;
 
-public:
-	HitMessage(void) : header.msgType(HITM), missileSeqNum_(0) {
+	HitMessage(unsigned int msgId, unsigned int missileSeqNum, unsigned char* shooterId) {
+		header(HITM, msgId);
+		missileSeqNum_ = missileSeqNum;
+		memset(shooterId_, 0, UUID_SIZE + 1);
+		memcpy(shooterId_, shooterId, UUID_SIZE);
+	}
 };
 
 /* Hit Response message struct */
 class HitResponseMessage : public PacketHeader {
-protected:
+public:
 	PacketHeader header;
 
 	unsigned char victimId_[UUID_SIZE];
 	unsigned int missileSeqNum_;
 
-public:
-	HitResponseMessage(void) : header.msgType(HTRS), missileSeqNum_(0) {}
+	HitResponseMessage(unsigned int msgId, unsigned int missileSeqNum, unsigned char* victimId) {
+		header(HTRS, msgId);
+		missileSeqNum_ = missileSeqNum;
+		memset(victimId_, 0, UUID_SIZE + 1);
+		memcpy(victimId_, victimId, UUID_SIZE);
+	}
 };
 
 
