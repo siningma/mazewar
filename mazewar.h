@@ -282,6 +282,11 @@ typedef	struct {
 	u_long	body[256];
 }					MW244BPacket;
 
+static unsigned int currentMessageId = 0;
+static unsigned int getMessageId() {
+	return currentMessageId++;
+}
+
 /* Common message header for all messages */
 class Message {
 public:

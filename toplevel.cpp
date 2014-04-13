@@ -38,9 +38,11 @@ int main(int argc, char *argv[])
     strncpy(M->myName_, ratName, NAMESIZE);
     free(ratName);	
 
-    JoinMessage join(100, "sma");
-
+    JoinMessage join(getMessageId(), "sma");
     printf("Test Join Message name: %s, messageType: %x, msgId: %d\n", join.name.c_str(), join.msgType, join.msgId);
+
+    printf("Current messageId: %u", getMessageId());
+    printf("Current messageId: %u", messageId);
 
     MazeInit(argc, argv);
 
