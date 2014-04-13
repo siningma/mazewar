@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 
     JoinMessage join(100, "sma");
 
-    printf("Test Join Message name: %s, messageType: %x, msgId: %d\n", join.name_.c_str(), join.msgType_, join.msgId_);
+    printf("Test Join Message name: %s, messageType: %x, msgId: %d\n", join.name.c_str(), join.msgType, join.msgId);
 
     MazeInit(argc, argv);
 

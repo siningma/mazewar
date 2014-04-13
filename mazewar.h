@@ -285,22 +285,22 @@ typedef	struct {
 /* Common message header for all messages */
 class Message {
 public:
-	unsigned char msgType_;
-	unsigned char reserved_;
-	unsigned char ratId_[UUID_SIZE + 1];
-	unsigned int msgId_;
+	unsigned char msgType;
+	unsigned char reserved;
+	unsigned char ratId[UUID_SIZE + 1];
+	unsigned int msgId;
 
-	Message(unsigned char msgType, unsigned int msgId) : reserved_(0) {
-		msgType_ = msgType;
-		msgId_ = msgId;
+	Message(unsigned char msgType, unsigned int msgId) : reserved(0) {
+		this->msgType = msgType;
+		this->msgId = msgId;
 
 		// generate random UUID
-	    memset(ratId_, 0, UUID_SIZE + 1);
+	    memset(this->ratId, 0, UUID_SIZE + 1);
 	    boost::uuids::uuid uuid = boost::uuids::random_generator()();
-	    memcpy(ratId_, &uuid, UUID_SIZE);
+	    memcpy(this->ratId, &uuid, UUID_SIZE);
 	    printf("ratId:");
 	    for (int i =0 ; i < UUID_SIZE; i++) {
-	    	printf("%x", ratId_[i]);
+	    	printf("%x", this->ratId[i]);
 	    }
 	    printf("\n");
 	}
@@ -309,53 +309,53 @@ public:
 /* Join message struct */
 class JoinMessage: public Message {
 public:
-	unsigned char len_;
-	std::string name_;	
+	unsigned char len;
+	std::string name;	
 
 	JoinMessage(unsigned int msgId, std::string name): Message(JOIN, msgId) {
-		len_ = name.length();
-		name_ = name;
+		this->len = name.length();
+		this->name = name;
 	}
 };
 
 /* Join Response message struct */
 class JoinResponseMessage: public Message {
 public:
-	unsigned char senderId_[UUID_SIZE + 1];
-	unsigned char len_;
-	std::string name_;
+	unsigned char senderId[UUID_SIZE + 1];
+	unsigned char len;
+	std::string name;
 
 	JoinResponseMessage(unsigned int msgId, std::string name, unsigned char* senderId): Message(JNRS, msgId) {
-		len_ = name.length();
-		name_ = name;
-		memset(senderId_, 0, UUID_SIZE + 1);
-		memcpy(senderId_, senderId, UUID_SIZE);	
+		this->len = name.length();
+		this->name = name;
+		memset(this->senderId, 0, UUID_SIZE + 1);
+		memcpy(this->senderId, senderId, UUID_SIZE);	
 	}	
 };
 
 /* KeepAlive message struct */
 class KeepAliveMessage: public Message {
 public:
-	unsigned char ratPosX_;
-	unsigned char ratPosY_;
-	unsigned char ratDir_;
-	int score_;
-	unsigned char missileFlag_;
-	unsigned char missilePosX_;
-	unsigned char missilePosY_;
-	unsigned int missileSeqNum_;
+	unsigned char ratPosX;
+	unsigned char ratPosY;
+	unsigned char ratDir;
+	int score;
+	unsigned char missileFlag;
+	unsigned char missilePosX;
+	unsigned char missilePosY;
+	unsigned int missileSeqNum;
 
 	KeepAliveMessage(unsigned int msgId, unsigned char ratPosX, unsigned char ratPosY, unsigned char ratDir, int score,
 					unsigned char missileFlag = 0, unsigned char missilePosX = 0, unsigned char missilePosY = 0, unsigned char missileSeqNum = 0)
 					: Message(KPLV, msgId) {
-		ratPosX_ = ratPosX;
-		ratPosY_ = ratPosY;
-		ratDir_ = ratDir;
-		score_ = score;
-		missileFlag_ = missileFlag;
-		missilePosX_ = missilePosX;
-		missilePosY_ = missilePosY;
-		missileSeqNum_ = missileSeqNum;
+		this->ratPosX = ratPosX;
+		this->ratPosY = ratPosY;
+		this->ratDir = ratDir;
+		this->score = score;
+		this->missileFlag = missileFlag;
+		this->missilePosX = missilePosX;
+		this->missilePosY = missilePosY;
+		this->missileSeqNum = missileSeqNum;
 	}
 };
 
@@ -368,26 +368,26 @@ public:
 /* Hit message struct */
 class HitMessage: public Message {
 public:
-	unsigned char shooterId_[UUID_SIZE];
-	unsigned int missileSeqNum_;
+	unsigned char shooterId[UUID_SIZE];
+	unsigned int missileSeqNum;
 
 	HitMessage(unsigned int msgId, unsigned int missileSeqNum, unsigned char* shooterId): Message(HITM, msgId) {
-		missileSeqNum_ = missileSeqNum;
-		memset(shooterId_, 0, UUID_SIZE + 1);
-		memcpy(shooterId_, shooterId, UUID_SIZE);
+		this->missileSeqNum = missileSeqNum;
+		memset(this->shooterId, 0, UUID_SIZE + 1);
+		memcpy(this->shooterId, shooterId, UUID_SIZE);
 	}
 };
 
 /* Hit Response message struct */
 class HitResponseMessage: public Message {
 public:
-	unsigned char victimId_[UUID_SIZE];
-	unsigned int missileSeqNum_;
+	unsigned char victimId[UUID_SIZE];
+	unsigned int missileSeqNum;
 
 	HitResponseMessage(unsigned int msgId, unsigned int missileSeqNum, unsigned char* victimId): Message(HTRS, msgId) {
-		missileSeqNum_ = missileSeqNum;
-		memset(victimId_, 0, UUID_SIZE + 1);
-		memcpy(victimId_, victimId, UUID_SIZE);
+		this->missileSeqNum = missileSeqNum;
+		memset(this->victimId, 0, UUID_SIZE + 1);
+		memcpy(this->victimId, victimId, UUID_SIZE);
 	}
 };
 
