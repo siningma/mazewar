@@ -49,6 +49,7 @@ SOFTWARE.
 #include "Nominal.h"
 #include "Exception.h"
 #include <string>
+#include <uuid/uuid.h>
 /* fundamental constants */
 
 #ifndef	TRUE
@@ -63,7 +64,7 @@ SOFTWARE.
 /* Feel free to modify.  This is the simplest version we came up with */
 
 /* A unique MAZEPORT will be assigned to your team by the TA */
-#define	MAZEPORT	5000
+#define	MAZEPORT	5010
 /* The multicast group for Mazewar is 224.1.1.1 */
 #define MAZEGROUP       0xe0010101
 #define	MAZESERVICE	"mazewar244B"
@@ -263,12 +264,26 @@ extern MazewarInstance::Ptr M;
 #define	EVENT_INT	17		/* user pressed interrupt key */
 #define	EVENT_TIMEOUT	18		/* nothing happened! */
 
+#define JOIN 	0xE0    	/* Join Message type */
+#define JNRS 	0xE1        /* Join Response Message type */
+#define KPLV 	0xE2		/* KeepAlive Message type */
+#define LEAV	0xE3		/* Leave Message type */
+#define HIT 	0xE4		/* Hit Message type */
+#define HTRS 	0xE5		/* Hit Response Message type */
+
 extern unsigned short	ratBits[];
 /* replace this with appropriate definition of your own */
 typedef	struct {
 	unsigned char type;
 	u_long	body[256];
 }					MW244BPacket;
+
+typedef struct {
+	unsigned char msgType;
+	unsigned char reserved;
+	uuid_t ratId;
+	unsigned int msgId;
+} 				PacketHeader;
 
 typedef	struct {
 	short		eventType;
