@@ -283,7 +283,7 @@ typedef	struct {
 }					MW244BPacket;
 
 /* Common message header for all messages */
-typedef struct _PacketHeader {
+class PacketHeader {
 protected:
 	unsigned char msgType_;
 	unsigned char reserved_;
@@ -291,32 +291,32 @@ protected:
 	unsigned int msgId_;
 
 public:
-	_PacketHeader(unsigned char msgType) : msgType_(msgType), reserved_(0), msgId_(0) {}
-} 	PacketHeader;
+	PacketHeader(unsigned char msgType) : msgType_(msgType), reserved_(0), msgId_(0) {}
+};
 
 /* Join message struct */
-typedef struct _JoinMessage : _PacketHeader {
+class JoinMessage : public PacketHeader {
 protected:
 	unsigned char len_;
 	std::string name_;	
 
 public:
-	_JoinMessage(void) : msgType_(JOIN), len_(0) {}
-} 	JoinMessage;
+	JoinMessage(void) : msgType_(JOIN), len_(0) {}
+};
 
 /* Join Response message struct */
-typedef struct _JoinResponseMessage : _PacketHeader {
+class JoinResponseMessage : public PacketHeader {
 protected:
 	unsigned char senderId_[UUID_SIZE];
 	unsigned char len_;
 	std::string name_;
 
 public:
-	_JoinResponseMessage(void) : msgType_(JNRS), len_(0) {}	
-} 	JoinResponseMessage;
+	JoinResponseMessage(void) : msgType_(JNRS), len_(0) {}	
+};
 
 /* KeepAlive message struct */
-typedef struct _KeepAliveMessage : _PacketHeader {
+class KeepAliveMessage : public PacketHeader {
 protected:
 	unsigned char ratPosX_;
 	unsigned char ratPosY_;
@@ -328,35 +328,35 @@ protected:
 	unsigned int missileSeqNum_;
 
 public:
-	_KeepAliveMessage(void) : msgType_(KPLV), ratPosX_(0), ratPosY_(0), ratDir_(0), score_(0)
+	KeepAliveMessage(void) : msgType_(KPLV), ratPosX_(0), ratPosY_(0), ratDir_(0), score_(0)
 						, missileFlag_(0), missilePosX_(0), missilePosY_(0), missileSeqNum_(0) {}
-}	KeepAliveMessage;
+};
 
 /* Leave message struct */
-typedef struct _LeaveMessage : _PacketHeader {
+class LeaveMessage : public PacketHeader {
 public:
-	_LeaveMessage(void) : msgType_(LEAV)
-}	LeaveMessage;
+	LeaveMessage(void) : msgType_(LEAV)
+};
 
 /* Hit message struct */
-typedef struct _HitMessage : _PacketHeader {
+class HitMessage : public PacketHeader {
 protected:
 	unsigned char shooterId_[UUID_SIZE];
 	unsigned int missileSeqNum_;
 
 public:
-	_HitMessage(void) : msgType_(HITM), missileSeqNum_(0) {
-}	HitMessage;
+	HitMessage(void) : msgType_(HITM), missileSeqNum_(0) {
+};
 
 /* Hit Response message struct */
-typedef struct _HitResponseMessage : _PacketHeader {
+class HitResponseMessage : public PacketHeader {
 protected:
 	unsigned char victimId_[UUID_SIZE];
 	unsigned int missileSeqNum_;
 
 public:
-	_HitResponseMessage(void) : msgType_(HTRS), missileSeqNum_(0) {}
-}	HitResponseMessage;
+	HitResponseMessage(void) : msgType_(HTRS), missileSeqNum_(0) {}
+};
 
 
 typedef	struct {
