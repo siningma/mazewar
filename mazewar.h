@@ -49,7 +49,8 @@ SOFTWARE.
 #include "Nominal.h"
 #include "Exception.h"
 #include <string>
-#include <uuid/uuid.h>
+
+#include <boost/uuid/uuid_io.hpp>         // streaming operators etc.
 /* fundamental constants */
 
 #ifndef	TRUE
@@ -281,7 +282,7 @@ typedef	struct {
 typedef struct {
 	unsigned char msgType;
 	unsigned char reserved;
-	uuid_t ratId;
+	unsigned char ratId[16];
 	unsigned int msgId;
 } 				PacketHeader;
 
