@@ -40,10 +40,15 @@ int main(int argc, char *argv[])
 
     unsigned char ratId[17];
     memset(ratId, 0, 17);
-    boost::uuids::uuid u;
-    memcpy(&u, ratId, 16);
+    boost::uuids::uuid uuid = boost::uuids::random_generator()();
+    std::cout << uuid << std::endl;
 
-    printf("ratId: %s\n", ratId);
+    memcpy(ratId, &uuid, 16);
+    printf("ratId:");
+    for (int i =0 ; i < 16; i++) {
+    	printf("%x", ratId[i]);
+    }
+    printf("\n");	
 
     MazeInit(argc, argv);
 

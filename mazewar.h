@@ -51,6 +51,8 @@ SOFTWARE.
 #include <string>
 
 #include <boost/uuid/uuid_io.hpp>         // streaming operators etc.
+#include <boost/uuid/uuid_generators.hpp> // generators
+#include <boost/uuid/uuid_io.hpp>         // streaming operators etc.
 /* fundamental constants */
 
 #ifndef	TRUE
