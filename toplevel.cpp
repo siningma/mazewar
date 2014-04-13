@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
     join.header.msgType = 0xE0;
     join.len = 5;
 
-    std::cout << "Test Join message: " << join.len << " " << join.header.msgType;
+    printf("Test Join Message len: %x, messageType: %x\n", join.len, join.header.msgType);
 
     MazeInit(argc, argv);
 

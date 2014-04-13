@@ -273,6 +273,8 @@ extern MazewarInstance::Ptr M;
 #define HIT 	0xE4		/* Hit Message type */
 #define HTRS 	0xE5		/* Hit Response Message type */
 
+#define UUID_SIZE	16 		/* UUID size for ratId */
+
 extern unsigned short	ratBits[];
 /* replace this with appropriate definition of your own */
 typedef	struct {
@@ -281,19 +283,53 @@ typedef	struct {
 }					MW244BPacket;
 
 /* Common message header for all messages */
-typedef struct {
+typedef struct _PacketHeader {
 	unsigned char msgType;
 	unsigned char reserved;
-	unsigned char ratId[16];
+	unsigned char ratId[UUID_SIZE];
 	unsigned int msgId;
-} 				PacketHeader;
+} 	PacketHeader;
 
 /* Join message struct */
-typedef struct {
-	struct PacketHeader header;
+typedef struct _JoinMessage : _PacketHeader {
 	unsigned char len;
 	std::string name;	
-} 				JoinMessage;
+} 	JoinMessage;
+
+/* Join Response message struct */
+typedef struct _JoinResponseMessage : _PacketHeader {
+	unsigned char senderId[UUID_SIZE];
+	unsigned char len;
+	std::string name;
+} 	JoinResponseMessage;
+
+/* KeepAlive message struct */
+typedef struct _KeepAliveMessage : _PacketHeader {
+	unsigned char ratPosX;
+	unsigned char ratPosY;
+	unsigned char ratDir;
+	int score;
+	unsigned char missileFlag;
+	unsigned char missilePosX;
+	unsigned char missilePosY;
+	unsigned int missileSeqNum;
+}	KeepAliveMessage;
+
+/* Leave message struct */
+typedef struct _LeaveMessage : _PacketHeader {
+}	LeaveMessage;
+
+/* Hit message struct */
+typedef struct _HitMessage : _PacketHeader {
+	unsigned char shooterId[UUID_SIZE];
+	unsigned int missileSeqNum;
+}	HitMessage;
+
+/* Hit Response message struct */
+typedef struct _HitResponseMessage : _PacketHeader {
+	unsigned char victimId[UUID_SIZE];
+	unsigned int missileSeqNum;
+}	HitResponseMessage;
 
 
 typedef	struct {
