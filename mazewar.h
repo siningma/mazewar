@@ -493,7 +493,7 @@ void MWError(char *);
 Score GetRatScore(RatIndexType);
 char  *GetRatName(RatIndexType);
 void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sockaddr *src_addr, socklen_t *addrlen);
-void ConvertOutgoing(Message *);
+void ConvertOutgoing(RatId ratId, Message msg);
 void ratState(void);
 void manageMissiles(void);
 void DoViewUpdate(void);
