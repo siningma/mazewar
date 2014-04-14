@@ -413,46 +413,58 @@ void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sock
     printf("Message Id: %u\n", msgId);
 
     switch (msgType) {
+    	int cc;
     	case JOIN:
-
-    	break;
+    	{
+    		break;
+    	}
     	case JNRS:
-    	break;
+    	{
+    		break;
+    	}
     	case KPLV:
-    	char payload_buf[14];
-    	memset(payload_buf, 0, 14);
-		cc = recvfrom(socket, payload_buf, 14, 0,
-			        src_addr, addrlen);
-		if (cc <= 0) {
-		    if (cc < 0 && errno != EINTR)
-				perror("event recvfrom");
-		      	continue;
-		}
-		unsigned char ratPosX = payload_buf[0];
-		unsigned char ratPosY = payload_buf[1];
-		unsigned char ratDir = payload_buf[2];
-		int score;
-		memcpy(&score, payload_buf + 3, 4);
-		unsigned char missileFlag = payload_buf[7];
+    	{
+	    	char payload_buf[14];
+	    	memset(payload_buf, 0, 14);
+			cc = recvfrom(socket, payload_buf, 14, 0,
+				        src_addr, addrlen);
+			if (cc <= 0) {
+			    if (cc < 0 && errno != EINTR)
+					perror("event recvfrom");
+			      	return;
+			}
+			unsigned char ratPosX = payload_buf[0];
+			unsigned char ratPosY = payload_buf[1];
+			unsigned char ratDir = payload_buf[2];
+			int score;
+			memcpy(&score, payload_buf + 3, 4);
+			unsigned char missileFlag = payload_buf[7];
 
-		// if missileFlag is not zero, set missile info
-		unsigned char missilePosX = 0;
-		unsigned char missilePosY = 0;
-		unsigned int missileSeqNum = 0;
-		if (missileFlag != 0) {
-			missilePosX = payload_buf[8];
-			missilePosY = payload_buf[9];
-			memcpy(&missileSeqNum, payload_buf + 10, 4);
-		}
-    	p = new KeepAliveMessage(msgId, ratPosX, ratPosY, ratDir, score, missileFlag, missilePosX, missilePosY, missileSeqNum);
-    	break;
+			// if missileFlag is not zero, set missile info
+			unsigned char missilePosX = 0;
+			unsigned char missilePosY = 0;
+			unsigned int missileSeqNum = 0;
+			if (missileFlag != 0) {
+				missilePosX = payload_buf[8];
+				missilePosY = payload_buf[9];
+				memcpy(&missileSeqNum, payload_buf + 10, 4);
+			}
+	    	p = new KeepAliveMessage(msgId, ratPosX, ratPosY, ratDir, score, missileFlag, missilePosX, missilePosY, missileSeqNum);
+	    	break;
+    	}
     	case LEAV:
-    	p = new LeaveMessage(msgId);
-    	break;
+    	{
+    		p = new LeaveMessage(msgId);
+    		break;
+    	}
     	case HITM:
-    	break;
+    	{
+    		break;
+    	}
     	case HTRS:
-    	break;
+    	{
+    		break;
+    	}
     }
 }
 
@@ -549,29 +561,41 @@ void processPacket (MWEvent *eventPacket)
 
 	switch(msg->msgType) {
 		case JOIN:
-		// JoinMessage *joinMsg = (JoinMessage *)msg;
+		{
+			JoinMessage *joinMsg = (JoinMessage *)msg;
 		
-		break;
+			break;
+		}
 		case JNRS:
-		// JoinResponseMessage *joinResponseMsg = (JoinResponseMessage *)msg;
+		{
+			JoinResponseMessage *joinResponseMsg = (JoinResponseMessage *)msg;
 
-		break;
+			break;
+		}
 		case KPLV:
-		// KeepAliveMessage *keepAliveMsg = (KeepAliveMessage *)msg;
+		{
+			KeepAliveMessage *keepAliveMsg = (KeepAliveMessage *)msg;
 
-		break;
+			break;
+		}
 		case LEAV:
-		// LeaveMessage *leaveMsg = (LeaveMessage *)msg;
+		{
+			LeaveMessage *leaveMsg = (LeaveMessage *)msg;
 
-		break;
+			break;
+		}
 		case HITM:
-		// HitMessage *hitMsg = (HitMessage *)msg;
+		{
+			HitMessage *hitMsg = (HitMessage *)msg;
 
-		break;
+			break;
+		}
 		case HTRS:
-		// HitResponseMessage *hitResponseMsg = (HitResponseMessage *)msg;
+		{
+			HitResponseMessage *hitResponseMsg = (HitResponseMessage *)msg;
 
-		break;
+			break;
+		}
 	}
 }
 
