@@ -136,9 +136,9 @@ typedef	char						RatName[NAMESIZE];
 		}
 	};
 
- 	class RatId : public Ordinal<RatId, unsigned char *> {
+ 	class RatId : public Ordinal<RatId, unsigned short> {
 	public:
-		RatId(unsigned char *num) : Ordinal<RatId, unsigned char *>(num) {
+		RatId(unsigned short num) : Ordinal<RatId, unsigned short >(num) {
 		}
 	};
 

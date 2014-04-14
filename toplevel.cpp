@@ -396,7 +396,7 @@ char *GetRatName(RatIndexType ratId)
 /* This is just for the sample version, rewrite your own if necessary */
 void ConvertIncoming(Message *p, int socket, const char* header_buf)
 {
-	unsigned char msgType = header_buf[0]
+	unsigned char msgType = header_buf[0];
 	unsigned char ratId[UUID_SIZE];
 	memset(ratId, 0, UUID_SIZE);
 	memcpy(ratId, header_buf + 2, UUID_SIZE);
@@ -414,7 +414,7 @@ void ConvertIncoming(Message *p, int socket, const char* header_buf)
 
     switch (msgType) {
     	case JOIN:
-    	
+
     	break;
     	case JNRS:
     	break;
@@ -522,27 +522,27 @@ void processPacket (MWEvent *eventPacket)
 
 	switch(msg->msgType) {
 		case JOIN:
-		JoinMessage *joinMsg = (JoinMessage *)msg;
+		// JoinMessage *joinMsg = (JoinMessage *)msg;
 		
 		break;
 		case JNRS:
-		JoinResponseMessage *joinResponseMsg = (JoinResponseMessage *)msg;
+		// JoinResponseMessage *joinResponseMsg = (JoinResponseMessage *)msg;
 
 		break;
 		case KPLV:
-		KeepAliveMessage *keepAliveMsg = (KeepAliveMessage *)msg;
+		// KeepAliveMessage *keepAliveMsg = (KeepAliveMessage *)msg;
 
 		break;
 		case LEAV:
-		LeaveMessage *leaveMsg = (LeaveMessage *)msg;
+		// LeaveMessage *leaveMsg = (LeaveMessage *)msg;
 
 		break;
 		case HITM:
-		HitMessage *hitMsg = (HitMessage *)msg;
+		// HitMessage *hitMsg = (HitMessage *)msg;
 
 		break;
 		case HTRS:
-		HitResponseMessage *hitResponseMsg = (HitResponseMessage *)msg;
+		// HitResponseMessage *hitResponseMsg = (HitResponseMessage *)msg;
 
 		break;
 	}
