@@ -18,6 +18,7 @@ MazewarInstance::Ptr M;
 static Sockaddr         groupAddr;
 #define MAX_OTHER_RATS  (MAX_RATS - 1)
 
+double lastKeepAliveMsgSendTime = 0;
 
 int main(int argc, char *argv[])
 {
@@ -129,6 +130,12 @@ play(void)
 		DoViewUpdate();
 
 		/* Any info to send over network? */
+		// send keep alive message every 200ms
+		double currentTimestamp = getCurrentTime();
+		if (currentTimestamp - lastKeepAliveMsgSendTime >= KEEPALIVE_INTERVAL) {
+			sendKeepAliveMessage();
+			lastKeepAliveMsgSendTime = getCurrentTime();
+		}
 
 	}
 }
@@ -325,7 +332,9 @@ void shoot()
 
 void quit(int sig)
 {
-
+	// Send leave message here
+	sendLeaveMessage();
+	
 	StopWindow();
 	exit(0);
 }
@@ -508,6 +517,41 @@ void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, st
 /* This is just for the sample version, rewrite your own if necessary */
 void ConvertOutgoing(Message *p)
 {
+}
+
+void sendKeepAliveMessage() {
+	KeepAliveMessage keepAliveMsg(getMessageId(), MY_X_LOC, MY_Y_LOC, MY_DIR, MY_SCORE);
+	keepAliveMsg.print();
+
+	unsigned char msg_buf[HEADER_SIZE + 14];
+	memset(msg_buf, 0, HEADER_SIZE + 14);
+	memcpy(msg_buf, keepAliveMsg.msgType, 1);
+	memcpy(msg_buf + 2, keepAliveMsg.ratId, UUID_SIZE);
+	memcpy(msg_buf + 2 + UUID_SIZE, keepAliveMsg.msgId, 4);
+	memcpy(msg_buf + HEADER_SIZE, keepAliveMsg.ratPosX, 1);
+	memcpy(msg_buf + HEADER_SIZE + 1, keepAliveMsg.ratPosY, 1);
+	memcpy(msg_buf + HEADER_SIZE + 2, keepAliveMsg.ratDir, 1);
+	memcpy(msg_buf + HEADER_SIZE + 3, keepAliveMsg.score, 4);
+	memcpy(msg_buf + HEADER_SIZE + 7, keepAliveMsg.missileFlag, 1);
+	memcpy(msg_buf + HEADER_SIZE + 8, keepAliveMsg.missilePosX, 1);
+	memcpy(msg_buf + HEADER_SIZE + 9, keepAliveMsg.missilePosY, 1);
+	memcpy(msg_buf + HEADER_SIZE + 10, keepAliveMsg.missileSeqNum, 4);
+
+	sendto(M->theSocket(), msg_buf, HEADER_SIZE + 14, 0, 
+			(struct sockaddr *)M->myAddr(), sizeof(*M->myAddr()));
+}
+
+void sendLeaveMessage() {
+	LeaveMessage leaveMsg(getMessageId());
+
+	unsigned char msg_buf[HEADER_SIZE];
+	memset(msg_buf, 0, HEADER_SIZE);
+	memcpy(msg_buf, leaveMsg.msgType, 1);
+	memcpy(msg_buf + 2, leaveMsg.ratId, UUID_SIZE);
+	memcpy(msg_buf + 2 + UUID_SIZE, leaveMsg.msgId, 4);
+
+	sendto(M->theSocket(), msg_buf, HEADER_SIZE, 0, 
+		(struct sockaddr *)M->myAddr(), sizeof(*M->myAddr()));
 }
 
 /* ----------------------------------------------------------------------- */

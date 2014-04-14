@@ -292,6 +292,7 @@ extern MazewarInstance::Ptr M;
 #define MY_DIR			M->dir().value()
 #define MY_X_LOC		M->xloc().value()
 #define MY_Y_LOC		M->yloc().value()
+#define MY_SCORE		M->score().value()
 
 /* events */
 
@@ -319,6 +320,7 @@ extern MazewarInstance::Ptr M;
 
 #define UUID_SIZE	16 		/* UUID size for ratId */
 #define HEADER_SIZE	22 		/* Header size */
+#define KEEPALIVE_INTERVAL 200
 
 extern unsigned short	ratBits[];
 /* replace this with appropriate definition of your own */
@@ -465,11 +467,12 @@ typedef	struct {
 	Sockaddr	eventSource;
 }					MWEvent;
 
-int getCurrentTime() {
+static double getCurrentTime() {
 	struct timeval tv; 
 	memset(&tv, 0, sizeof(struct timeval));
 	gettimeofday(&tv, NULL);  	
-	return tv.tv_sec % 10000000;
+
+	return tv.tv_sec * 1000 + tv.tv_usec / 1000;
 }
 
 void		*malloc();
