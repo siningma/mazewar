@@ -118,8 +118,7 @@ struct _resources {
 
   int 		time_interval; /* in milliseconds */
   bool	robotic;
- }
-app_resources;
+ }	app_resources;
 
 String default_resources[] = {
     "time_interval 500",

@@ -181,7 +181,7 @@ typedef struct {
 	Rat rat;
 	Missile missile;
 	int score;
-}	Player;
+}	PlayerInfo;
 
 typedef	RatAppearance			RatApp_type [MAX_RATS];
 typedef	RatAppearance *			RatLook;
@@ -323,11 +323,16 @@ public:
 	    memset(this->ratId, 0, UUID_SIZE + 1);
 	    boost::uuids::uuid uuid = boost::uuids::random_generator()();
 	    memcpy(this->ratId, &uuid, UUID_SIZE);
-	    printf("ratId:");
-	    for (int i =0 ; i < UUID_SIZE; i++) {
-	    	printf("%x", this->ratId[i]);
+	}
+
+	void print() {
+		printf("Message type: %x\n", msgType);
+		printf("RatId: ");
+	    for (int i = 2 ; i < 2 + UUID_SIZE; i++) {
+	    	printf("%x", ratId[i]);
 	    }
 	    printf("\n");
+	    printf("Message Id: %u\n", msgId);
 	}
 };
 
@@ -371,7 +376,7 @@ public:
 	unsigned int missileSeqNum;
 
 	KeepAliveMessage(unsigned int msgId, unsigned char ratPosX, unsigned char ratPosY, unsigned char ratDir, int score,
-					unsigned char missileFlag = 0, unsigned char missilePosX = 0, unsigned char missilePosY = 0, unsigned char missileSeqNum = 0)
+					unsigned char missileFlag = 0, unsigned char missilePosX = 0, unsigned char missilePosY = 0, unsigned int missileSeqNum = 0)
 					: Message(KPLV, msgId) {
 		this->ratPosX = ratPosX;
 		this->ratPosY = ratPosY;
@@ -381,6 +386,12 @@ public:
 		this->missilePosX = missilePosX;
 		this->missilePosY = missilePosY;
 		this->missileSeqNum = missileSeqNum;
+	}
+
+	void print() {
+		Message::print();
+		printf("ratPosX: 0x%x, ratPosY: 0x%x, ratDir: 0x%x\n", ratPosX, ratPosY, ratDir);
+		printf("score: %d, missileFlag: 0x%x, missilePosX: 0x%x, missilePosY: 0x%x, missileSeqNum: %d\n", score, missileFlag, missilePosX, missilePosY, missileSeqNum);
 	}
 };
 
@@ -400,6 +411,10 @@ public:
 		this->missileSeqNum = missileSeqNum;
 		memset(this->shooterId, 0, UUID_SIZE + 1);
 		memcpy(this->shooterId, shooterId, UUID_SIZE);
+	}
+
+	void print() {
+		Message::print();
 	}
 };
 
@@ -424,6 +439,8 @@ typedef	struct {
 
 void		*malloc();
 Sockaddr	*resolveHost();
+
+HashMap<PlayerInfo, RatId> map;
 
 /* display.c */
 void InitDisplay(int, char **);

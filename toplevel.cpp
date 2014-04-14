@@ -450,11 +450,13 @@ void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sock
 				memcpy(&missileSeqNum, payload_buf + 10, 4);
 			}
 	    	p = new KeepAliveMessage(msgId, ratPosX, ratPosY, ratDir, score, missileFlag, missilePosX, missilePosY, missileSeqNum);
+	    	p->print();
 	    	break;
     	}
     	case LEAV:
     	{
     		p = new LeaveMessage(msgId);
+    		p->print();
     		break;
     	}
     	case HITM:
