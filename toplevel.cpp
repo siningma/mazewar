@@ -41,9 +41,6 @@ int main(int argc, char *argv[])
     JoinMessage join(getMessageId(), "sma");
     printf("Test Join Message name: %s, messageType: %x, msgId: %d\n", join.name.c_str(), join.msgType, join.msgId);
 
-    printf("Current messageId: %u", getMessageId());
-    printf("Current messageId: %u", messageId);
-
     MazeInit(argc, argv);
 
     NewPosition(M);
@@ -64,7 +61,7 @@ void
 play(void)
 {
 	MWEvent		event;
-	MW244BPacket	incoming;
+	Message	incoming;
 
 	event.eventDetail = &incoming;
 
@@ -397,14 +394,45 @@ char *GetRatName(RatIndexType ratId)
 /* ----------------------------------------------------------------------- */
 
 /* This is just for the sample version, rewrite your own if necessary */
-void ConvertIncoming(MW244BPacket *p)
+void ConvertIncoming(Message *p, int socket, const char* header_buf)
 {
+	unsigned char msgType = header_buf[0]
+	unsigned char ratId[UUID_SIZE];
+	memset(ratId, 0, UUID_SIZE);
+	memcpy(ratId, header_buf + 2, UUID_SIZE);
+	unsigned int msgId = 0; 
+	memcpy(&msgId, header_buf + 2 + UUID_SIZE, 4);
+
+	printf("Message Header detail: \n");
+	printf("Message type: %x\n", msgType);
+	printf("RatId: ");
+    for (int i = 2 ; i < 2 + UUID_SIZE; i++) {
+    	printf("%x", ratId[i]);
+    }
+    printf("\n");
+    printf("Message Id: %u\n", msgId);
+
+    switch (msgType) {
+    	case JOIN:
+
+    	break;
+    	case JNRS:
+    	break;
+    	case KPLV:
+    	break;
+    	case LEAV:
+    	break;
+    	case HITM:
+    	break;
+    	case HTRS:
+    	break;
+    }
 }
 
 /* ----------------------------------------------------------------------- */
 
 /* This is just for the sample version, rewrite your own if necessary */
-void ConvertOutgoing(MW244BPacket *p)
+void ConvertOutgoing(Message *p)
 {
 }
 
@@ -473,7 +501,9 @@ void sendPacketToPlayer(RatId ratId)
 
 /* ----------------------------------------------------------------------- */
 
-/* Sample of processPacket. */
+/* Message has been converted from byte stream to data structure
+ * processPacket function is used to update shared state
+ */
 
 void processPacket (MWEvent *eventPacket)
 {
@@ -488,7 +518,34 @@ void processPacket (MWEvent *eventPacket)
         case ...
 	}
 */
+	Message *msg = eventPacket->eventDetail;
 
+	switch(msg->msgType) {
+		case JOIN:
+		JoinMessage *joinMsg = (JoinMessage *)msg;
+		
+		break;
+		case JNRS:
+		JoinResponseMessage *joinResponseMsg = (JoinResponseMessage *)msg;
+
+		break;
+		case KPLV:
+		KeepAliveMessage *keepAliveMsg = (KeepAliveMessage *)msg;
+
+		break;
+		case LEAV:
+		LeaveMessage *leaveMsg = (LeaveMessage *)msg;
+
+		break;
+		case HITM:
+		HitMessage *hitMsg = (HitMessage *)msg;
+
+		break;
+		case HTRS:
+		HitResponseMessage *hitResponseMsg = (HitResponseMessage *)msg;
+
+		break;
+	}
 }
 
 /* ----------------------------------------------------------------------- */

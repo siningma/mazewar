@@ -136,9 +136,9 @@ typedef	char						RatName[NAMESIZE];
 		}
 	};
 
- 	class RatId : public Ordinal<RatId, unsigned short> {
+ 	class RatId : public Ordinal<RatId, unsigned char[UUID_SIZE]> {
 	public:
-		RatId(unsigned short num) : Ordinal<RatId, unsigned short>(num) {
+		RatId(unsigned char[] num) : Ordinal<RatId, unsigned cahr[UUID_SIZE]>(num) {
 		}
 	};
 
@@ -166,6 +166,22 @@ public:
 	Loc	x, y;
 	Direction dir;
 };
+
+class Missile{
+public:
+	Missile() : shoot(FALSE), x(0), y(0), dir(NORTH) {};
+	bool exist;
+	Loc x, y;
+	Direction dir;
+};
+
+typedef struct {
+	RatId ratId;
+	std::string ratName;
+	Rat rat;
+	Missile missile;
+	int score;
+}	Player;
 
 typedef	RatAppearance			RatApp_type [MAX_RATS];
 typedef	RatAppearance *			RatLook;
@@ -274,15 +290,17 @@ extern MazewarInstance::Ptr M;
 #define HTRS 	0xE5		/* Hit Response Message type */
 
 #define UUID_SIZE	16 		/* UUID size for ratId */
+#define HEADER_SIZE	22 		/* Header size */
 
 extern unsigned short	ratBits[];
 /* replace this with appropriate definition of your own */
-typedef	struct {
+/*typedef	struct {
 	unsigned char type;
 	u_long	body[256];
-}					MW244BPacket;
+}					MW244BPacket; */
 
 static unsigned int currentMessageId = 0;
+/* One Rat(Player) gets a new message Id */
 static unsigned int getMessageId() {
 	return currentMessageId++;
 }
@@ -373,7 +391,7 @@ public:
 /* Hit message struct */
 class HitMessage: public Message {
 public:
-	unsigned char shooterId[UUID_SIZE];
+	unsigned char shooterId[UUID_SIZE + 1];
 	unsigned int missileSeqNum;
 
 	HitMessage(unsigned int msgId, unsigned int missileSeqNum, unsigned char* shooterId): Message(HITM, msgId) {
@@ -386,7 +404,7 @@ public:
 /* Hit Response message struct */
 class HitResponseMessage: public Message {
 public:
-	unsigned char victimId[UUID_SIZE];
+	unsigned char victimId[UUID_SIZE + 1];
 	unsigned int missileSeqNum;
 
 	HitResponseMessage(unsigned int msgId, unsigned int missileSeqNum, unsigned char* victimId): Message(HTRS, msgId) {
@@ -396,10 +414,9 @@ public:
 	}
 };
 
-
 typedef	struct {
 	short		eventType;
-	MW244BPacket	*eventDetail;	/* for incoming data */
+	Message	*eventDetail;	/* for incoming data */
 	Sockaddr	eventSource;
 }					MWEvent;
 
@@ -456,8 +473,8 @@ void NewPosition(MazewarInstance::Ptr M);
 void MWError(char *);
 Score GetRatScore(RatIndexType);
 char  *GetRatName(RatIndexType);
-void ConvertIncoming(MW244BPacket *);
-void ConvertOutgoing(MW244BPacket *);
+void ConvertIncoming(Message *);
+void ConvertOutgoing(Message *);
 void ratState(void);
 void manageMissiles(void);
 void DoViewUpdate(void);
