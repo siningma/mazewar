@@ -641,7 +641,7 @@ NextEvent(MWEvent *event, int socket)
 	{
 	  socklen_t fromLen = sizeof(event->eventSource);
 	  int cc;
-	  char header_buf[HEADER_SIZE];
+	  unsigned char header_buf[HEADER_SIZE];
 	  memset(header_buf, 0, HEADER_SIZE);
 
 	  event->eventType = EVENT_NETWORK;

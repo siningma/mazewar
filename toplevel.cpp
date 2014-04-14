@@ -393,8 +393,18 @@ char *GetRatName(RatIndexType ratId)
 
 /* ----------------------------------------------------------------------- */
 
+int recvPacket(int socket, unsigned char* payload_buf, int len, struct sockaddr *src_addr, socklen_t *addrlen) {
+	int cc = recvfrom(socket, payload_buf, len, 0,
+		        src_addr, addrlen);
+	if (cc <= 0) {
+	    if (cc < 0 && errno != EINTR) 
+			perror("event recvfrom");
+	}	
+	return cc;
+}
+
 /* This is just for the sample version, rewrite your own if necessary */
-void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sockaddr *src_addr, socklen_t *addrlen)
+void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, struct sockaddr *src_addr, socklen_t *addrlen)
 {
 	unsigned char msgType = header_buf[0];
 	unsigned char ratId[UUID_SIZE];
@@ -424,15 +434,12 @@ void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sock
     	}
     	case KPLV:
     	{
-	    	char payload_buf[14];
+	    	unsigned char payload_buf[14];
 	    	memset(payload_buf, 0, 14);
-			cc = recvfrom(socket, payload_buf, 14, 0,
-				        src_addr, addrlen);
-			if (cc <= 0) {
-			    if (cc < 0 && errno != EINTR)
-					perror("event recvfrom");
-			      	return;
-			}
+	    	int cc = recvPacket(socket, payload_buf, 14, src_addr, addrlen);
+	    	if (cc < 0)
+	    		return;
+
 			unsigned char ratPosX = payload_buf[0];
 			unsigned char ratPosY = payload_buf[1];
 			unsigned char ratDir = payload_buf[2];
@@ -461,12 +468,38 @@ void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sock
     	}
     	case HITM:
     	{
+    		unsigned char payload_buf[20];
+    		memset(payload_buf 0, 20);
+    		int cc = recvPacket(socket, payload_buf, 20, src_addr, addrlen);
+    		if (cc < 0)
+    			return;
+
+    		unsigned char shooterId[UUID_SIZE];
+    		memset(shooterId, 0, UUID_SIZE);
+    		memcpy(shooterId, payload_buf, UUID_SIZE);
+    		unsigned int missileSeqNum = 0;
+    		memcpy(&missileSeqNum, payload_buf + UUID_SIZE, 4);
+    		p = new HitMessage(msgId, missileSeqNum, shooterId);
     		break;
     	}
     	case HTRS:
     	{
+    		unsigned char payload_buf[20];
+    		memset(payload_buf 0, 20);
+    		int cc = recvPacket(socket, payload_buf, 20, src_addr, addrlen);
+    		if (cc < 0)
+    			return;
+
+    		unsigned char victimId[UUID_SIZE];
+    		memset(victimId, 0, UUID_SIZE);
+    		memcpy(victimId, payload_buf, UUID_SIZE);
+    		unsigned int missileSeqNum = 0;
+    		memcpy(&missileSeqNum, payload_buf + UUID_SIZE, 4);
+    		p = new HitResponseMessage(msgId, missileSeqNum, victimId);
     		break;
     	}
+    	default:
+    	break;
     }
 }
 

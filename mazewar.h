@@ -49,6 +49,8 @@ SOFTWARE.
 #include "Nominal.h"
 #include "Exception.h"
 #include <string>
+#include <map>
+#include <sys/time.h>
 
 #include <boost/uuid/uuid_io.hpp>         // streaming operators etc.
 #include <boost/uuid/uuid_generators.hpp> // generators
@@ -175,12 +177,38 @@ public:
 	Direction dir;
 };
 
+class MW_RatId{
+public:
+	unsigned char m_ratId[UUID_SIZE];
+	
+	MW_RatId() { memset(m_ratId, 0, UUID_SIZE); }
+	MW_RatId(unsigned char* ratId) {
+		memset(m_ratId, 0, UUID_SIZE);
+		memcpy(m_ratId, ratId, UUID_SIZE);
+	} 
+	MW_RatId(const MW_RatId& other) {
+		memset(this->m_ratId, 0, UUID_SIZE);
+		memcpy(this->m_ratId, other.m_ratId, UUID_SIZE);
+	}
+	MW_RatId& operator= (const MW_RatId& other) {
+		if(this == &other)	return *this;
+	
+		memset(this->m_ratId, 0, UUID_SIZE);
+		memcpy(this->m_ratId, other.m_ratId, UUID_SIZE);
+		return *this;
+	}
+	bool operator<(const MW_RatId& other) const {
+		return (memcmp(this->m_ratId, other.m_ratId, UUID_SIZE) < 0);
+	}
+};
+
 typedef struct {
-	RatId ratId;
+	MW_RatId ratId;
 	std::string ratName;
 	Rat rat;
 	Missile missile;
 	int score;
+	int lastKeepAliveTime;
 }	PlayerInfo;
 
 typedef	RatAppearance			RatApp_type [MAX_RATS];
@@ -436,6 +464,13 @@ typedef	struct {
 	Message	*eventDetail;	/* for incoming data */
 	Sockaddr	eventSource;
 }					MWEvent;
+
+int getCurrentTime() {
+	struct timeval tv; 
+	memset(&tv, 0, sizeof(struct timeval));
+	gettimeofday(&tv, NULL);  	
+	return tv.tv_sec % 10000000;
+}
 
 void		*malloc();
 Sockaddr	*resolveHost();
