@@ -414,7 +414,7 @@ void ConvertIncoming(Message *p, int socket, const char* header_buf)
 
     switch (msgType) {
     	case JOIN:
-
+    	
     	break;
     	case JNRS:
     	break;

@@ -136,9 +136,9 @@ typedef	char						RatName[NAMESIZE];
 		}
 	};
 
- 	class RatId : public Ordinal<RatId, unsigned char[UUID_SIZE]> {
+ 	class RatId : public Ordinal<RatId, unsigned char *> {
 	public:
-		RatId(unsigned char[] num) : Ordinal<RatId, unsigned cahr[UUID_SIZE]>(num) {
+		RatId(unsigned char *num) : Ordinal<RatId, unsigned char *>(num) {
 		}
 	};
 
@@ -169,7 +169,7 @@ public:
 
 class Missile{
 public:
-	Missile() : shoot(FALSE), x(0), y(0), dir(NORTH) {};
+	Missile() : exist(FALSE), x(0), y(0), dir(NORTH) {};
 	bool exist;
 	Loc x, y;
 	Direction dir;
@@ -312,6 +312,8 @@ public:
 	unsigned char reserved;
 	unsigned char ratId[UUID_SIZE + 1];
 	unsigned int msgId;
+
+	Message() {}
 
 	Message(unsigned char msgType, unsigned int msgId) : reserved(0) {
 		this->msgType = msgType;
