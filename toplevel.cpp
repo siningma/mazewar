@@ -314,7 +314,8 @@ void peekStop()
 void shoot()
 {
 	M->scoreIs( M->score().value()-1 );
-	UpdateScoreCard(M->myRatId().value());
+	boost::uuids::uuid uuid = M->myRatId().value();
+	// UpdateScoreCard(M->myRatId().value());
 }
 
 /* ----------------------------------------------------------------------- */

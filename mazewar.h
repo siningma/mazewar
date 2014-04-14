@@ -136,9 +136,9 @@ typedef	char						RatName[NAMESIZE];
 		}
 	};
 
- 	class RatId : public Ordinal<RatId, unsigned short> {
+ 	class RatId : public Ordinal<RatId, boost::uuids::uuid> {
 	public:
-		RatId(unsigned short num) : Ordinal<RatId, unsigned short >(num) {
+		RatId(boost::uuids::uuid num) : Ordinal<RatId, boost::uuids::uuid>(num) {
 		}
 	};
 
@@ -475,7 +475,7 @@ void NewPosition(MazewarInstance::Ptr M);
 void MWError(char *);
 Score GetRatScore(RatIndexType);
 char  *GetRatName(RatIndexType);
-void ConvertIncoming(Message *p, int socket, const char* header_buf);
+void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sockaddr *src_addr, socklen_t *addrlen);
 void ConvertOutgoing(Message *);
 void ratState(void);
 void manageMissiles(void);
