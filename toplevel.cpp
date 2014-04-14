@@ -61,9 +61,9 @@ void
 play(void)
 {
 	MWEvent		event;
-	Message	incoming;
+	Message	*incoming;
 
-	event.eventDetail = &incoming;
+	event.eventDetail = incoming;
 
 	while (TRUE) {
 		NextEvent(&event, M->theSocket());
@@ -394,7 +394,7 @@ char *GetRatName(RatIndexType ratId)
 /* ----------------------------------------------------------------------- */
 
 /* This is just for the sample version, rewrite your own if necessary */
-void ConvertIncoming(Message *p, int socket, const char* header_buf)
+void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sockaddr *src_addr, socklen_t *addrlen)
 {
 	unsigned char msgType = header_buf[0];
 	unsigned char ratId[UUID_SIZE];
@@ -419,8 +419,35 @@ void ConvertIncoming(Message *p, int socket, const char* header_buf)
     	case JNRS:
     	break;
     	case KPLV:
+    	char payload_buf[14];
+    	memset(payload_buf, 0, 14);
+		cc = recvfrom(socket, payload_buf, 14, 0,
+			        src_addr, addrlen);
+		if (cc <= 0) {
+		    if (cc < 0 && errno != EINTR)
+				perror("event recvfrom");
+		      	continue;
+		}
+		unsigned char ratPosX = payload_buf[0];
+		unsigned char ratPosY = payload_buf[1];
+		unsigned char ratDir = payload_buf[2];
+		int score;
+		memcpy(&score, payload_buf + 3, 4);
+		unsigned char missileFlag = payload_buf[7];
+
+		// if missileFlag is not zero, set missile info
+		unsigned char missilePosX = 0;
+		unsigned char missilePosY = 0;
+		unsigned int missileSeqNum = 0;
+		if (missileFlag != 0) {
+			missilePosX = payload_buf[8];
+			missilePosY = payload_buf[9];
+			memcpy(&missileSeqNum, payload_buf + 10, 4);
+		}
+    	p = new KeepAliveMessage(msgId, ratPosX, ratPosY, ratDir, score, missileFlag, missilePosX, missilePosY, missileSeqNum);
     	break;
     	case LEAV:
+    	p = new LeaveMessage(msgId);
     	break;
     	case HITM:
     	break;
