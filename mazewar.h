@@ -440,8 +440,6 @@ typedef	struct {
 void		*malloc();
 Sockaddr	*resolveHost();
 
-HashMap<PlayerInfo, RatId> map;
-
 /* display.c */
 void InitDisplay(int, char **);
 void StartDisplay(void);
@@ -493,11 +491,11 @@ void MWError(char *);
 Score GetRatScore(RatIndexType);
 char  *GetRatName(RatIndexType);
 void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sockaddr *src_addr, socklen_t *addrlen);
-void ConvertOutgoing(RatId ratId, Message msg);
+void ConvertOutgoing(Message *);
 void ratState(void);
 void manageMissiles(void);
 void DoViewUpdate(void);
-void sendPacketToPlayer(RatId);
+void sendPacketToPlayer(RatId, Message *);
 void processPacket(MWEvent *);
 void netInit(void);
 

@@ -484,7 +484,7 @@ void ratStates()
 {
   /* In our sample version, we don't know about the state of any rats over
      the net, so this is a no-op */
-	KeepAliveMessage msgAlive(getMessageId(), MY_X_LOC, MY_Y_LOC, MY_DIR, M->ScoreIs().value());
+	KeepAliveMessage *msgAlive = new KeepAliveMessage(getMessageId(), MY_X_LOC, MY_Y_LOC, MY_DIR, M->score().value());
 	sendPacketToPlayer(MY_RAT_INDEX, msgAlive);
 }
 
@@ -521,7 +521,7 @@ void DoViewUpdate()
  * before any call to sendto.
  */
 
-void sendPacketToPlayer(RatId ratId, Message msg)
+void sendPacketToPlayer(RatId ratId, Message *msg)
 {
 /*
 	MW244BPacket pack;
@@ -540,6 +540,17 @@ void sendPacketToPlayer(RatId ratId, Message msg)
 		   (Sockaddr) destSocket, sizeof(Sockaddr)) < 0)
 	  { MWError("Sample error") };
 */
+	switch(msg->msgType)
+	{
+		case KPLV:
+		{
+			KeepAliveMessage *KPLVmsg = (KeepAliveMessage *)msg;
+			KPLVmsg->print();
+			break;
+		}
+		default:
+			printf("unexpected msgType:%x\n", msg->msgType);
+	}
 }
 
 /* ----------------------------------------------------------------------- */
