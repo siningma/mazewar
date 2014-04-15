@@ -538,7 +538,12 @@ void DoViewUpdate(void);
 void sendPacketToPlayer(RatId, Message *);
 void processPacket(MWEvent *);
 void netInit(void);
-
+void sendKeepAliveMessage();
+void sendLeaveMessage();
+void sendJoinMessage();
+void sendJoinResponseMessage();
+void sendHitMessage();
+void sendHitResponseMessage();
 
 
 /* winsys.c */
