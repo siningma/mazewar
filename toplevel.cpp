@@ -138,7 +138,7 @@ play(void)
 		/* Any info to send over network? */
 		// send keep alive message every 200ms
 		double currentTimestamp = getCurrentTime();
-		if (currentTimestamp - lastKeepAliveMsgSendTime >= KEEPALIVE_INTERVAL) {
+		if (currentTimestamp - lastKeepAliveMsgSendTime >= KEEPALIVE_INTERVAL * 10) {
 			sendKeepAliveMessage();
 			lastKeepAliveMsgSendTime = getCurrentTime();
 		}
@@ -471,13 +471,13 @@ void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, st
 				missilePosY = payload_buf[9];
 				memcpy(&missileSeqNum, payload_buf + 10, 4);
 			}
-	    	p = new KeepAliveMessage(msgId, ratPosX, ratPosY, ratDir, score, missileFlag, missilePosX, missilePosY, missileSeqNum);
+	    	p = new KeepAliveMessage(ratId, msgId, ratPosX, ratPosY, ratDir, score, missileFlag, missilePosX, missilePosY, missileSeqNum);
 	    	p->print();
 	    	break;
     	}
     	case LEAV:
     	{
-    		p = new LeaveMessage(msgId);
+    		p = new LeaveMessage(ratId, msgId);
     		p->print();
     		break;
     	}
@@ -494,7 +494,7 @@ void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, st
     		memcpy(shooterId, payload_buf, UUID_SIZE);
     		unsigned int missileSeqNum = 0;
     		memcpy(&missileSeqNum, payload_buf + UUID_SIZE, 4);
-    		p = new HitMessage(msgId, missileSeqNum, shooterId);
+    		p = new HitMessage(ratId, msgId, missileSeqNum, shooterId);
     		break;
     	}
     	case HTRS:
@@ -510,7 +510,7 @@ void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, st
     		memcpy(victimId, payload_buf, UUID_SIZE);
     		unsigned int missileSeqNum = 0;
     		memcpy(&missileSeqNum, payload_buf + UUID_SIZE, 4);
-    		p = new HitResponseMessage(msgId, missileSeqNum, victimId);
+    		p = new HitResponseMessage(ratId, msgId, missileSeqNum, victimId);
     		break;
     	}
     	default:
@@ -527,7 +527,7 @@ void ConvertOutgoing(Message *p)
 
 void sendKeepAliveMessage() {
 	KeepAliveMessage keepAliveMsg(M->mw_ratId.value(), getMessageId(), MY_X_LOC, MY_Y_LOC, MY_DIR, MY_SCORE);
-	// keepAliveMsg.print();
+	keepAliveMsg.print();
 
 	unsigned char msg_buf[HEADER_SIZE + 14];
 	memset(msg_buf, 0, HEADER_SIZE + 14);
