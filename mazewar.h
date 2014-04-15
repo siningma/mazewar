@@ -91,6 +91,18 @@ SOFTWARE.
 #define	REAR		2
 #define	FRONT		3
 
+
+#define JOIN 	0xE0    	/* Join Message type */
+#define JNRS 	0xE1        /* Join Response Message type */
+#define KPLV 	0xE2		/* KeepAlive Message type */
+#define LEAV	0xE3		/* Leave Message type */
+#define HITM 	0xE4		/* Hit Message type */
+#define HTRS 	0xE5		/* Hit Response Message type */
+
+#define UUID_SIZE	16 		/* UUID size for ratId */
+#define HEADER_SIZE	22 		/* Header size */
+#define KEEPALIVE_INTERVAL 200
+
 /* types */
 
 typedef	struct sockaddr_in			Sockaddr;
@@ -310,17 +322,6 @@ extern MazewarInstance::Ptr M;
 #define	EVENT_NETWORK	16		/* incoming network packet */
 #define	EVENT_INT	17		/* user pressed interrupt key */
 #define	EVENT_TIMEOUT	18		/* nothing happened! */
-
-#define JOIN 	0xE0    	/* Join Message type */
-#define JNRS 	0xE1        /* Join Response Message type */
-#define KPLV 	0xE2		/* KeepAlive Message type */
-#define LEAV	0xE3		/* Leave Message type */
-#define HITM 	0xE4		/* Hit Message type */
-#define HTRS 	0xE5		/* Hit Response Message type */
-
-#define UUID_SIZE	16 		/* UUID size for ratId */
-#define HEADER_SIZE	22 		/* Header size */
-#define KEEPALIVE_INTERVAL 200
 
 extern unsigned short	ratBits[];
 /* replace this with appropriate definition of your own */

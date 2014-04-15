@@ -525,17 +525,17 @@ void sendKeepAliveMessage() {
 
 	unsigned char msg_buf[HEADER_SIZE + 14];
 	memset(msg_buf, 0, HEADER_SIZE + 14);
-	memcpy(msg_buf, keepAliveMsg.msgType, 1);
-	memcpy(msg_buf + 2, keepAliveMsg.ratId, UUID_SIZE);
-	memcpy(msg_buf + 2 + UUID_SIZE, keepAliveMsg.msgId, 4);
-	memcpy(msg_buf + HEADER_SIZE, keepAliveMsg.ratPosX, 1);
-	memcpy(msg_buf + HEADER_SIZE + 1, keepAliveMsg.ratPosY, 1);
-	memcpy(msg_buf + HEADER_SIZE + 2, keepAliveMsg.ratDir, 1);
-	memcpy(msg_buf + HEADER_SIZE + 3, keepAliveMsg.score, 4);
-	memcpy(msg_buf + HEADER_SIZE + 7, keepAliveMsg.missileFlag, 1);
-	memcpy(msg_buf + HEADER_SIZE + 8, keepAliveMsg.missilePosX, 1);
-	memcpy(msg_buf + HEADER_SIZE + 9, keepAliveMsg.missilePosY, 1);
-	memcpy(msg_buf + HEADER_SIZE + 10, keepAliveMsg.missileSeqNum, 4);
+	memcpy(msg_buf, &keepAliveMsg.msgType, 1);
+	memcpy(msg_buf + 2, &keepAliveMsg.ratId, UUID_SIZE);
+	memcpy(msg_buf + 2 + UUID_SIZE, &keepAliveMsg.msgId, 4);
+	memcpy(msg_buf + HEADER_SIZE, &keepAliveMsg.ratPosX, 1);
+	memcpy(msg_buf + HEADER_SIZE + 1, &keepAliveMsg.ratPosY, 1);
+	memcpy(msg_buf + HEADER_SIZE + 2, &keepAliveMsg.ratDir, 1);
+	memcpy(msg_buf + HEADER_SIZE + 3, &keepAliveMsg.score, 4);
+	memcpy(msg_buf + HEADER_SIZE + 7, &keepAliveMsg.missileFlag, 1);
+	memcpy(msg_buf + HEADER_SIZE + 8, &keepAliveMsg.missilePosX, 1);
+	memcpy(msg_buf + HEADER_SIZE + 9, &keepAliveMsg.missilePosY, 1);
+	memcpy(msg_buf + HEADER_SIZE + 10, &keepAliveMsg.missileSeqNum, 4);
 
 	sendto(M->theSocket(), msg_buf, HEADER_SIZE + 14, 0, 
 			(struct sockaddr *)M->myAddr(), sizeof(*M->myAddr()));
@@ -546,9 +546,9 @@ void sendLeaveMessage() {
 
 	unsigned char msg_buf[HEADER_SIZE];
 	memset(msg_buf, 0, HEADER_SIZE);
-	memcpy(msg_buf, leaveMsg.msgType, 1);
-	memcpy(msg_buf + 2, leaveMsg.ratId, UUID_SIZE);
-	memcpy(msg_buf + 2 + UUID_SIZE, leaveMsg.msgId, 4);
+	memcpy(msg_buf, &leaveMsg.msgType, 1);
+	memcpy(msg_buf + 2, &leaveMsg.ratId, UUID_SIZE);
+	memcpy(msg_buf + 2 + UUID_SIZE, &leaveMsg.msgId, 4);
 
 	sendto(M->theSocket(), msg_buf, HEADER_SIZE, 0, 
 		(struct sockaddr *)M->myAddr(), sizeof(*M->myAddr()));
@@ -559,11 +559,11 @@ void sendJoinMessage() {
 
 	unsigned char msg_buf[HEADER_SIZE + 21];
 	memset(msg_buf, 0, HEADER_SIZE + 21);
-	memcpy(msg_buf, joinMsg.msgType, 1);
-	memcpy(msg_buf + 2, joinMsg.ratId, UUID_SIZE);
-	memcpy(msg_buf + 2 + UUID_SIZE, joinMsg.msgId, 4);
-	memcpy(msg_buf + HEADER_SIZE, joinMsg.len, 1);
-	memcpy(msg_buf + HEADER_SIZE + 1, joinMsg.name.c_str(), 20);
+	memcpy(msg_buf, &joinMsg.msgType, 1);
+	memcpy(msg_buf + 2, &joinMsg.ratId, UUID_SIZE);
+	memcpy(msg_buf + 2 + UUID_SIZE, &joinMsg.msgId, 4);
+	memcpy(msg_buf + HEADER_SIZE, &joinMsg.len, 1);
+	memcpy(msg_buf + HEADER_SIZE + 1, &joinMsg.name.c_str(), 20);
 
 	sendto(M->theSocket(), msg_buf, HEADER_SIZE + 21, 0, 
 		(struct sockaddr *)M->myAddr(), sizeof(*M->myAddr()));
@@ -574,11 +574,11 @@ void sendJoinResponseMessage() {
 
 	unsigned char msg_buf[HEADER_SIZE + 21];
 	memset(msg_buf, 0, HEADER_SIZE + 21);
-	memcpy(msg_buf, joinResponseMsg.msgType, 1);
-	memcpy(msg_buf + 2, joinResponseMsg.ratId, UUID_SIZE);
-	memcpy(msg_buf + 2 + UUID_SIZE, joinResponseMsg.msgId, 4);
-	memcpy(msg_buf + HEADER_SIZE, joinResponseMsg.len, 1);
-	memcpy(msg_buf + HEADER_SIZE + 1, joinResponseMsg.name.c_str(), 20);
+	memcpy(msg_buf, &joinResponseMsg.msgType, 1);
+	memcpy(msg_buf + 2, &joinResponseMsg.ratId, UUID_SIZE);
+	memcpy(msg_buf + 2 + UUID_SIZE, &joinResponseMsg.msgId, 4);
+	memcpy(msg_buf + HEADER_SIZE, &joinResponseMsg.len, 1);
+	memcpy(msg_buf + HEADER_SIZE + 1, &joinResponseMsg.name.c_str(), 20);
 
 	sendto(M->theSocket(), msg_buf, HEADER_SIZE + 21, 0, 
 		(struct sockaddr *)M->myAddr(), sizeof(*M->myAddr()));	
