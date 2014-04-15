@@ -39,6 +39,12 @@ int main(int argc, char *argv[])
     strncpy(M->myName_, ratName, NAMESIZE);
     free(ratName);	
 
+	printf("My RatId: ");
+    for (int i = 2 ; i < 2 + UUID_SIZE; i++) {
+    	printf("%x", M->mw_ratId[i]);
+    }
+    printf("\n");
+
     // JoinMessage join(getMessageId(), "sma");
     // printf("Test Join Message name: %s, messageType: %x, msgId: %d\n", join.name.c_str(), join.msgType, join.msgId);
 
@@ -520,7 +526,7 @@ void ConvertOutgoing(Message *p)
 }
 
 void sendKeepAliveMessage() {
-	KeepAliveMessage keepAliveMsg(getMessageId(), MY_X_LOC, MY_Y_LOC, MY_DIR, MY_SCORE);
+	KeepAliveMessage keepAliveMsg(M->mw_ratId.value(), getMessageId(), MY_X_LOC, MY_Y_LOC, MY_DIR, MY_SCORE);
 	// keepAliveMsg.print();
 
 	unsigned char msg_buf[HEADER_SIZE + 14];
@@ -542,7 +548,7 @@ void sendKeepAliveMessage() {
 }
 
 void sendLeaveMessage() {
-	LeaveMessage leaveMsg(getMessageId());
+	LeaveMessage leaveMsg(M->mw_ratId.value(), getMessageId());
 
 	unsigned char msg_buf[HEADER_SIZE];
 	memset(msg_buf, 0, HEADER_SIZE);
@@ -555,7 +561,7 @@ void sendLeaveMessage() {
 }
 
 void sendJoinMessage() {
-	JoinMessage joinMsg(getMessageId(), M->myName_);
+	JoinMessage joinMsg(M->mw_ratId.value(), getMessageId(), M->myName_);
 
 	unsigned char msg_buf[HEADER_SIZE + 21];
 	memset(msg_buf, 0, HEADER_SIZE + 21);
@@ -653,17 +659,6 @@ void sendPacketToPlayer(RatId ratId, Message *msg)
 		   (Sockaddr) destSocket, sizeof(Sockaddr)) < 0)
 	  { MWError("Sample error") };
 */
-	switch(msg->msgType)
-	{
-		case KPLV:
-		{
-			KeepAliveMessage *KPLVmsg = (KeepAliveMessage *)msg;
-			KPLVmsg->print();
-			break;
-		}
-		default:
-			printf("unexpected msgType:%x\n", msg->msgType);
-	}
 }
 
 /* ----------------------------------------------------------------------- */

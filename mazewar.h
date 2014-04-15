@@ -193,7 +193,12 @@ class MW_RatId{
 public:
 	unsigned char m_ratId[UUID_SIZE];
 	
-	MW_RatId() { memset(m_ratId, 0, UUID_SIZE); }
+	MW_RatId() {
+		memset(m_ratId, 0, UUID_SIZE); 
+		// generate random UUID
+	    boost::uuids::uuid uuid = boost::uuids::random_generator()();
+	    memcpy(this->m_ratId, &uuid, UUID_SIZE);
+	}
 	MW_RatId(unsigned char* ratId) {
 		memset(m_ratId, 0, UUID_SIZE);
 		memcpy(m_ratId, ratId, UUID_SIZE);
@@ -211,6 +216,10 @@ public:
 	}
 	bool operator<(const MW_RatId& other) const {
 		return (memcmp(this->m_ratId, other.m_ratId, UUID_SIZE) < 0);
+	}
+
+	unsigned char* value() {
+		return m_ratId;
 	}
 };
 
@@ -273,6 +282,7 @@ class MazewarInstance :  public Fwk::NamedInterface  {
 
     MazeType maze_;
     RatName myName_;
+    MW_RatId mw_ratId;
 protected:
 	MazewarInstance(string s) : Fwk::NamedInterface(s), dir_(0), dirPeek_(0), myRatId_(0), score_(0),
 		xloc_(1), yloc_(3), xPeek_(0), yPeek_(0) {
@@ -341,19 +351,16 @@ class Message {
 public:
 	unsigned char msgType;
 	unsigned char reserved;
-	unsigned char ratId[UUID_SIZE + 1];
+	unsigned char ratId[UUID_SIZE];
 	unsigned int msgId;
 
 	Message() {}
 
-	Message(unsigned char msgType, unsigned int msgId) : reserved(0) {
+	Message(unsigned char* ratId, unsigned char msgType, unsigned int msgId) : reserved(0) {
 		this->msgType = msgType;
 		this->msgId = msgId;
-
-		// generate random UUID
-	    memset(this->ratId, 0, UUID_SIZE + 1);
-	    // boost::uuids::uuid uuid = boost::uuids::random_generator()();
-	    // memcpy(this->ratId, &uuid, UUID_SIZE);
+	    memset(this->ratId, 0, UUID_SIZE);
+	    memcpy(this->ratId, ratId, UUID_SIZE);
 	}
 
 	void print() {
@@ -373,7 +380,7 @@ public:
 	unsigned char len;
 	std::string name;	
 
-	JoinMessage(unsigned int msgId, std::string name): Message(JOIN, msgId) {
+	JoinMessage(unsigned char* ratId, unsigned int msgId, std::string name): Message(ratId, JOIN, msgId) {
 		this->len = name.length();
 		this->name = name;
 	}
@@ -382,14 +389,14 @@ public:
 /* Join Response message struct */
 class JoinResponseMessage: public Message {
 public:
-	unsigned char senderId[UUID_SIZE + 1];
+	unsigned char senderId[UUID_SIZE];
 	unsigned char len;
 	std::string name;
 
-	JoinResponseMessage(unsigned int msgId, std::string name, unsigned char* senderId): Message(JNRS, msgId) {
+	JoinResponseMessage(unsigned char* ratId, unsigned int msgId, std::string name, unsigned char* senderId): Message(ratId, JNRS, msgId) {
 		this->len = name.length();
 		this->name = name;
-		memset(this->senderId, 0, UUID_SIZE + 1);
+		memset(this->senderId, 0, UUID_SIZE);
 		memcpy(this->senderId, senderId, UUID_SIZE);	
 	}	
 };
@@ -406,9 +413,9 @@ public:
 	unsigned char missilePosY;
 	unsigned int missileSeqNum;
 
-	KeepAliveMessage(unsigned int msgId, unsigned char ratPosX, unsigned char ratPosY, unsigned char ratDir, int score,
+	KeepAliveMessage(unsigned char* ratId, unsigned int msgId, unsigned char ratPosX, unsigned char ratPosY, unsigned char ratDir, int score,
 					unsigned char missileFlag = 0, unsigned char missilePosX = 0, unsigned char missilePosY = 0, unsigned int missileSeqNum = 0)
-					: Message(KPLV, msgId) {
+					: Message(ratId, KPLV, msgId) {
 		this->ratPosX = ratPosX;
 		this->ratPosY = ratPosY;
 		this->ratDir = ratDir;
@@ -430,18 +437,18 @@ public:
 /* Leave message struct */
 class LeaveMessage: public Message {
 public:
-	LeaveMessage(unsigned int msgId): Message(LEAV, msgId) {}
+	LeaveMessage(unsigned char* ratId, unsigned int msgId): Message(ratId, LEAV, msgId) {}
 };
 
 /* Hit message struct */
 class HitMessage: public Message {
 public:
-	unsigned char shooterId[UUID_SIZE + 1];
+	unsigned char shooterId[UUID_SIZE];
 	unsigned int missileSeqNum;
 
-	HitMessage(unsigned int msgId, unsigned int missileSeqNum, unsigned char* shooterId): Message(HITM, msgId) {
+	HitMessage(unsigned char* ratId, unsigned int msgId, unsigned int missileSeqNum, unsigned char* shooterId): Message(ratId, HITM, msgId) {
 		this->missileSeqNum = missileSeqNum;
-		memset(this->shooterId, 0, UUID_SIZE + 1);
+		memset(this->shooterId, 0, UUID_SIZE);
 		memcpy(this->shooterId, shooterId, UUID_SIZE);
 	}
 
@@ -454,12 +461,12 @@ public:
 /* Hit Response message struct */
 class HitResponseMessage: public Message {
 public:
-	unsigned char victimId[UUID_SIZE + 1];
+	unsigned char victimId[UUID_SIZE];
 	unsigned int missileSeqNum;
 
-	HitResponseMessage(unsigned int msgId, unsigned int missileSeqNum, unsigned char* victimId): Message(HTRS, msgId) {
+	HitResponseMessage(unsigned char* ratId, unsigned int msgId, unsigned int missileSeqNum, unsigned char* victimId): Message(ratId, HTRS, msgId) {
 		this->missileSeqNum = missileSeqNum;
-		memset(this->victimId, 0, UUID_SIZE + 1);
+		memset(this->victimId, 0, UUID_SIZE);
 		memcpy(this->victimId, victimId, UUID_SIZE);
 	}
 };
