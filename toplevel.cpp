@@ -478,7 +478,7 @@ void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, st
     	case HITM:
     	{
     		unsigned char payload_buf[20];
-    		memset(payload_buf 0, 20);
+    		memset(payload_buf, 0, 20);
     		int cc = recvPacket(socket, payload_buf, 20, src_addr, addrlen);
     		if (cc < 0)
     			return;
@@ -494,7 +494,7 @@ void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, st
     	case HTRS:
     	{
     		unsigned char payload_buf[20];
-    		memset(payload_buf 0, 20);
+    		memset(payload_buf, 0, 20);
     		int cc = recvPacket(socket, payload_buf, 20, src_addr, addrlen);
     		if (cc < 0)
     			return;
@@ -563,14 +563,14 @@ void sendJoinMessage() {
 	memcpy(msg_buf + 2, &joinMsg.ratId, UUID_SIZE);
 	memcpy(msg_buf + 2 + UUID_SIZE, &joinMsg.msgId, 4);
 	memcpy(msg_buf + HEADER_SIZE, &joinMsg.len, 1);
-	memcpy(msg_buf + HEADER_SIZE + 1, &joinMsg.name.c_str(), 20);
+	memcpy(msg_buf + HEADER_SIZE + 1, joinMsg.name.c_str(), 20);
 
 	sendto(M->theSocket(), msg_buf, HEADER_SIZE + 21, 0, 
 		(struct sockaddr *)M->myAddr(), sizeof(*M->myAddr()));
 }
 
 void sendJoinResponseMessage() {
-	JoinResponseMessage joinResponseMsg(getMessageId(), M->myName_);
+	/*JoinResponseMessage joinResponseMsg(getMessageId(), M->myName_);
 
 	unsigned char msg_buf[HEADER_SIZE + 21];
 	memset(msg_buf, 0, HEADER_SIZE + 21);
@@ -581,7 +581,7 @@ void sendJoinResponseMessage() {
 	memcpy(msg_buf + HEADER_SIZE + 1, &joinResponseMsg.name.c_str(), 20);
 
 	sendto(M->theSocket(), msg_buf, HEADER_SIZE + 21, 0, 
-		(struct sockaddr *)M->myAddr(), sizeof(*M->myAddr()));	
+		(struct sockaddr *)M->myAddr(), sizeof(*M->myAddr()));	*/
 }
 
 void sendHitMessage() {
