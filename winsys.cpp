@@ -639,6 +639,7 @@ NextEvent(MWEvent *event, int socket)
 
       if (FD_ISSET(socket, &fdmask))
 	{
+		printf("******recv called******");
 	  socklen_t fromLen = sizeof(event->eventSource);
 	  int cc;
 	  unsigned char header_buf[HEADER_SIZE];

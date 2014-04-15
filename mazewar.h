@@ -352,8 +352,8 @@ public:
 
 		// generate random UUID
 	    memset(this->ratId, 0, UUID_SIZE + 1);
-	    boost::uuids::uuid uuid = boost::uuids::random_generator()();
-	    memcpy(this->ratId, &uuid, UUID_SIZE);
+	    // boost::uuids::uuid uuid = boost::uuids::random_generator()();
+	    // memcpy(this->ratId, &uuid, UUID_SIZE);
 	}
 
 	void print() {

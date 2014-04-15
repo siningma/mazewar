@@ -39,8 +39,8 @@ int main(int argc, char *argv[])
     strncpy(M->myName_, ratName, NAMESIZE);
     free(ratName);	
 
-    JoinMessage join(getMessageId(), "sma");
-    printf("Test Join Message name: %s, messageType: %x, msgId: %d\n", join.name.c_str(), join.msgType, join.msgId);
+    // JoinMessage join(getMessageId(), "sma");
+    // printf("Test Join Message name: %s, messageType: %x, msgId: %d\n", join.name.c_str(), join.msgType, join.msgId);
 
     MazeInit(argc, argv);
 
@@ -599,8 +599,6 @@ void ratStates()
 {
   /* In our sample version, we don't know about the state of any rats over
      the net, so this is a no-op */
-	KeepAliveMessage *msgAlive = new KeepAliveMessage(getMessageId(), MY_X_LOC, MY_Y_LOC, MY_DIR, M->score().value());
-	sendPacketToPlayer(MY_RAT_INDEX, msgAlive);
 }
 
 /* ----------------------------------------------------------------------- */
