@@ -334,7 +334,7 @@ void quit(int sig)
 {
 	// Send leave message here
 	sendLeaveMessage();
-	
+
 	StopWindow();
 	exit(0);
 }
@@ -552,6 +552,44 @@ void sendLeaveMessage() {
 
 	sendto(M->theSocket(), msg_buf, HEADER_SIZE, 0, 
 		(struct sockaddr *)M->myAddr(), sizeof(*M->myAddr()));
+}
+
+void sendJoinMessage() {
+	JoinMessage joinMsg(getMessageId(), M->myName_);
+
+	unsigned char msg_buf[HEADER_SIZE + 21];
+	memset(msg_buf, 0, HEADER_SIZE + 21);
+	memcpy(msg_buf, joinMsg.msgType, 1);
+	memcpy(msg_buf + 2, joinMsg.ratId, UUID_SIZE);
+	memcpy(msg_buf + 2 + UUID_SIZE, joinMsg.msgId, 4);
+	memcpy(msg_buf + HEADER_SIZE, joinMsg.len, 1);
+	memcpy(msg_buf + HEADER_SIZE + 1, joinMsg.name.c_str(), 20);
+
+	sendto(M->theSocket(), msg_buf, HEADER_SIZE + 21, 0, 
+		(struct sockaddr *)M->myAddr(), sizeof(*M->myAddr()));
+}
+
+void sendJoinResponseMessage() {
+	JoinResponseMessage joinResponseMsg(getMessageId(), M->myName_);
+
+	unsigned char msg_buf[HEADER_SIZE + 21];
+	memset(msg_buf, 0, HEADER_SIZE + 21);
+	memcpy(msg_buf, joinResponseMsg.msgType, 1);
+	memcpy(msg_buf + 2, joinResponseMsg.ratId, UUID_SIZE);
+	memcpy(msg_buf + 2 + UUID_SIZE, joinResponseMsg.msgId, 4);
+	memcpy(msg_buf + HEADER_SIZE, joinResponseMsg.len, 1);
+	memcpy(msg_buf + HEADER_SIZE + 1, joinResponseMsg.name.c_str(), 20);
+
+	sendto(M->theSocket(), msg_buf, HEADER_SIZE + 21, 0, 
+		(struct sockaddr *)M->myAddr(), sizeof(*M->myAddr()));	
+}
+
+void sendHitMessage() {
+
+}
+
+void sendHitResponseMessage() {
+
 }
 
 /* ----------------------------------------------------------------------- */
