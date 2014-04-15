@@ -530,7 +530,7 @@ void NewPosition(MazewarInstance::Ptr M);
 void MWError(char *);
 Score GetRatScore(RatIndexType);
 char  *GetRatName(RatIndexType);
-void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sockaddr *src_addr, socklen_t *addrlen);
+void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, struct sockaddr *src_addr, socklen_t *addrlen);
 void ConvertOutgoing(Message *);
 void ratState(void);
 void manageMissiles(void);
