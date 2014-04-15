@@ -420,9 +420,10 @@ public:
 	}
 
 	void print() {
+		printf("KeepAliveMessage: \n");
 		Message::print();
-		printf("ratPosX: 0x%x, ratPosY: 0x%x, ratDir: 0x%x\n", ratPosX, ratPosY, ratDir);
-		printf("score: %d, missileFlag: 0x%x, missilePosX: 0x%x, missilePosY: 0x%x, missileSeqNum: %d\n", score, missileFlag, missilePosX, missilePosY, missileSeqNum);
+		printf("ratPosX: %u, ratPosY: %u, ratDir: %u\n", ratPosX, ratPosY, ratDir);
+		printf("score: %d, missileFlag: %u, missilePosX: %u, missilePosY: %u, missileSeqNum: %d\n", score, missileFlag, missilePosX, missilePosY, missileSeqNum);
 	}
 };
 

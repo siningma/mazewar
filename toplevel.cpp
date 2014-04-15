@@ -422,8 +422,8 @@ void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, st
 	unsigned int msgId = 0; 
 	memcpy(&msgId, header_buf + 2 + UUID_SIZE, 4);
 
-	printf("Message Header detail: \n");
-	printf("Message type: %x\n", msgType);
+	printf("Receive Message Header detail: \n");
+	printf("Message type: 0x%x\n", msgType);
 	printf("RatId: ");
     for (int i = 2 ; i < 2 + UUID_SIZE; i++) {
     	printf("%x", ratId[i]);
@@ -521,7 +521,7 @@ void ConvertOutgoing(Message *p)
 
 void sendKeepAliveMessage() {
 	KeepAliveMessage keepAliveMsg(getMessageId(), MY_X_LOC, MY_Y_LOC, MY_DIR, MY_SCORE);
-	keepAliveMsg.print();
+	// keepAliveMsg.print();
 
 	unsigned char msg_buf[HEADER_SIZE + 14];
 	memset(msg_buf, 0, HEADER_SIZE + 14);
