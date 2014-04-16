@@ -425,6 +425,7 @@ int recvPacket(int socket, unsigned char* payload_buf, int len, struct sockaddr 
 	if(FD_ISSET(socket, &fdmask))	{
 		cc = recvfrom(socket, payload_buf, len, 0,
 		        src_addr, addrlen);
+		printf("receive packet payload_buf size: %d\n", cc);
 		if (cc <= 0) {
 		    if (cc < 0 && errno != EINTR) 
 				perror("event recvfrom");
@@ -621,13 +622,15 @@ void sendHitResponseMessage() {
 }
 
 void sendMsgSepPrint() {
-	for (int i = 0; i < 20; i++)
+	for (int i = 0; i < 40; i++)
 		printf("*");
+	printf("\n");
 }
 
 void recvMsgSepPrint() {
-	for (int i = 0; i < 20; i++)
+	for (int i = 0; i < 40; i++)
 		printf("+");
+	printf("\n");
 }
 
 /* ----------------------------------------------------------------------- */
