@@ -444,19 +444,8 @@ void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, st
 	unsigned int msgId = 0; 
 	memcpy(&msgId, header_buf + 2 + UUID_SIZE, 4);
 
-	/*
-	printf("Receive Message Header detail: \n");
-	printf("Message type: 0x%x\n", msgType);
-	printf("RatId: ");
-    for (int i = 2 ; i < 2 + UUID_SIZE; i++) {
-    	printf("%x", ratId[i]);
-    }
-    printf("\n");
-    printf("Message Id: %u\n", msgId);
-    */
-
+    int cc;
     switch (msgType) {
-    	int cc;
     	case JOIN:
     	{
     		break;
@@ -481,15 +470,15 @@ void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, st
 			unsigned char missileFlag = payload_buf[7];
 
 			// if missileFlag is not zero, set missile info
-			unsigned char missilePosX = 0;
-			unsigned char missilePosY = 0;
-			unsigned int missileSeqNum = 0;
-			if (missileFlag != 0) {
-				missilePosX = payload_buf[8];
-				missilePosY = payload_buf[9];
+			if (missileFlag == 0) {
+				p = new KeepAliveMessage(ratId, msgId, ratPosX, ratPosY, ratDir, score, missileFlag);	
+			} else {
+				unsigned char missilePosX = payload_buf[8];
+				unsigned char missilePosY = payload_buf[9];
+				unsigned int missileSeqNum = 0;
 				memcpy(&missileSeqNum, payload_buf + 10, 4);
+				p = new KeepAliveMessage(ratId, msgId, ratPosX, ratPosY, ratDir, score, missileFlag, missilePosX, missilePosY, missileSeqNum);
 			}
-	    	p = new KeepAliveMessage(ratId, msgId, ratPosX, ratPosY, ratDir, score, missileFlag, missilePosX, missilePosY, missileSeqNum);
 	    	
 	    	recvMsgSepPrint();
 	    	p->print();
@@ -499,7 +488,10 @@ void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, st
     	case LEAV:
     	{
     		p = new LeaveMessage(ratId, msgId);
+
+    		recvMsgSepPrint();
     		p->print();
+    		recvMsgSepPrint();
     		break;
     	}
     	case HITM:
@@ -572,6 +564,9 @@ void sendKeepAliveMessage() {
 
 void sendLeaveMessage() {
 	LeaveMessage leaveMsg(M->mw_ratId.value(), getMessageId());
+	sendMsgSepPrint();
+	leaveMsg.print();
+	sendMsgSepPrint();
 
 	unsigned char msg_buf[HEADER_SIZE];
 	memset(msg_buf, 0, HEADER_SIZE);
@@ -622,13 +617,13 @@ void sendHitResponseMessage() {
 }
 
 void sendMsgSepPrint() {
-	for (int i = 0; i < 40; i++)
+	for (int i = 0; i < 100; i++)
 		printf("*");
 	printf("\n");
 }
 
 void recvMsgSepPrint() {
-	for (int i = 0; i < 40; i++)
+	for (int i = 0; i < 100; i++)
 		printf("+");
 	printf("\n");
 }

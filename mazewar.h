@@ -363,7 +363,7 @@ public:
 	    memcpy(this->ratId, ratId, UUID_SIZE);
 	}
 
-	void print() {
+	virtual void print() {
 		printf("Message type: 0x%x\n", msgType);
 		printf("RatId: ");
 	    for (int i = 2 ; i < 2 + UUID_SIZE; i++) {
