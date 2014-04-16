@@ -409,12 +409,26 @@ char *GetRatName(RatIndexType ratId)
 /* ----------------------------------------------------------------------- */
 
 int recvPacket(int socket, unsigned char* payload_buf, int len, struct sockaddr *src_addr, socklen_t *addrlen) {
-	int cc = recvfrom(socket, payload_buf, len, 0,
+	int cc;
+	fd_set	fdmask;
+	FD_ZERO(&fdmask);
+	FD_SET(socket, &fdmask);
+
+	struct timeval timeout;
+	timeout.tv_sec = 0;
+	timeout.tv_usec = 0;
+	while ((ret = select(socket + 1, &fdmask, NULL, NULL, &timeout)) == -1)
+		if (errno != EINTR)
+	  		MWError("select error on events");
+
+	if(FD_ISSET(sockfd, &fdmask))	{
+		cc = recvfrom(socket, payload_buf, len, 0,
 		        src_addr, addrlen);
-	if (cc <= 0) {
-	    if (cc < 0 && errno != EINTR) 
-			perror("event recvfrom");
-	}	
+		if (cc <= 0) {
+		    if (cc < 0 && errno != EINTR) 
+				perror("event recvfrom");
+		}	
+	}
 	return cc;
 }
 
