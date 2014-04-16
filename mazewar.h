@@ -341,10 +341,6 @@ extern unsigned short	ratBits[];
 }					MW244BPacket; */
 
 static unsigned int currentMessageId = 0;
-/* One Rat(Player) gets a new message Id */
-static unsigned int getMessageId() {
-	return currentMessageId++;
-}
 
 /* Common message header for all messages */
 class Message {
@@ -537,6 +533,7 @@ void NewPosition(MazewarInstance::Ptr M);
 void MWError(char *);
 Score GetRatScore(RatIndexType);
 char  *GetRatName(RatIndexType);
+unsigned int getMessageId();
 void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, struct sockaddr *src_addr, socklen_t *addrlen);
 void ConvertOutgoing(Message *);
 void ratState(void);
@@ -551,8 +548,8 @@ void sendJoinMessage();
 void sendJoinResponseMessage();
 void sendHitMessage();
 void sendHitResponseMessage();
-void sendMsgSepPrint();
-void recvMsgSepPrint();
+void sendMsgPrint(Message *p);
+void recvMsgPrint(Message *p);
 
 
 /* winsys.c */

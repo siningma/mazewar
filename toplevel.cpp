@@ -444,6 +444,9 @@ void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, st
 	unsigned int msgId = 0; 
 	memcpy(&msgId, header_buf + 2 + UUID_SIZE, 4);
 
+	// ignore receving messages that sent by myself
+	bool isMsgSentByMe = isRatIdEquals(M->mw_ratId.value(), ratId);
+
     int cc;
     switch (msgType) {
     	case JOIN:
@@ -459,7 +462,7 @@ void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, st
 	    	unsigned char payload_buf[14];
 	    	memset(payload_buf, 0, 14);
 	    	int cc = recvPacket(socket, payload_buf, 14, src_addr, addrlen);
-	    	if (cc < 0)
+	    	if (cc < 0 || isMsgSentByMe)
 	    		return;
 
 			unsigned char ratPosX = payload_buf[0];
@@ -480,18 +483,17 @@ void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, st
 				p = new KeepAliveMessage(ratId, msgId, ratPosX, ratPosY, ratDir, score, missileFlag, missilePosX, missilePosY, missileSeqNum);
 			}
 	    	
-	    	recvMsgSepPrint();
-	    	p->print();
-	    	recvMsgSepPrint();
+	    	recvMsgPrint(p);
 	    	break;
     	}
     	case LEAV:
     	{
+    		if (isMsgSentByMe)
+    			return;
+
     		p = new LeaveMessage(ratId, msgId);
 
-    		recvMsgSepPrint();
-    		p->print();
-    		recvMsgSepPrint();
+    		recvMsgPrint(p);
     		break;
     	}
     	case HITM:
@@ -540,9 +542,7 @@ void ConvertOutgoing(Message *p)
 
 void sendKeepAliveMessage() {
 	KeepAliveMessage keepAliveMsg(M->mw_ratId.value(), getMessageId(), MY_X_LOC, MY_Y_LOC, MY_DIR, MY_SCORE);
-	sendMsgSepPrint();
-	keepAliveMsg.print();
-	sendMsgSepPrint();
+	sendMsgPrint(&keepAliveMsg);
 
 	unsigned char msg_buf[HEADER_SIZE + 14];
 	memset(msg_buf, 0, HEADER_SIZE + 14);
@@ -564,9 +564,7 @@ void sendKeepAliveMessage() {
 
 void sendLeaveMessage() {
 	LeaveMessage leaveMsg(M->mw_ratId.value(), getMessageId());
-	sendMsgSepPrint();
-	leaveMsg.print();
-	sendMsgSepPrint();
+	sendMsgPrint(&leaveMsg);
 
 	unsigned char msg_buf[HEADER_SIZE];
 	memset(msg_buf, 0, HEADER_SIZE);
@@ -616,16 +614,36 @@ void sendHitResponseMessage() {
 
 }
 
-void sendMsgSepPrint() {
+/* send one message nice print */
+void sendMsgPrint(Message *p) {
+	for (int i = 0; i < 100; i++)
+		printf("*");
+	printf("\n");
+	printf("Send Message:\n");
+	p->print();
 	for (int i = 0; i < 100; i++)
 		printf("*");
 	printf("\n");
 }
-
-void recvMsgSepPrint() {
+/* recv one message nice print */
+void recvMsgPrint(Message *p) {
 	for (int i = 0; i < 100; i++)
 		printf("+");
 	printf("\n");
+	printf("Receive Message:\n");
+	p->print();
+	for (int i = 0; i < 100; i++)
+		printf("+");
+	printf("\n");
+}
+
+/* One Rat gets a new message Id */
+unsigned int getMessageId() {
+	return currentMessageId++;
+}
+
+bool isRatIdEquals(const unsigned char* myRatId, const unsigned char* recvRatId) {
+	return memcmp(myRatId, recvRatId, UUID_SIZE) == 0;
 }
 
 /* ----------------------------------------------------------------------- */
