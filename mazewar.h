@@ -364,7 +364,7 @@ public:
 	}
 
 	void print() {
-		printf("Message type: %x\n", msgType);
+		printf("Message type: 0x%x\n", msgType);
 		printf("RatId: ");
 	    for (int i = 2 ; i < 2 + UUID_SIZE; i++) {
 	    	printf("%x", ratId[i]);
@@ -427,7 +427,6 @@ public:
 	}
 
 	void print() {
-		printf("KeepAliveMessage: \n");
 		Message::print();
 		printf("ratPosX: %u, ratPosY: %u, ratDir: %u\n", ratPosX, ratPosY, ratDir);
 		printf("score: %d, missileFlag: %u, missilePosX: %u, missilePosY: %u, missileSeqNum: %d\n", score, missileFlag, missilePosX, missilePosY, missileSeqNum);
@@ -552,6 +551,8 @@ void sendJoinMessage();
 void sendJoinResponseMessage();
 void sendHitMessage();
 void sendHitResponseMessage();
+void sendMsgSepPrint();
+void recvMsgSepPrint();
 
 
 /* winsys.c */

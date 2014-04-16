@@ -410,6 +410,7 @@ char *GetRatName(RatIndexType ratId)
 
 int recvPacket(int socket, unsigned char* payload_buf, int len, struct sockaddr *src_addr, socklen_t *addrlen) {
 	int cc;
+	int	ret;
 	fd_set	fdmask;
 	FD_ZERO(&fdmask);
 	FD_SET(socket, &fdmask);
@@ -421,7 +422,7 @@ int recvPacket(int socket, unsigned char* payload_buf, int len, struct sockaddr 
 		if (errno != EINTR)
 	  		MWError("select error on events");
 
-	if(FD_ISSET(sockfd, &fdmask))	{
+	if(FD_ISSET(socket, &fdmask))	{
 		cc = recvfrom(socket, payload_buf, len, 0,
 		        src_addr, addrlen);
 		if (cc <= 0) {
@@ -442,6 +443,7 @@ void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, st
 	unsigned int msgId = 0; 
 	memcpy(&msgId, header_buf + 2 + UUID_SIZE, 4);
 
+	/*
 	printf("Receive Message Header detail: \n");
 	printf("Message type: 0x%x\n", msgType);
 	printf("RatId: ");
@@ -450,6 +452,7 @@ void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, st
     }
     printf("\n");
     printf("Message Id: %u\n", msgId);
+    */
 
     switch (msgType) {
     	int cc;
@@ -486,7 +489,10 @@ void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, st
 				memcpy(&missileSeqNum, payload_buf + 10, 4);
 			}
 	    	p = new KeepAliveMessage(ratId, msgId, ratPosX, ratPosY, ratDir, score, missileFlag, missilePosX, missilePosY, missileSeqNum);
+	    	
+	    	recvMsgSepPrint();
 	    	p->print();
+	    	recvMsgSepPrint();
 	    	break;
     	}
     	case LEAV:
@@ -541,7 +547,9 @@ void ConvertOutgoing(Message *p)
 
 void sendKeepAliveMessage() {
 	KeepAliveMessage keepAliveMsg(M->mw_ratId.value(), getMessageId(), MY_X_LOC, MY_Y_LOC, MY_DIR, MY_SCORE);
+	sendMsgSepPrint();
 	keepAliveMsg.print();
+	sendMsgSepPrint();
 
 	unsigned char msg_buf[HEADER_SIZE + 14];
 	memset(msg_buf, 0, HEADER_SIZE + 14);
@@ -610,6 +618,16 @@ void sendHitMessage() {
 
 void sendHitResponseMessage() {
 
+}
+
+void sendMsgSepPrint() {
+	for (int i = 0; i < 20; i++)
+		printf("*");
+}
+
+void recvMsgSepPrint() {
+	for (int i = 0; i < 20; i++)
+		printf("+");
 }
 
 /* ----------------------------------------------------------------------- */
