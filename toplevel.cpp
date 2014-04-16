@@ -446,7 +446,7 @@ void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, st
 	memcpy(&msgId, header_buf + 2 + UUID_SIZE, 4);
 
 	// ignore receving messages that sent by myself
-	bool isMsgSentByMe = isRatIdEquals(M->mw_ratId.value(), ratId);
+	bool isMsgSentByMe = isRatIdEquals(M->my_ratId.value(), ratId);
 
     int cc;
     switch (msgType) {

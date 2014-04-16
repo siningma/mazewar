@@ -362,7 +362,7 @@ public:
 	virtual void print() {
 		printf("Message type: 0x%x\n", msgType);
 		printf("RatId: ");
-	    for (int i = 2 ; i < 2 + UUID_SIZE; i++) {
+	    for (int i = 0; i < UUID_SIZE; i++) {
 	    	printf("%x", this->ratId[i]);
 	    }
 	    printf("\n");
