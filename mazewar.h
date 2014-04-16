@@ -282,7 +282,7 @@ class MazewarInstance :  public Fwk::NamedInterface  {
 
     MazeType maze_;
     RatName myName_;
-    MW_RatId mw_ratId;
+    MW_RatId my_ratId;
 protected:
 	MazewarInstance(string s) : Fwk::NamedInterface(s), dir_(0), dirPeek_(0), myRatId_(0), score_(0),
 		xloc_(1), yloc_(3), xPeek_(0), yPeek_(0) {
@@ -363,7 +363,7 @@ public:
 		printf("Message type: 0x%x\n", msgType);
 		printf("RatId: ");
 	    for (int i = 2 ; i < 2 + UUID_SIZE; i++) {
-	    	printf("%x", ratId[i]);
+	    	printf("%x", this->ratId[i]);
 	    }
 	    printf("\n");
 	    printf("Message Id: %u\n", msgId);
@@ -550,6 +550,7 @@ void sendHitMessage();
 void sendHitResponseMessage();
 void sendMsgPrint(Message *p);
 void recvMsgPrint(Message *p);
+bool isRatIdEquals(const unsigned char* myRatId, const unsigned char* recvRatId);
 
 
 /* winsys.c */
