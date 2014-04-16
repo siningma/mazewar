@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
 
 	printf("My RatId: ");
     for (int i = 2 ; i < 2 + UUID_SIZE; i++) {
-    	printf("%x", M->mw_ratId[i]);
+    	printf("%x", M->mw_ratId.value()[i]);
     }
     printf("\n");
 
@@ -544,7 +544,7 @@ void sendKeepAliveMessage() {
 	memcpy(msg_buf + HEADER_SIZE + 10, &keepAliveMsg.missileSeqNum, 4);
 
 	sendto(M->theSocket(), msg_buf, HEADER_SIZE + 14, 0, 
-			(struct sockaddr *)M->myAddr(), sizeof(*M->myAddr()));
+			(struct sockaddr *)&groupAddr, sizeof(Sockaddr));
 }
 
 void sendLeaveMessage() {
@@ -557,7 +557,7 @@ void sendLeaveMessage() {
 	memcpy(msg_buf + 2 + UUID_SIZE, &leaveMsg.msgId, 4);
 
 	sendto(M->theSocket(), msg_buf, HEADER_SIZE, 0, 
-		(struct sockaddr *)M->myAddr(), sizeof(*M->myAddr()));
+		(struct sockaddr *)&groupAddr, sizeof(Sockaddr));
 }
 
 void sendJoinMessage() {
@@ -572,7 +572,7 @@ void sendJoinMessage() {
 	memcpy(msg_buf + HEADER_SIZE + 1, joinMsg.name.c_str(), 20);
 
 	sendto(M->theSocket(), msg_buf, HEADER_SIZE + 21, 0, 
-		(struct sockaddr *)M->myAddr(), sizeof(*M->myAddr()));
+		(struct sockaddr *)&groupAddr, sizeof(Sockaddr));
 }
 
 void sendJoinResponseMessage() {
