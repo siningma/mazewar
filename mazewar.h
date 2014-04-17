@@ -101,7 +101,18 @@ SOFTWARE.
 
 #define UUID_SIZE	16 		/* UUID size for ratId */
 #define HEADER_SIZE	22 		/* Header size */
-#define KEEPALIVE_INTERVAL 200
+
+#define KEEPALIVE_INTERVAL 200 	/* KeepAliveMessage send time interval */
+#define JOIN_INTERVAL	300		/* JoinMessage send time interval */
+#define HIT_INTERVAL 	200 	/* HitMessage send time interval */
+
+#define KEEPALIVE_TIMEOUT	10000 	/* KeepAliveMessage timeout time */
+#define JOIN_PHASE_LASTTIME	3000	/* join phase last time */
+#define HIT_PHASE_LASTTIME 	2000	/* hit phase last time */
+
+#define PLAY_PHASE	1 	/* player in play phase */
+#define JOIN_PHASE	2 	/* player in join phase */
+#define HIT_PHASE	3 	/* player in hit phase */
 
 /* types */
 
@@ -183,10 +194,11 @@ public:
 
 class Missile{
 public:
-	Missile() : exist(FALSE), x(0), y(0), dir(NORTH) {};
+	Missile() : exist(false), x(0), y(0), dir(NORTH), seqNum(0) {};
 	bool exist;
 	Loc x, y;
 	Direction dir;
+	unsigned int seqNum;
 };
 
 class MW_RatId{
@@ -224,13 +236,12 @@ public:
 };
 
 typedef struct {
-	MW_RatId ratId;
-	std::string ratName;
+	char ratName[NAMESIZE];
 	Rat rat;
 	Missile missile;
 	int score;
-	int lastKeepAliveTime;
-}	PlayerInfo;
+	double lastKeepAliveRecvTime;
+}	OtherRat;
 
 typedef	RatAppearance			RatApp_type [MAX_RATS];
 typedef	RatAppearance *			RatLook;
@@ -283,6 +294,11 @@ class MazewarInstance :  public Fwk::NamedInterface  {
     MazeType maze_;
     RatName myName_;
     MW_RatId my_ratId;
+    Missile my_missile;
+
+    unsigned char my_currPhaseState = JOIN_PHASE;
+
+    std::map<MW_RatId, OtherRat> otherRatInfo_map; 
 protected:
 	MazewarInstance(string s) : Fwk::NamedInterface(s), dir_(0), dirPeek_(0), myRatId_(0), score_(0),
 		xloc_(1), yloc_(3), xPeek_(0), yPeek_(0) {
@@ -315,6 +331,10 @@ extern MazewarInstance::Ptr M;
 #define MY_X_LOC		M->xloc().value()
 #define MY_Y_LOC		M->yloc().value()
 #define MY_SCORE		M->score().value()
+#define MY_MISSILE_EXIST	M->my_missile.exist 
+#define MY_MISSILE_X_LOC 	M->my_missile.x.value()
+#define MY_MISSILE_Y_LOC 	M->my_missile.y.value()
+#define MY_MISSILE_SEQNUM 	M->my_missile.seqNum
 
 /* events */
 
@@ -374,11 +394,12 @@ public:
 class JoinMessage: public Message {
 public:
 	unsigned char len;
-	std::string name;	
+	char name[NAMESIZE];	
 
-	JoinMessage(unsigned char* ratId, unsigned int msgId, std::string name): Message(ratId, JOIN, msgId) {
-		this->len = name.length();
-		this->name = name;
+	JoinMessage(unsigned char* ratId, unsigned int msgId, char *name): Message(ratId, JOIN, msgId) {
+		this->len = NAMESIZE;
+		memset(this->name, 0, NAMESIZE);
+		memcpy(this->name, name, NAMESIZE);
 	}
 };
 
@@ -387,11 +408,13 @@ class JoinResponseMessage: public Message {
 public:
 	unsigned char senderId[UUID_SIZE];
 	unsigned char len;
-	std::string name;
+	char name[];
 
-	JoinResponseMessage(unsigned char* ratId, unsigned int msgId, std::string name, unsigned char* senderId): Message(ratId, JNRS, msgId) {
-		this->len = name.length();
-		this->name = name;
+	JoinResponseMessage(unsigned char* ratId, unsigned int msgId, char *name, unsigned char* senderId): Message(ratId, JNRS, msgId) {
+		this->len = NAMESIZE;
+		memset(this->name, 0, NAMESIZE);
+		memcpy(this->name, name, NAMESIZE);
+
 		memset(this->senderId, 0, UUID_SIZE);
 		memcpy(this->senderId, senderId, UUID_SIZE);	
 	}	
@@ -441,7 +464,7 @@ public:
 	unsigned char shooterId[UUID_SIZE];
 	unsigned int missileSeqNum;
 
-	HitMessage(unsigned char* ratId, unsigned int msgId, unsigned int missileSeqNum, unsigned char* shooterId): Message(ratId, HITM, msgId) {
+	HitMessage(unsigned char* ratId, unsigned int msgId, unsigned char* shooterId, unsigned int missileSeqNum): Message(ratId, HITM, msgId) {
 		this->missileSeqNum = missileSeqNum;
 		memset(this->shooterId, 0, UUID_SIZE);
 		memcpy(this->shooterId, shooterId, UUID_SIZE);
@@ -459,7 +482,7 @@ public:
 	unsigned char victimId[UUID_SIZE];
 	unsigned int missileSeqNum;
 
-	HitResponseMessage(unsigned char* ratId, unsigned int msgId, unsigned int missileSeqNum, unsigned char* victimId): Message(ratId, HTRS, msgId) {
+	HitResponseMessage(unsigned char* ratId, unsigned int msgId, unsigned char* victimId, unsigned int missileSeqNum): Message(ratId, HTRS, msgId) {
 		this->missileSeqNum = missileSeqNum;
 		memset(this->victimId, 0, UUID_SIZE);
 		memcpy(this->victimId, victimId, UUID_SIZE);
@@ -545,12 +568,21 @@ void netInit(void);
 void sendKeepAliveMessage();
 void sendLeaveMessage();
 void sendJoinMessage();
-void sendJoinResponseMessage();
-void sendHitMessage();
-void sendHitResponseMessage();
+void sendJoinResponseMessage(const unsigned char *senderId);
+void sendHitMessage(const unsigned char *shooterId, const unsigned int other_missileSeqNum);
+void sendHitResponseMessage(const unsigned char *victimId, const unsigned int other_missileSeqNum);
 void sendMsgPrint(Message *p);
 void recvMsgPrint(Message *p);
 bool isRatIdEquals(const unsigned char* myRatId, const unsigned char* recvRatId);
+void joinPhase();
+void hitPhase();
+
+void process_recv_JoinMessage(JoinMessage *p);
+void process_recv_JoinResponseMessage(JoinResponseMessage *p);
+void process_recv_KeepAliveMessage(KeepAliveMessage *p);
+void process_recv_LeaveMessage(LeaveMessage *p);
+void process_recv_HitMessage(HitMessage *p);
+void process_recv_HitResponseMessage(HitResponseMessage *p);
 
 
 /* winsys.c */

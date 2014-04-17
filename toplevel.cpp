@@ -18,7 +18,13 @@ MazewarInstance::Ptr M;
 static Sockaddr         groupAddr;
 #define MAX_OTHER_RATS  (MAX_RATS - 1)
 
+double lastJoinMsgSendTime = 0;
+double lastHitMsgSendTime = 0;
+
+double firstJoinMsgSendTime = 0;
+
 double lastKeepAliveMsgSendTime = 0;
+
 
 int main(int argc, char *argv[])
 {
@@ -40,14 +46,12 @@ int main(int argc, char *argv[])
     free(ratName);	
 
     printf("RatName size: %d\n", sizeof(M->myName_));
+    printf("My RatName: %s\n", M->myName_);
 	printf("My RatId: ");
     for (int i = 0 ; i < UUID_SIZE; i++) {
     	printf("%x", M->my_ratId.value()[i]);
     }
     printf("\n");
-
-    // JoinMessage join(getMessageId(), "sma");
-    // printf("Test Join Message name: %s, messageType: %x, msgId: %d\n", join.name.c_str(), join.msgType, join.msgId);
 
     MazeInit(argc, argv);
 
@@ -130,20 +134,43 @@ play(void)
 				break;
 			}
 
-		ratStates();		/* clean house */
+		ratSFtates();		/* clean house */
 
 		manageMissiles();
 
 		DoViewUpdate();
 
 		/* Any info to send over network? */
+
+		// if I am in join phase
+		if (M->my_currPhaseState == JOIN_PHASE) {
+			joinPhase();
+		}
+
+		// if I am in hit phase
+		if (M->my_currPhaseState == HIT_PHASE) {
+			hitPhase();
+		}
+
 		// send keep alive message every 200ms
-		double currentTimestamp = getCurrentTime();
-		if (currentTimestamp - lastKeepAliveMsgSendTime >= KEEPALIVE_INTERVAL * 10) {
+		if (getCurrentTime() - lastKeepAliveMsgSendTime >= KEEPALIVE_INTERVAL * 10) {
 			sendKeepAliveMessage();
 			lastKeepAliveMsgSendTime = getCurrentTime();
 		}
 
+		// check if there is any other player has not send any KeepAliveMessage for more than 10 seconds
+		for (map<MW_RatId, OtherRat>::iterator it = otherRatInfo_map.begin(); it != otherRatInfo_map.end();) {
+			if((getCurrentTime() - it->second.lastKeepAliveRecvTime) >= KEEPALIVE_TIMEOUT) {
+				printf("No KeepAliveMessage Received for more than 10 seconds.\nRemove ratId: ");
+				for (int i = 0; i < UUID_SIZE; i++) {
+			    	printf("%x", it->first.value()[i]);
+			    }
+			    printf("\n");
+				otherRatInfo_map.erase(it++);
+			}
+			else
+				it++;	
+		}
 	}
 }
 
@@ -452,10 +479,39 @@ void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, st
     switch (msgType) {
     	case JOIN:
     	{
+    		unsigned char payload_buf[21];
+	    	memset(payload_buf, 0, 21);
+	    	int cc = recvPacket(socket, payload_buf, 21, src_addr, addrlen);
+	    	if (cc < 0 || isMsgSentByMe)
+	    		return;
+
+	    	unsigned char name_len = payload_buf[0];
+	    	char name[NAMESIZE];
+	    	memset(name, 0, NAMESIZE);
+	    	memcpy(name, payload_buf + 1, NAMESIZE);
+	    	p = new JoinMessage(ratId, msgId, name);
+
+	    	recvMsgPrint(p);
     		break;
     	}
     	case JNRS:
     	{
+    		unsigned char payload_buf[37];
+	    	memset(payload_buf, 0, 37);
+	    	int cc = recvPacket(socket, payload_buf, 37, src_addr, addrlen);
+	    	if (cc < 0 || isMsgSentByMe)
+	    		return;
+
+	    	unsigned char senderId[UUID_SIZE];
+	    	memset(senderId, 0, UUID_SIZE);
+	    	memcpy(senderId, payload_buf, UUID_SIZE);
+	    	unsigned char name_len = payload_buf[17];
+	    	char name[NAMESIZE];
+	    	memset(name, 0, NAMESIZE);
+	    	memcpy(name, payload_buf + 17, NAMESIZE);
+	    	p = new JoinResponseMessage(ratId, msgId, name, senderId);
+
+	    	recvMsgPrint(p);
     		break;
     	}
     	case KPLV:
@@ -542,7 +598,9 @@ void ConvertOutgoing(Message *p)
 }
 
 void sendKeepAliveMessage() {
-	KeepAliveMessage keepAliveMsg(M->my_ratId.value(), getMessageId(), MY_X_LOC, MY_Y_LOC, MY_DIR, MY_SCORE);
+	KeepAliveMessage keepAliveMsg(M->my_ratId.value(), getMessageId(), 
+									MY_X_LOC, MY_Y_LOC, MY_DIR, MY_SCORE, 
+									MY_MISSILE_EXIST, MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC, MY_MISSILE_SEQNUM);
 	sendMsgPrint(&keepAliveMsg);
 
 	unsigned char msg_buf[HEADER_SIZE + 14];
@@ -586,33 +644,56 @@ void sendJoinMessage() {
 	memcpy(msg_buf + 2, &joinMsg.ratId, UUID_SIZE);
 	memcpy(msg_buf + 2 + UUID_SIZE, &joinMsg.msgId, 4);
 	memcpy(msg_buf + HEADER_SIZE, &joinMsg.len, 1);
-	memcpy(msg_buf + HEADER_SIZE + 1, joinMsg.name.c_str(), 20);
+	memcpy(msg_buf + HEADER_SIZE + 1, joinMsg.name, joinMsg.len);
 
 	sendto(M->theSocket(), msg_buf, HEADER_SIZE + 21, 0, 
 		(struct sockaddr *)&groupAddr, sizeof(Sockaddr));
 }
 
-void sendJoinResponseMessage() {
-	/*JoinResponseMessage joinResponseMsg(getMessageId(), M->myName_);
+void sendJoinResponseMessage(const unsigned char *senderId) {
+	JoinResponseMessage joinResponseMsg(M->my_ratId.value(), getMessageId(), M->myName_, senderId);
 
-	unsigned char msg_buf[HEADER_SIZE + 21];
-	memset(msg_buf, 0, HEADER_SIZE + 21);
+	unsigned char msg_buf[HEADER_SIZE + 37];
+	memset(msg_buf, 0, HEADER_SIZE + 37);
 	memcpy(msg_buf, &joinResponseMsg.msgType, 1);
 	memcpy(msg_buf + 2, &joinResponseMsg.ratId, UUID_SIZE);
 	memcpy(msg_buf + 2 + UUID_SIZE, &joinResponseMsg.msgId, 4);
-	memcpy(msg_buf + HEADER_SIZE, &joinResponseMsg.len, 1);
-	memcpy(msg_buf + HEADER_SIZE + 1, &joinResponseMsg.name.c_str(), 20);
+	memcpy(msg_buf + HEADER_SIZE, joinResponseMsg.senderId, UUID_SIZE);
+	memcpy(msg_buf + HEADER_SIZE + UUID_SIZE, &joinResponseMsg.len, 1);
+	memcpy(msg_buf + HEADER_SIZE + UUID_SIZE + 1, joinResponseMsg.name, joinResponseMsg.len);
 
-	sendto(M->theSocket(), msg_buf, HEADER_SIZE + 21, 0, 
-		(struct sockaddr *)M->myAddr(), sizeof(*M->myAddr()));	*/
+	sendto(M->theSocket(), msg_buf, HEADER_SIZE + 37, 0, 
+		(struct sockaddr *)&groupAddr, sizeof(Sockaddr));
 }
 
-void sendHitMessage() {
+void sendHitMessage(const unsigned char *shooterId, const unsigned int other_missileSeqNum) {
+	HitMessage hitMsg(M->my_ratId, getMessageId(), shooterId, other_missileSeqNum);
 
+	unsigned char msg_buf[HEADER_SIZE + 20];
+	memset(msg_buf, 0, HEADER_SIZE + 20);
+	memcpy(msg_buf, &hitMsg.msgType, 1);
+	memcpy(msg_buf + 2, &hitMsg.ratId, UUID_SIZE);
+	memcpy(msg_buf + 2 + UUID_SIZE, &hitMsg.msgId, 4);
+	memcpy(msg_buf + HEADER_SIZE, hitMsg.shooterId, UUID_SIZE);
+	memcpy(msg_buf + HEADER_SIZE + UUID_SIZE, hitMsg.missileSeqNum, 4);
+
+	sendto(M->theSocket(), msg_buf, HEADER_SIZE + 20, 0, 
+		(struct sockaddr *)&groupAddr, sizeof(Sockaddr));
 }
 
-void sendHitResponseMessage() {
+void sendHitResponseMessage(const unsigned char *victimId, const unsigned int other_missileSeqNum) {
+	HitResponseMessage hitResponseMsg(M->my_ratId, getMessageId(), victimId, other_missileSeqNum);
 
+	unsigned char msg_buf[HEADER_SIZE + 20];
+	memset(msg_buf, 0, HEADER_SIZE + 20);
+	memcpy(msg_buf, &hitResponseMsg.msgType, 1);
+	memcpy(msg_buf + 2, &hitResponseMsg.ratId, UUID_SIZE);
+	memcpy(msg_buf + 2 + UUID_SIZE, &hitResponseMsg.msgId, 4);
+	memcpy(msg_buf + HEADER_SIZE, hitResponseMsg.victimId, UUID_SIZE);
+	memcpy(msg_buf + HEADER_SIZE + UUID_SIZE, hitResponseMsg.missileSeqNum, 4);
+
+	sendto(M->theSocket(), msg_buf, HEADER_SIZE + 20, 0, 
+		(struct sockaddr *)&groupAddr, sizeof(Sockaddr));
 }
 
 /* send one message nice print */
@@ -625,6 +706,7 @@ void sendMsgPrint(Message *p) {
 	for (int i = 0; i < 100; i++)
 		printf("*");
 	printf("\n");
+	printf("\n");
 }
 /* recv one message nice print */
 void recvMsgPrint(Message *p) {
@@ -636,6 +718,7 @@ void recvMsgPrint(Message *p) {
 	for (int i = 0; i < 100; i++)
 		printf("+");
 	printf("\n");
+	printf("\n");
 }
 
 /* One Rat gets a new message Id */
@@ -645,6 +728,26 @@ unsigned int getMessageId() {
 
 bool isRatIdEquals(const unsigned char* myRatId, const unsigned char* recvRatId) {
 	return memcmp(myRatId, recvRatId, UUID_SIZE) == 0;
+}
+
+void joinPhase() {
+	// update first JoinMessage send time only once
+	if (firstJoinMsgSendTime == 0)
+		firstJoinMsgSendTime = getCurrentTime();
+
+	// send JoinMessage every JOIN_INTERVAL
+	if (getCurrentTime() - lastJoinMsgSendTime >= JOIN_INTERVAL) {
+		sendJoinMessage();
+		lastJoinMsgSendTime = getCurrentTime();	
+	}
+
+	// JOIN_PHASE will last JOIN_PHASE_LASTTIME
+	if (firstJoinMsgSendTime != 0 && getCurrentTime() - firstJoinMsgSendTime >= JOIN_PHASE_LASTTIME)
+		M->my_currPhaseState = PLAY_PHASE;
+}
+
+void hitPhase() {
+
 }
 
 /* ----------------------------------------------------------------------- */
@@ -661,7 +764,21 @@ void ratStates()
 /* This is just for the sample version, rewrite your own */
 void manageMissiles()
 {
-  /* Leave this up to you. */
+	// check if I am hit by any missile
+	for (map<MW_RatId, OtherRat>::iterator it = otherRatInfo_map.begin(); it != otherRatInfo_map.end();) {
+		OtherRat *other_rat = &it->second;
+		if (other_rat->missile.exist == true && M->xloc == other_rat->missile.x && M->yloc == other_rat->missile.y) {
+			M->my_currPhaseState = HIT_PHASE;
+			printf("I am hit by a missile at x: %d, y: %d\n", M->xloc.value(), M->yloc.value());
+			sendHitMessage(it->first.m_ratId, other_rat->missile.seqNum);
+			break;
+		}
+	} 
+
+	// update my missile info once 200ms
+	if (M->my_missile.exist == true) {
+
+	} 
 }
 
 /* ----------------------------------------------------------------------- */
@@ -735,40 +852,155 @@ void processPacket (MWEvent *eventPacket)
 		case JOIN:
 		{
 			JoinMessage *joinMsg = (JoinMessage *)msg;
-		
+			process_recv_JoinMessage(joinMsg);
 			break;
 		}
 		case JNRS:
 		{
 			JoinResponseMessage *joinResponseMsg = (JoinResponseMessage *)msg;
-
+			process_recv_JoinResponseMessage(joinResponseMsg);
 			break;
 		}
 		case KPLV:
 		{
 			KeepAliveMessage *keepAliveMsg = (KeepAliveMessage *)msg;
-
+			process_recv_KeepAliveMessage(keepAliveMsg);
 			break;
 		}
 		case LEAV:
 		{
 			LeaveMessage *leaveMsg = (LeaveMessage *)msg;
-
+			process_recv_LeaveMessage(leaveMsg);
 			break;
 		}
 		case HITM:
 		{
 			HitMessage *hitMsg = (HitMessage *)msg;
-
+			process_recv_HitMessage(hitMsg);
 			break;
 		}
 		case HTRS:
 		{
 			HitResponseMessage *hitResponseMsg = (HitResponseMessage *)msg;
-
+			process_recv_HitResponseMessage(hitResponseMsg);
 			break;
 		}
 	}
+}
+
+void process_recv_JoinMessage(JoinMessage *p) {
+	map<MW_RatId, OtherRat>::iterator it = otherRatInfo_map.find(p->ratId);
+	if (it != otherRatInfo_map.end()) {
+		// if find JoinMessage ratId in my otherRatInfo table
+		// update thia player's name
+		if (!memcmp(it->second.ratName, p->name, NAMESIZE)) {			
+			memcpy(it->second.ratName, p->name, NAMESIZE);
+			printf("Receive JoinMessage and update ratName: %s, RatId: ", other.ratName);
+			for (int i = 0 ; i < UUID_SIZE; i++) {
+		    	printf("%x", it->first.m_ratId[i]);
+		    }
+		}	
+	} else {
+		MW_RatId other_ratId(p->ratId);
+		OtherRat other;
+		memcpy(other.ratName, p->name, NAMESIZE);
+		other.score = 0;
+		other.lastKeepAliveRecvTime = getCurrentTime();
+		otherRatInfo_map.insert(pair<MW_RatId, OtherRat>(other_ratId, other));
+		
+		printf("Receive JoinMessage and store ratName: %s, RatId: ", other.ratName);
+		for (int i = 0 ; i < UUID_SIZE; i++) {
+	    	printf("%x", it->first.m_ratId[i]);
+	    }
+	}
+}
+
+void process_recv_JoinResponseMessage(JoinResponseMessage *p) {
+	// Receiving JoinResponseMessage is valid only in JOIN_PHASE and JoinResponseMessage is intended for me 
+	if (M->my_currPhaseState == JOIN_PHASE && isRatIdEquals(p->senderId, M->my_ratId)) {
+		map<MW_RatId, OtherRat>::iterator it = otherRatInfo_map.find(p->ratId);
+		if (it != otherRatInfo_map.end()) {
+			// if find JoinReponseMessage ratId in my otherRatInfo table
+			// update this play's name
+			if (!memcmp(it->second.ratName, p->name, NAMESIZE)) {			
+				memcpy(it->second.ratName, p->name, NAMESIZE);
+				printf("Receive JoinResponseMessage and update ratName: %s, RatId: ", other.ratName);
+				for (int i = 0 ; i < UUID_SIZE; i++) {
+			    	printf("%x", it->first.m_ratId[i]);
+			    }
+			}	
+		} else {
+			MW_RatId other_ratId(p->ratId);
+			OtherRat other;
+			memcpy(other.ratName, p->name, NAMESIZE);
+			other.score = 0;
+			other.lastKeepAliveRecvTime = getCurrentTime();
+			otherRatInfo_map.insert(pair<MW_RatId, OtherRat>(other_ratId, other));
+			
+			printf("Receive JoinResponseMessage and store ratName: %s, RatId: ", other.ratName);
+			for (int i = 0 ; i < UUID_SIZE; i++) {
+		    	printf("%x", it->first.m_ratId[i]);
+		    }
+		}
+	}	
+}
+
+void process_recv_KeepAliveMessage(KeepAliveMessage *p) {
+	map<MW_RatId, OtherRat>::iterator it = otherRatInfo_map.find(p->ratId);
+	if (it != otherRatInfo_map.end()) {
+		// find send KeepAliveMessage ratId in my otherRatInfo table
+		// update other Rat info in my table
+		OtherRat *other = &it->second;
+		other->rat.x = Loc(p->ratPosX);
+		other->rat.y = Loc(p->ratPosY);
+		other->rat.dir = Direction(p->ratDir);
+		other->missile.exist = p->missileFlag;
+		other->missile.x = Loc(p->missilePosX);
+		other->missile.y = Loc(p->missilePosY);
+		other->missile.seqNum = p->missileSeqNum;
+		other->score = p->score;
+		other->lastKeepAliveRecvTime = getCurrentTime();
+	} else {
+		MW_RatId other_ratId(p->ratId);
+		OtherRat other;
+		memcpy(other.ratName, p->name, NAMESIZE);
+		other.rat.x = Loc(p->ratPosX);
+		other.rat.y = Loc(p->ratPosY);
+		other.rat.dir = Direction(p->ratDir);
+		other.missile.exist = p->missileFlag;
+		other.missile.x = Loc(p->missilePosX);
+		other.missile.y = Loc(p->missilePosY);
+		other.missile.seqNum = p->missileSeqNum;
+		other.score = p->score;
+		other.lastKeepAliveRecvTime = getCurrentTime();
+		otherRatInfo_map.insert(pair<MW_RatId, OtherRat>(other_ratId, other));
+	}
+}
+
+void process_recv_LeaveMessage(LeaveMessage *p) {
+	map<MW_RatId, OtherRat>::iterator it = otherRatInfo_map.find(p->ratId);
+	if (it != otherRatInfo_map.end()) {
+		// find sent LeaveMessage ratId in my otherRatInfo table
+		// remove this rat info from my table
+		printf("Remove rat with ratId: ");
+	    for (int i = 0 ; i < UUID_SIZE; i++) {
+	    	printf("%x", it->first.value()[i]);
+	    }
+		printf("\n");
+
+		printf("Before remove otherRatInfo_map size: %d\n", otherRatInfo_map.size());
+		otherRatInfo_map.erase(p->ratId);
+		printf("After remove otherRatInfo_map size: %d\n", otherRatInfo_map.size());
+
+	}
+}
+
+void process_recv_HitMessage(HitMessage *p) {
+
+}
+
+void process_recv_HitResponseMessage(HitResponseMessage *p) {
+
 }
 
 /* ----------------------------------------------------------------------- */
