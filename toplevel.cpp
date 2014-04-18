@@ -165,7 +165,7 @@ play(void)
 			if((getCurrentTime() - it->second.lastKeepAliveRecvTime) >= KEEPALIVE_TIMEOUT) {
 				printf("No KeepAliveMessage Received for more than 10 seconds.\nRemove ratId: ");
 				for (int i = 0; i < UUID_SIZE; i++) {
-			    	printf("%x", it->first.m_ratId[i]);
+			    	printf("%x", it->first.value()[i]);
 			    }
 			    printf("\n");
 				M->otherRatInfo_map.erase(it++);
@@ -477,7 +477,6 @@ void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, st
 	// ignore receving messages that sent by myself
 	bool isMsgSentByMe = isRatIdEquals(M->my_ratId.value(), ratId);
 
-    int cc;
     switch (msgType) {
     	case JOIN:
     	{
@@ -490,7 +489,7 @@ void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, st
 	    	unsigned char name_len = payload_buf[0];
 	    	char name[NAMESIZE];
 	    	memset(name, 0, NAMESIZE);
-	    	memcpy(name, payload_buf + 1, NAMESIZE);
+	    	memcpy(name, payload_buf + 1, name_len);
 	    	p = new JoinMessage(ratId, msgId, name);
 
 	    	recvMsgPrint(p);
@@ -510,7 +509,7 @@ void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, st
 	    	unsigned char name_len = payload_buf[17];
 	    	char name[NAMESIZE];
 	    	memset(name, 0, NAMESIZE);
-	    	memcpy(name, payload_buf + 17, NAMESIZE);
+	    	memcpy(name, payload_buf + 17, name_len);
 	    	p = new JoinResponseMessage(ratId, msgId, name, senderId);
 
 	    	recvMsgPrint(p);
@@ -669,7 +668,7 @@ void sendJoinResponseMessage(unsigned char *senderId) {
 }
 
 void sendHitMessage(unsigned char *shooterId, unsigned int other_missileSeqNum) {
-	HitMessage hitMsg(M->my_ratId, getMessageId(), shooterId, other_missileSeqNum);
+	HitMessage hitMsg(M->my_ratId.value(), getMessageId(), shooterId, other_missileSeqNum);
 
 	unsigned char msg_buf[HEADER_SIZE + 20];
 	memset(msg_buf, 0, HEADER_SIZE + 20);
@@ -684,7 +683,7 @@ void sendHitMessage(unsigned char *shooterId, unsigned int other_missileSeqNum) 
 }
 
 void sendHitResponseMessage(unsigned char *victimId, unsigned int other_missileSeqNum) {
-	HitResponseMessage hitResponseMsg(M->my_ratId, getMessageId(), victimId, other_missileSeqNum);
+	HitResponseMessage hitResponseMsg(M->my_ratId.value(), getMessageId(), victimId, other_missileSeqNum);
 
 	unsigned char msg_buf[HEADER_SIZE + 20];
 	memset(msg_buf, 0, HEADER_SIZE + 20);
@@ -778,10 +777,10 @@ void manageMissiles()
 	// check if I am hit by any missile
 	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.begin(); it != M->otherRatInfo_map.end();) {
 		OtherRat *other_rat = &it->second;
-		if (other_rat->missile.exist == true && M->xloc.value() == other_rat->missile.x.value() && M->yloc.value() == other_rat->missile.y.value()) {
+		if (other_rat->missile.exist == true && MY_X_LOC == other_rat->missile.x.value() && MY_Y_LOC == other_rat->missile.y.value()) {
 			M->my_currPhaseState = HIT_PHASE;
-			printf("I am hit by a missile at x: %d, y: %d\n", M->xloc.value(), M->yloc.value());
-			sendHitMessage(it->first.m_ratId, other_rat->missile.seqNum);
+			printf("I am hit by a missile at x: %d, y: %d\n", MY_X_LOC, MY_Y_LOC;
+			sendHitMessage(it->first.value(), other_rat->missile.seqNum);
 			break;
 		}
 	} 
@@ -909,7 +908,7 @@ void process_recv_JoinMessage(JoinMessage *p) {
 			memcpy(it->second.ratName, p->name, NAMESIZE);
 			printf("Receive JoinMessage and update ratName: %s, RatId: ", it->second.ratName);
 			for (int i = 0 ; i < UUID_SIZE; i++) {
-		    	printf("%x", it->first.m_ratId[i]);
+		    	printf("%x", it->first.value()[i]);
 		    }
 		}	
 	} else {
@@ -922,7 +921,7 @@ void process_recv_JoinMessage(JoinMessage *p) {
 		
 		printf("Receive JoinMessage and store ratName: %s, RatId: ", other.ratName);
 		for (int i = 0 ; i < UUID_SIZE; i++) {
-	    	printf("%x", it->first.m_ratId[i]);
+	    	printf("%x", it->first.value()[i]);
 	    }
 	}
 }
@@ -936,9 +935,9 @@ void process_recv_JoinResponseMessage(JoinResponseMessage *p) {
 			// update this play's name
 			if (!memcmp(it->second.ratName, p->name, NAMESIZE)) {			
 				memcpy(it->second.ratName, p->name, NAMESIZE);
-				printf("Receive JoinResponseMessage and update ratName: %s, RatId: ", other.ratName);
+				printf("Receive JoinResponseMessage and update ratName: %s, RatId: ", it->second.ratName);
 				for (int i = 0 ; i < UUID_SIZE; i++) {
-			    	printf("%x", it->first.m_ratId[i]);
+			    	printf("%x", it->first.value()[i]);
 			    }
 			}	
 		} else {
@@ -951,7 +950,7 @@ void process_recv_JoinResponseMessage(JoinResponseMessage *p) {
 			
 			printf("Receive JoinResponseMessage and store ratName: %s, RatId: ", other.ratName);
 			for (int i = 0 ; i < UUID_SIZE; i++) {
-		    	printf("%x", it->first.m_ratId[i]);
+		    	printf("%x", it->first.value()[i]);
 		    }
 		}
 	}	
@@ -975,7 +974,6 @@ void process_recv_KeepAliveMessage(KeepAliveMessage *p) {
 	} else {
 		MW_RatId other_ratId(p->ratId);
 		OtherRat other;
-		memcpy(other.ratName, p->name, NAMESIZE);
 		other.rat.x = Loc(p->ratPosX);
 		other.rat.y = Loc(p->ratPosY);
 		other.rat.dir = Direction(p->ratDir);
@@ -1008,16 +1006,16 @@ void process_recv_LeaveMessage(LeaveMessage *p) {
 }
 
 void process_recv_HitMessage(HitMessage *p) {
-	if (isRatIdEquals(p->senderId, M->my_ratId.m_ratId)) {
+	if (isRatIdEquals(p->shooterId, M->my_ratId.value())) {
 		M->scoreIs( M->score().value() + 11 );
 		// store my missile with some seqNum hit someone
 	}
 }
 
 void process_recv_HitResponseMessage(HitResponseMessage *p) {
-	if (isRatIdEquals(p->victimId, M->my_ratId.m_ratId)) {
+	if (isRatIdEquals(p->victimId, M->my_ratId.value())) {
 		M->scoreIs( M->score().value() - 5 );
-			
+
 	}
 }
 
