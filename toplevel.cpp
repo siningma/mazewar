@@ -53,6 +53,8 @@ int main(int argc, char *argv[])
     }
     printf("\n");
 
+    missileStatusPrint(&M->my_missile);
+
     MazeInit(argc, argv);
 
     NewPosition(M);
@@ -134,7 +136,7 @@ play(void)
 				break;
 			}
 
-		ratSFtates();		/* clean house */
+		ratState();		/* clean house */
 
 		manageMissiles();
 
@@ -159,14 +161,14 @@ play(void)
 		}
 
 		// check if there is any other player has not send any KeepAliveMessage for more than 10 seconds
-		for (map<MW_RatId, OtherRat>::iterator it = otherRatInfo_map.begin(); it != otherRatInfo_map.end();) {
+		for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.begin(); it != M->otherRatInfo_map.end();) {
 			if((getCurrentTime() - it->second.lastKeepAliveRecvTime) >= KEEPALIVE_TIMEOUT) {
 				printf("No KeepAliveMessage Received for more than 10 seconds.\nRemove ratId: ");
 				for (int i = 0; i < UUID_SIZE; i++) {
 			    	printf("%x", it->first.value()[i]);
 			    }
 			    printf("\n");
-				otherRatInfo_map.erase(it++);
+				M->otherRatInfo_map.erase(it++);
 			}
 			else
 				it++;	
@@ -705,8 +707,7 @@ void sendMsgPrint(Message *p) {
 	p->print();
 	for (int i = 0; i < 100; i++)
 		printf("*");
-	printf("\n");
-	printf("\n");
+	printf("\n\n");
 }
 /* recv one message nice print */
 void recvMsgPrint(Message *p) {
@@ -717,8 +718,18 @@ void recvMsgPrint(Message *p) {
 	p->print();
 	for (int i = 0; i < 100; i++)
 		printf("+");
+	printf("\n\n");
+}
+
+void missileStatusPrint(Missile *p) {
+	for (int i = 0; i < 100; i++)
+		printf("-");
 	printf("\n");
-	printf("\n");
+	printf("My Missile Status: \n");
+	printf("Exist: %d, X: %d, Y: %d, dir: %d, SeqNum: %d\n", p->exist, p->x.value(), p->y.value(), p->dir.value(), p->seqNum);
+	for (int i = 0; i < 100; i++)
+		printf("-");
+	printf("\n\n");
 }
 
 /* One Rat gets a new message Id */
@@ -765,7 +776,7 @@ void ratStates()
 void manageMissiles()
 {
 	// check if I am hit by any missile
-	for (map<MW_RatId, OtherRat>::iterator it = otherRatInfo_map.begin(); it != otherRatInfo_map.end();) {
+	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.begin(); it != M->otherRatInfo_map.end();) {
 		OtherRat *other_rat = &it->second;
 		if (other_rat->missile.exist == true && M->xloc == other_rat->missile.x && M->yloc == other_rat->missile.y) {
 			M->my_currPhaseState = HIT_PHASE;
@@ -779,6 +790,7 @@ void manageMissiles()
 	if (M->my_missile.exist == true) {
 
 	} 
+
 }
 
 /* ----------------------------------------------------------------------- */
@@ -889,8 +901,8 @@ void processPacket (MWEvent *eventPacket)
 }
 
 void process_recv_JoinMessage(JoinMessage *p) {
-	map<MW_RatId, OtherRat>::iterator it = otherRatInfo_map.find(p->ratId);
-	if (it != otherRatInfo_map.end()) {
+	map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.find(p->ratId);
+	if (it != M->otherRatInfo_map.end()) {
 		// if find JoinMessage ratId in my otherRatInfo table
 		// update thia player's name
 		if (!memcmp(it->second.ratName, p->name, NAMESIZE)) {			
@@ -906,7 +918,7 @@ void process_recv_JoinMessage(JoinMessage *p) {
 		memcpy(other.ratName, p->name, NAMESIZE);
 		other.score = 0;
 		other.lastKeepAliveRecvTime = getCurrentTime();
-		otherRatInfo_map.insert(pair<MW_RatId, OtherRat>(other_ratId, other));
+		M->otherRatInfo_map.insert(pair<MW_RatId, OtherRat>(other_ratId, other));
 		
 		printf("Receive JoinMessage and store ratName: %s, RatId: ", other.ratName);
 		for (int i = 0 ; i < UUID_SIZE; i++) {
@@ -918,8 +930,8 @@ void process_recv_JoinMessage(JoinMessage *p) {
 void process_recv_JoinResponseMessage(JoinResponseMessage *p) {
 	// Receiving JoinResponseMessage is valid only in JOIN_PHASE and JoinResponseMessage is intended for me 
 	if (M->my_currPhaseState == JOIN_PHASE && isRatIdEquals(p->senderId, M->my_ratId)) {
-		map<MW_RatId, OtherRat>::iterator it = otherRatInfo_map.find(p->ratId);
-		if (it != otherRatInfo_map.end()) {
+		map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.find(p->ratId);
+		if (it != M->otherRatInfo_map.end()) {
 			// if find JoinReponseMessage ratId in my otherRatInfo table
 			// update this play's name
 			if (!memcmp(it->second.ratName, p->name, NAMESIZE)) {			
@@ -935,7 +947,7 @@ void process_recv_JoinResponseMessage(JoinResponseMessage *p) {
 			memcpy(other.ratName, p->name, NAMESIZE);
 			other.score = 0;
 			other.lastKeepAliveRecvTime = getCurrentTime();
-			otherRatInfo_map.insert(pair<MW_RatId, OtherRat>(other_ratId, other));
+			M->otherRatInfo_map.insert(pair<MW_RatId, OtherRat>(other_ratId, other));
 			
 			printf("Receive JoinResponseMessage and store ratName: %s, RatId: ", other.ratName);
 			for (int i = 0 ; i < UUID_SIZE; i++) {
@@ -946,8 +958,8 @@ void process_recv_JoinResponseMessage(JoinResponseMessage *p) {
 }
 
 void process_recv_KeepAliveMessage(KeepAliveMessage *p) {
-	map<MW_RatId, OtherRat>::iterator it = otherRatInfo_map.find(p->ratId);
-	if (it != otherRatInfo_map.end()) {
+	map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.find(p->ratId);
+	if (it != M->otherRatInfo_map.end()) {
 		// find send KeepAliveMessage ratId in my otherRatInfo table
 		// update other Rat info in my table
 		OtherRat *other = &it->second;
@@ -973,13 +985,13 @@ void process_recv_KeepAliveMessage(KeepAliveMessage *p) {
 		other.missile.seqNum = p->missileSeqNum;
 		other.score = p->score;
 		other.lastKeepAliveRecvTime = getCurrentTime();
-		otherRatInfo_map.insert(pair<MW_RatId, OtherRat>(other_ratId, other));
+		M->otherRatInfo_map.insert(pair<MW_RatId, OtherRat>(other_ratId, other));
 	}
 }
 
 void process_recv_LeaveMessage(LeaveMessage *p) {
-	map<MW_RatId, OtherRat>::iterator it = otherRatInfo_map.find(p->ratId);
-	if (it != otherRatInfo_map.end()) {
+	map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.find(p->ratId);
+	if (it != M->otherRatInfo_map.end()) {
 		// find sent LeaveMessage ratId in my otherRatInfo table
 		// remove this rat info from my table
 		printf("Remove rat with ratId: ");
@@ -988,9 +1000,9 @@ void process_recv_LeaveMessage(LeaveMessage *p) {
 	    }
 		printf("\n");
 
-		printf("Before remove otherRatInfo_map size: %d\n", otherRatInfo_map.size());
-		otherRatInfo_map.erase(p->ratId);
-		printf("After remove otherRatInfo_map size: %d\n", otherRatInfo_map.size());
+		printf("Before remove otherRatInfo_map size: %d\n", M->otherRatInfo_map.size());
+		M->otherRatInfo_map.erase(p->ratId);
+		printf("After remove otherRatInfo_map size: %d\n", M->otherRatInfo_map.size());
 
 	}
 }
