@@ -136,7 +136,7 @@ play(void)
 				break;
 			}
 
-		ratState();		/* clean house */
+		ratStates();		/* clean house */
 
 		manageMissiles();
 
