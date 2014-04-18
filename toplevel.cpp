@@ -942,7 +942,7 @@ void process_recv_JoinMessage(JoinMessage *p) {
 
 void process_recv_JoinResponseMessage(JoinResponseMessage *p) {
 	// Receiving JoinResponseMessage is valid only in JOIN_PHASE and JoinResponseMessage is intended for me 
-	if (M->myCurrPhaseStateIs() == JOIN_PHASE && isRatIdEquals(p->senderId, M->my_ratId.m_ratId)) {
+	if (M->myCurrPhaseState() == JOIN_PHASE && isRatIdEquals(p->senderId, M->my_ratId.m_ratId)) {
 		map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.find(p->ratId);
 		if (it != M->otherRatInfo_map.end()) {
 			// if find JoinReponseMessage ratId in my otherRatInfo table
