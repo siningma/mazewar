@@ -782,7 +782,7 @@ void manageMissiles()
 			M->my_currPhaseState = HIT_PHASE;
 			printf("I am hit by a missile at x: %d, y: %d\n", MY_X_LOC, MY_Y_LOC);
 
-			sendHitMessage(it->first.m_ratId, other_rat->missile.seqNum);
+			sendHitMessage((unsigned char*)it->first.m_ratId, other_rat->missile.seqNum);
 			break;
 		}
 	} 

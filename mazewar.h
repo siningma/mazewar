@@ -231,7 +231,7 @@ public:
 	}
 
 	unsigned char* value() {
-		return m_ratId;
+		return this->m_ratId;
 	}
 };
 
