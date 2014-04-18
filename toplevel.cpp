@@ -911,9 +911,8 @@ void process_recv_JoinMessage(JoinMessage *p) {
 			memcpy(it->second.ratName, p->name, NAMESIZE);
 
 			printf("Receive JoinMessage and update ratName: %s, RatId: ", it->second.ratName);
-			const MW_RatId *other_ratId = &it->first;
 			for (int i = 0 ; i < UUID_SIZE; i++) {
-		    	printf("%x", other_ratId->value()[i]);
+		    	printf("%x", it->first.value()[i]);
 		    }
 		    printf("\n");
 		}	
@@ -927,7 +926,7 @@ void process_recv_JoinMessage(JoinMessage *p) {
 		
 		printf("Receive JoinMessage and store ratName: %s, RatId: ", other.ratName);
 		for (int i = 0 ; i < UUID_SIZE; i++) {
-	    	printf("%x", other_ratId->value()[i]);
+	    	printf("%x", other_ratId.value()[i]);
 	    }
 	    printf("\n");
 	}
@@ -944,9 +943,8 @@ void process_recv_JoinResponseMessage(JoinResponseMessage *p) {
 				memcpy(it->second.ratName, p->name, NAMESIZE);
 
 				printf("Receive JoinResponseMessage and update ratName: %s, RatId: ", it->second.ratName);
-				const MW_RatId *other_ratId = &it->first;
 				for (int i = 0 ; i < UUID_SIZE; i++) {
-			    	printf("%x", other_ratId->value()[i]);
+			    	printf("%x", if->first.value()[i]);
 			    }
 			    printf("\n");
 			}	
@@ -960,7 +958,7 @@ void process_recv_JoinResponseMessage(JoinResponseMessage *p) {
 			
 			printf("Receive JoinResponseMessage and store ratName: %s, RatId: ", other.ratName);
 			for (int i = 0 ; i < UUID_SIZE; i++) {
-		    	printf("%x", other_ratId->value()[i]);
+		    	printf("%x", other_ratId.value()[i]);
 		    }
 		    printf("\n");
 		}
