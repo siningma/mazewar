@@ -908,6 +908,9 @@ void processPacket (MWEvent *eventPacket)
 			break;
 		}
 	}
+
+	// delete msg pointer should work here
+	// delete msg;
 }
 
 void process_recv_JoinMessage(JoinMessage *p) {
@@ -1016,7 +1019,8 @@ void process_recv_LeaveMessage(LeaveMessage *p) {
 		printf("\n");
 
 		printf("Before remove otherRatInfo_map size: %d\n", (unsigned int)M->otherRatInfo_map.size());
-		M->otherRatInfo_map.erase(p->ratId);
+		MW_RatId other_ratId(p->ratId);
+		M->otherRatInfo_map.erase(other_ratId);
 		printf("After remove otherRatInfo_map size: %d\n", (unsigned int)M->otherRatInfo_map.size());
 
 	}
