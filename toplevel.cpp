@@ -164,9 +164,8 @@ play(void)
 		for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.begin(); it != M->otherRatInfo_map.end();) {
 			if((getCurrentTime() - it->second.lastKeepAliveRecvTime) >= KEEPALIVE_TIMEOUT) {
 				printf("No KeepAliveMessage Received for more than 10 seconds.\nRemove ratId: ");
-				MW_RatId *other_RatId = &it->first;
 				for (int i = 0; i < UUID_SIZE; i++) {
-			    	printf("%x", other_RatId->value()[i]);
+			    	printf("%x", it->first.m_ratId[i]);
 			    }
 			    printf("\n");
 				M->otherRatInfo_map.erase(it++);
