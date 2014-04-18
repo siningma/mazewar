@@ -559,7 +559,6 @@ char  *GetRatName(RatIndexType);
 unsigned int getMessageId();
 void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, struct sockaddr *src_addr, socklen_t *addrlen);
 void ConvertOutgoing(Message *);
-void ratState(void);
 void manageMissiles(void);
 void DoViewUpdate(void);
 void sendPacketToPlayer(RatId, Message *);
