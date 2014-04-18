@@ -776,7 +776,8 @@ void ratStates()
 void manageMissiles()
 {
 	// check if I am hit by any missile
-	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.begin(); it != M->otherRatInfo_map.end();) {
+	map<MW_RatId, OtherRat>::iterator it; 
+	for (it = M->otherRatInfo_map.begin(); it != M->otherRatInfo_map.end(); ++it) {
 		OtherRat *other_rat = &it->second;
 		if (other_rat->missile.exist == true && MY_X_LOC == other_rat->missile.x.value() && MY_Y_LOC == other_rat->missile.y.value()) {
 			M->my_currPhaseState = HIT_PHASE;
@@ -911,7 +912,7 @@ void process_recv_JoinMessage(JoinMessage *p) {
 
 			printf("Receive JoinMessage and update ratName: %s, RatId: ", it->second.ratName);
 			for (int i = 0 ; i < UUID_SIZE; i++) {
-		    	printf("%x", it->first.value()[i]);
+		    	printf("%x", it->first.m_ratId[i]);
 		    }
 		    printf("\n");
 		}	
@@ -943,7 +944,7 @@ void process_recv_JoinResponseMessage(JoinResponseMessage *p) {
 
 				printf("Receive JoinResponseMessage and update ratName: %s, RatId: ", it->second.ratName);
 				for (int i = 0 ; i < UUID_SIZE; i++) {
-			    	printf("%x", it->first.value()[i]);
+			    	printf("%x", it->first.m_ratId[i]);
 			    }
 			    printf("\n");
 			}	
