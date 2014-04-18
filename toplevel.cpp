@@ -782,8 +782,7 @@ void manageMissiles()
 			M->my_currPhaseState = HIT_PHASE;
 			printf("I am hit by a missile at x: %d, y: %d\n", MY_X_LOC, MY_Y_LOC);
 
-			const MW_RatId* other_ratId = &it->first;
-			sendHitMessage(other_ratId->value(), other_rat->missile.seqNum);
+			sendHitMessage(it->first.value(), other_rat->missile.seqNum);
 			break;
 		}
 	} 
@@ -944,7 +943,7 @@ void process_recv_JoinResponseMessage(JoinResponseMessage *p) {
 
 				printf("Receive JoinResponseMessage and update ratName: %s, RatId: ", it->second.ratName);
 				for (int i = 0 ; i < UUID_SIZE; i++) {
-			    	printf("%x", if->first.value()[i]);
+			    	printf("%x", it->first.value()[i]);
 			    }
 			    printf("\n");
 			}	
