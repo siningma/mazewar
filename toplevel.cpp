@@ -776,14 +776,13 @@ void ratStates()
 void manageMissiles()
 {
 	// check if I am hit by any missile
-	map<MW_RatId, OtherRat>::iterator it; 
-	for (it = M->otherRatInfo_map.begin(); it != M->otherRatInfo_map.end(); ++it) {
+	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.begin(); it != M->otherRatInfo_map.end(); ++it) {
 		OtherRat *other_rat = &it->second;
 		if (other_rat->missile.exist == true && MY_X_LOC == other_rat->missile.x.value() && MY_Y_LOC == other_rat->missile.y.value()) {
 			M->my_currPhaseState = HIT_PHASE;
 			printf("I am hit by a missile at x: %d, y: %d\n", MY_X_LOC, MY_Y_LOC);
 
-			sendHitMessage(it->first.value(), other_rat->missile.seqNum);
+			sendHitMessage(it->first.m_ratId, other_rat->missile.seqNum);
 			break;
 		}
 	} 
@@ -1003,7 +1002,7 @@ void process_recv_LeaveMessage(LeaveMessage *p) {
 		// remove this rat info from my table
 		printf("Remove rat with ratId: ");
 	    for (int i = 0 ; i < UUID_SIZE; i++) {
-	    	printf("%x", it->first.value()[i]);
+	    	printf("%x", it->first.m_ratId[i]);
 	    }
 		printf("\n");
 
