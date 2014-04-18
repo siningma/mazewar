@@ -18,6 +18,8 @@ MazewarInstance::Ptr M;
 static Sockaddr         groupAddr;
 #define MAX_OTHER_RATS  (MAX_RATS - 1)
 
+static unsigned int currentMessageId = 0;
+
 double lastJoinMsgSendTime = 0;
 double lastHitMsgSendTime = 0;
 
@@ -145,12 +147,12 @@ play(void)
 		/* Any info to send over network? */
 
 		// if I am in join phase
-		if (M->my_currPhaseState == JOIN_PHASE) {
+		if (M->myCurrPhaseState() == JOIN_PHASE) {
 			joinPhase();
 		}
 
 		// if I am in hit phase
-		if (M->my_currPhaseState == HIT_PHASE) {
+		if (M->myCurrPhaseState() == HIT_PHASE) {
 			hitPhase();
 		}
 
@@ -736,6 +738,14 @@ unsigned int getMessageId() {
 	return currentMessageId++;
 }
 
+double getCurrentTime() {
+	struct timeval tv; 
+	memset(&tv, 0, sizeof(struct timeval));
+	gettimeofday(&tv, NULL);  	
+
+	return tv.tv_sec * 1000 + tv.tv_usec / 1000;
+}
+
 bool isRatIdEquals(const unsigned char* myRatId, const unsigned char* recvRatId) {
 	return memcmp(myRatId, recvRatId, UUID_SIZE) == 0;
 }
@@ -753,7 +763,7 @@ void joinPhase() {
 
 	// JOIN_PHASE will last JOIN_PHASE_LASTTIME
 	if (firstJoinMsgSendTime != 0 && getCurrentTime() - firstJoinMsgSendTime >= JOIN_PHASE_LASTTIME)
-		M->my_currPhaseState = PLAY_PHASE;
+		M->myCurrPhaseStateIs(PLAY_PHASE);
 }
 
 void hitPhase() {
@@ -778,7 +788,7 @@ void manageMissiles()
 	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.begin(); it != M->otherRatInfo_map.end(); ++it) {
 		OtherRat *other_rat = &it->second;
 		if (other_rat->missile.exist == true && MY_X_LOC == other_rat->missile.x.value() && MY_Y_LOC == other_rat->missile.y.value()) {
-			M->my_currPhaseState = HIT_PHASE;
+			M->myCurrPhaseStateIs(HIT_PHASE);
 			printf("I am hit by a missile at x: %d, y: %d\n", MY_X_LOC, MY_Y_LOC);
 
 			sendHitMessage((unsigned char*)it->first.m_ratId, other_rat->missile.seqNum);
@@ -932,7 +942,7 @@ void process_recv_JoinMessage(JoinMessage *p) {
 
 void process_recv_JoinResponseMessage(JoinResponseMessage *p) {
 	// Receiving JoinResponseMessage is valid only in JOIN_PHASE and JoinResponseMessage is intended for me 
-	if (M->my_currPhaseState == JOIN_PHASE && isRatIdEquals(p->senderId, M->my_ratId.m_ratId)) {
+	if (M->myCurrPhaseStateIs() == JOIN_PHASE && isRatIdEquals(p->senderId, M->my_ratId.m_ratId)) {
 		map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.find(p->ratId);
 		if (it != M->otherRatInfo_map.end()) {
 			// if find JoinReponseMessage ratId in my otherRatInfo table

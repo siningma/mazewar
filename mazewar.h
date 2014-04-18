@@ -290,13 +290,13 @@ class MazewarInstance :  public Fwk::NamedInterface  {
     void activeIs(int active) { this->active_ = active; }
     inline Rat rat(RatIndexType num) const { return mazeRats_[num.value()]; }
     void ratIs(Rat rat, RatIndexType num) { this->mazeRats_[num.value()] = rat; }
+    inline unsigned char myCurrPhaseState() const { return my_currPhaseState; }
+    void myCurrPhaseStateIs(unsigned char my_currPhaseState) { this->my_currPhaseState = my_currPhaseState; }
 
     MazeType maze_;
     RatName myName_;
     MW_RatId my_ratId;
     Missile my_missile;
-
-    unsigned char my_currPhaseState;
 
     std::map<MW_RatId, OtherRat> otherRatInfo_map; 
 protected:
@@ -323,6 +323,7 @@ protected:
     Loc xPeek_;
     Loc yPeek_;
     int active_;
+    unsigned char my_currPhaseState;
 };
 extern MazewarInstance::Ptr M;
 
@@ -359,8 +360,6 @@ extern unsigned short	ratBits[];
 	unsigned char type;
 	u_long	body[256];
 }					MW244BPacket; */
-
-static unsigned int currentMessageId = 0;
 
 /* Common message header for all messages */
 class Message {
@@ -495,14 +494,6 @@ typedef	struct {
 	Sockaddr	eventSource;
 }					MWEvent;
 
-static double getCurrentTime() {
-	struct timeval tv; 
-	memset(&tv, 0, sizeof(struct timeval));
-	gettimeofday(&tv, NULL);  	
-
-	return tv.tv_sec * 1000 + tv.tv_usec / 1000;
-}
-
 void		*malloc();
 Sockaddr	*resolveHost();
 
@@ -574,6 +565,7 @@ void sendMsgPrint(Message *p);
 void recvMsgPrint(Message *p);
 void missileStatusPrint(Missile *p);
 bool isRatIdEquals(const unsigned char* myRatId, const unsigned char* recvRatId);
+double getCurrentTime();
 void joinPhase();
 void hitPhase();
 
