@@ -781,7 +781,8 @@ void manageMissiles()
 		if (other_rat->missile.exist == true && MY_X_LOC == other_rat->missile.x.value() && MY_Y_LOC == other_rat->missile.y.value()) {
 			M->my_currPhaseState = HIT_PHASE;
 			printf("I am hit by a missile at x: %d, y: %d\n", MY_X_LOC, MY_Y_LOC);
-			MW_RatId* other_ratId = &it->first;
+
+			const MW_RatId* other_ratId = &it->first;
 			sendHitMessage(other_ratId->value(), other_rat->missile.seqNum);
 			break;
 		}
@@ -908,8 +909,9 @@ void process_recv_JoinMessage(JoinMessage *p) {
 		// update thia player's name
 		if (!memcmp(it->second.ratName, p->name, NAMESIZE)) {			
 			memcpy(it->second.ratName, p->name, NAMESIZE);
+
 			printf("Receive JoinMessage and update ratName: %s, RatId: ", it->second.ratName);
-			MW_RatId *other_ratId = &it->first;
+			const MW_RatId *other_ratId = &it->first;
 			for (int i = 0 ; i < UUID_SIZE; i++) {
 		    	printf("%x", other_ratId->value()[i]);
 		    }
@@ -924,7 +926,7 @@ void process_recv_JoinMessage(JoinMessage *p) {
 		M->otherRatInfo_map.insert(pair<MW_RatId, OtherRat>(other_ratId, other));
 		
 		printf("Receive JoinMessage and store ratName: %s, RatId: ", other.ratName);
-		MW_RatId *other_ratId = &it->first;
+		const MW_RatId *other_ratId = &it->first;
 		for (int i = 0 ; i < UUID_SIZE; i++) {
 	    	printf("%x", other_ratId->value()[i]);
 	    }
@@ -941,8 +943,9 @@ void process_recv_JoinResponseMessage(JoinResponseMessage *p) {
 			// update this play's name
 			if (!memcmp(it->second.ratName, p->name, NAMESIZE)) {			
 				memcpy(it->second.ratName, p->name, NAMESIZE);
+
 				printf("Receive JoinResponseMessage and update ratName: %s, RatId: ", it->second.ratName);
-				MW_RatId *other_ratId = &it->first;
+				const MW_RatId *other_ratId = &it->first;
 				for (int i = 0 ; i < UUID_SIZE; i++) {
 			    	printf("%x", other_ratId->value()[i]);
 			    }
@@ -957,7 +960,7 @@ void process_recv_JoinResponseMessage(JoinResponseMessage *p) {
 			M->otherRatInfo_map.insert(pair<MW_RatId, OtherRat>(other_ratId, other));
 			
 			printf("Receive JoinResponseMessage and store ratName: %s, RatId: ", other.ratName);
-			MW_RatId *other_ratId = &it->first;
+			const MW_RatId *other_ratId = &it->first;
 			for (int i = 0 ; i < UUID_SIZE; i++) {
 		    	printf("%x", other_ratId->value()[i]);
 		    }
