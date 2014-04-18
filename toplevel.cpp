@@ -926,7 +926,6 @@ void process_recv_JoinMessage(JoinMessage *p) {
 		M->otherRatInfo_map.insert(pair<MW_RatId, OtherRat>(other_ratId, other));
 		
 		printf("Receive JoinMessage and store ratName: %s, RatId: ", other.ratName);
-		const MW_RatId *other_ratId = &it->first;
 		for (int i = 0 ; i < UUID_SIZE; i++) {
 	    	printf("%x", other_ratId->value()[i]);
 	    }
@@ -960,7 +959,6 @@ void process_recv_JoinResponseMessage(JoinResponseMessage *p) {
 			M->otherRatInfo_map.insert(pair<MW_RatId, OtherRat>(other_ratId, other));
 			
 			printf("Receive JoinResponseMessage and store ratName: %s, RatId: ", other.ratName);
-			const MW_RatId *other_ratId = &it->first;
 			for (int i = 0 ; i < UUID_SIZE; i++) {
 		    	printf("%x", other_ratId->value()[i]);
 		    }
