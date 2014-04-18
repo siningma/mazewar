@@ -164,8 +164,9 @@ play(void)
 		for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.begin(); it != M->otherRatInfo_map.end();) {
 			if((getCurrentTime() - it->second.lastKeepAliveRecvTime) >= KEEPALIVE_TIMEOUT) {
 				printf("No KeepAliveMessage Received for more than 10 seconds.\nRemove ratId: ");
+				MW_RatId *other_RatId = &it->first;
 				for (int i = 0; i < UUID_SIZE; i++) {
-			    	printf("%x", it->first.value()[i]);
+			    	printf("%x", other_RatId->value()[i]);
 			    }
 			    printf("\n");
 				M->otherRatInfo_map.erase(it++);
@@ -779,8 +780,9 @@ void manageMissiles()
 		OtherRat *other_rat = &it->second;
 		if (other_rat->missile.exist == true && MY_X_LOC == other_rat->missile.x.value() && MY_Y_LOC == other_rat->missile.y.value()) {
 			M->my_currPhaseState = HIT_PHASE;
-			printf("I am hit by a missile at x: %d, y: %d\n", MY_X_LOC, MY_Y_LOC;
-			sendHitMessage(it->first.value(), other_rat->missile.seqNum);
+			printf("I am hit by a missile at x: %d, y: %d\n", MY_X_LOC, MY_Y_LOC);
+			MW_RatId* other_ratId = &it->first;
+			sendHitMessage(other_ratId->value(), other_rat->missile.seqNum);
 			break;
 		}
 	} 
@@ -907,9 +909,11 @@ void process_recv_JoinMessage(JoinMessage *p) {
 		if (!memcmp(it->second.ratName, p->name, NAMESIZE)) {			
 			memcpy(it->second.ratName, p->name, NAMESIZE);
 			printf("Receive JoinMessage and update ratName: %s, RatId: ", it->second.ratName);
+			MW_RatId *other_ratId = &it->first;
 			for (int i = 0 ; i < UUID_SIZE; i++) {
-		    	printf("%x", it->first.value()[i]);
+		    	printf("%x", other_ratId->value()[i]);
 		    }
+		    printf("\n");
 		}	
 	} else {
 		MW_RatId other_ratId(p->ratId);
@@ -920,9 +924,11 @@ void process_recv_JoinMessage(JoinMessage *p) {
 		M->otherRatInfo_map.insert(pair<MW_RatId, OtherRat>(other_ratId, other));
 		
 		printf("Receive JoinMessage and store ratName: %s, RatId: ", other.ratName);
+		MW_RatId *other_ratId = &it->first;
 		for (int i = 0 ; i < UUID_SIZE; i++) {
-	    	printf("%x", it->first.value()[i]);
+	    	printf("%x", other_ratId->value()[i]);
 	    }
+	    printf("\n");
 	}
 }
 
@@ -936,9 +942,11 @@ void process_recv_JoinResponseMessage(JoinResponseMessage *p) {
 			if (!memcmp(it->second.ratName, p->name, NAMESIZE)) {			
 				memcpy(it->second.ratName, p->name, NAMESIZE);
 				printf("Receive JoinResponseMessage and update ratName: %s, RatId: ", it->second.ratName);
+				MW_RatId *other_ratId = &it->first;
 				for (int i = 0 ; i < UUID_SIZE; i++) {
-			    	printf("%x", it->first.value()[i]);
+			    	printf("%x", other_ratId->value()[i]);
 			    }
+			    printf("\n");
 			}	
 		} else {
 			MW_RatId other_ratId(p->ratId);
@@ -949,9 +957,11 @@ void process_recv_JoinResponseMessage(JoinResponseMessage *p) {
 			M->otherRatInfo_map.insert(pair<MW_RatId, OtherRat>(other_ratId, other));
 			
 			printf("Receive JoinResponseMessage and store ratName: %s, RatId: ", other.ratName);
+			MW_RatId *other_ratId = &it->first;
 			for (int i = 0 ; i < UUID_SIZE; i++) {
-		    	printf("%x", it->first.value()[i]);
+		    	printf("%x", other_ratId->value()[i]);
 		    }
+		    printf("\n");
 		}
 	}	
 }
