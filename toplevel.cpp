@@ -19,13 +19,22 @@ static Sockaddr         groupAddr;
 #define MAX_OTHER_RATS  (MAX_RATS - 1)
 
 static unsigned int currentMessageId = 0;
+static unsigned int currentMissileId = 0;
 
+// last timestamp when JoinMessage is sent. This is only updated in JOIN_PHASE, once 300ms
 double lastJoinMsgSendTime = 0;
+
+// last timestamp when HitMessage is sent. This is only updated in HIT_PHASE, once 200ms
 double lastHitMsgSendTime = 0;
 
+// first JoinMessage sent time. JOIN_PHASE lasts 3 s
 double firstJoinMsgSendTime = 0;
 
+// last timestamp when KeepAliveMessage is sent. This is sent once 200ms. 
 double lastKeepAliveMsgSendTime = 0;
+
+// last timestamp the missile position get updated in manageMissile()
+double lastMissilePosUpdateTime = 0;
 
 
 int main(int argc, char *argv[])
@@ -55,7 +64,7 @@ int main(int argc, char *argv[])
     }
     printf("\n");
 
-    missileStatusPrint(&M->my_missile);
+    myMissileStatusPrint();
 
     MazeInit(argc, argv);
 
@@ -146,12 +155,17 @@ play(void)
 
 		/* Any info to send over network? */
 
-		// if I am in join phase
+		// if I am in join phase, send JoinMessage for 3 seconds
 		if (M->myCurrPhaseState() == JOIN_PHASE) {
 			joinPhase();
 		}
 
-		// if I am in hit phase
+		// if I am in play phase, check if I am hit by some other missiles
+		if (M->myCurrPhaseState() == PLAY_PHASE) {
+			playPhase();
+		}
+
+		// if I am in hit phase, send HitMessage until receiving HitResponseMessage
 		if (M->myCurrPhaseState() == HIT_PHASE) {
 			hitPhase();
 		}
@@ -722,12 +736,12 @@ void recvMsgPrint(Message *p) {
 	printf("\n\n");
 }
 
-void missileStatusPrint(Missile *p) {
+void myMissileStatusPrint() {
 	for (int i = 0; i < 100; i++)
 		printf("-");
 	printf("\n");
 	printf("My Missile Status: \n");
-	printf("Exist: %d, X: %d, Y: %d, dir: %d, SeqNum: %d\n", p->exist, p->x.value(), p->y.value(), p->dir.value(), p->seqNum);
+	printf("Exist: %d, X: %d, Y: %d, dir: %d, SeqNum: %d\n", MY_MISSILE_EXIST, MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC, MY_MISSILE_DIR, MY_MISSILE_SEQNUM);
 	for (int i = 0; i < 100; i++)
 		printf("-");
 	printf("\n\n");
@@ -744,6 +758,14 @@ double getCurrentTime() {
 	gettimeofday(&tv, NULL);  	
 
 	return tv.tv_sec * 1000 + tv.tv_usec / 1000;
+}
+
+unsigned int getCurrentMissileId() {
+	return currentMissileId;
+}
+
+void incrCurrentMissileId() {
+	++currentMissileId;
 }
 
 bool isRatIdEquals(const unsigned char* myRatId, const unsigned char* recvRatId) {
@@ -766,6 +788,23 @@ void joinPhase() {
 		M->myCurrPhaseStateIs(PLAY_PHASE);
 }
 
+void playPhase() {
+	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.begin(); it != M->otherRatInfo_map.end(); ++it) {
+		if (it->second.missile.exist == true && it->second.missile.x.value() == MY_X_LOC && it->second.missile.y.value() == MY_Y_LOC) {
+			// I am hit by a missile, send HitMessage and go to HIT_PHASE
+			// I can only be hit by only one missile at one time
+			printf("I am hit by a missile from ratId: ");
+			for (int i = 0 ; i < UUID_SIZE; i++) {
+		    	printf("%x", it->first.m_ratId[i]);
+		    }
+		    printf("\n");
+
+			M->myCurrPhaseStateIs(HIT_PHASE);
+			break;
+		}
+	}
+}
+
 void hitPhase() {
 
 }
@@ -775,30 +814,43 @@ void hitPhase() {
 /* This is just for the sample version, rewrite your own */
 void ratStates()
 {
-  /* In our sample version, we don't know about the state of any rats over
-     the net, so this is a no-op */
+	// go over otherRatInfo_map and print other rats states (score)
+	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.begin(); it != M->otherRatInfo_map.end(); ++it) {
+		if (strlen(it->second.ratName) > 0) {
+
+		}
+	}
+
 }
 
 /* ----------------------------------------------------------------------- */
-
-/* This is just for the sample version, rewrite your own */
+// This function is only used to update my missile position if the missile exists
 void manageMissiles()
 {
-	// check if I am hit by any missile
-	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.begin(); it != M->otherRatInfo_map.end(); ++it) {
-		OtherRat *other_rat = &it->second;
-		if (other_rat->missile.exist == true && MY_X_LOC == other_rat->missile.x.value() && MY_Y_LOC == other_rat->missile.y.value()) {
-			M->myCurrPhaseStateIs(HIT_PHASE);
-			printf("I am hit by a missile at x: %d, y: %d\n", MY_X_LOC, MY_Y_LOC);
-
-			sendHitMessage((unsigned char*)it->first.m_ratId, other_rat->missile.seqNum);
-			break;
-		}
-	} 
-
 	// update my missile info once 200ms
-	if (M->my_missile.exist == true) {
+	// TODO: when shoot a missile, must update lastMissilePosUpdateTime
+	if (MY_MISSILE_EXIST == true) {
+		unsigned int step = (getCurrentTime() - lastMissilePosUpdateTime) / MISSILE_UPDATE_INTERVAL;
+		if (step > 0) {
+			switch(MY_MISSILE_DIR) {
+				case NORTH:	missileXLocIs(Loc(MY_MISSILE_X_LOC + step)); break;
+				case SOUTH:	missileXLocIs(Loc(MY_MISSILE_X_LOC - step)); break;
+				case EAST:	missileXLocIs(Loc(MY_MISSILE_Y_LOC + step)); break;
+				case WEST:	missileXLocIs(Loc(MY_MISSILE_Y_LOC - step)); break;
+				default:
+					M->missileExistIs(false);
+					incrCurrentMissileId();
+					break;
+			}
 
+			lastMissilePosUpdateTime = getCurrentTime();
+		}	
+
+		// missile hit the wall
+		if (M->maze_[MY_MISSILE_X_LOC][MY_MISSILE_Y_LOC]) {
+			M->missileExistIs(false);
+			incrCurrentMissileId();
+		}
 	} 
 
 }
@@ -857,17 +909,6 @@ void sendPacketToPlayer(RatId ratId, Message *msg)
 
 void processPacket (MWEvent *eventPacket)
 {
-/*
-	MW244BPacket		*pack = eventPacket->eventDetail;
-	DataStructureX		*packX;
-
-	switch(pack->type) {
-	case PACKET_TYPE_X:
-	  packX = (DataStructureX *) &(pack->body);
-	  break;
-        case ...
-	}
-*/
 	Message *msg = eventPacket->eventDetail;
 
 	switch(msg->msgType) {
@@ -1030,6 +1071,8 @@ void process_recv_HitMessage(HitMessage *p) {
 	if (isRatIdEquals(p->shooterId, M->my_ratId.value())) {
 		M->scoreIs( M->score().value() + 11 );
 		// store my missile with some seqNum hit someone
+
+		sendHitResponseMessage(p->ratId, p->missileSeqNum);
 	}
 }
 

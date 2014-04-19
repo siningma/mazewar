@@ -105,6 +105,7 @@ SOFTWARE.
 #define KEEPALIVE_INTERVAL 200 	/* KeepAliveMessage send time interval */
 #define JOIN_INTERVAL	300		/* JoinMessage send time interval */
 #define HIT_INTERVAL 	200 	/* HitMessage send time interval */
+#define MISSILE_UPDATE_INTERVAL	200 	/* missile position update interval */
 
 #define KEEPALIVE_TIMEOUT	10000 	/* KeepAliveMessage timeout time */
 #define JOIN_PHASE_LASTTIME	3000	/* join phase last time */
@@ -293,6 +294,18 @@ class MazewarInstance :  public Fwk::NamedInterface  {
     inline unsigned char myCurrPhaseState() const { return my_currPhaseState; }
     void myCurrPhaseStateIs(unsigned char my_currPhaseState) { this->my_currPhaseState = my_currPhaseState; }
 
+    inline bool missileExist() const { return this->my_missile.exist; } 
+    void missileExistIs(bool exist) { this->my_missile.exist = exist; }
+    inline Loc missileXLoc() const { return this->my_missile.x; } 
+    void missileXLocIs(Loc xloc) { this->my_missile.x = xloc; }
+    inline Loc missileYLoc() const { return this->my_missile.y; } 
+    void missileYLocIs(Loc yloc) { this->my_missile.y = yloc; }
+    inline Direction missileDir() const { return this->my_missile.dir; } 
+    void missileDirIs(Direction dir) { this->my_missile.dir = dir; }
+    inline unsigned int missileSeqNum() const { return this->my_missile.seqNum; } 
+    void missileSeqNumIs(unsigned int seqNum) { this->my_missile.seqNum = seqNum; }
+
+
     MazeType maze_;
     RatName myName_;
     MW_RatId my_ratId;
@@ -332,10 +345,11 @@ extern MazewarInstance::Ptr M;
 #define MY_X_LOC		M->xloc().value()
 #define MY_Y_LOC		M->yloc().value()
 #define MY_SCORE		M->score().value()
-#define MY_MISSILE_EXIST	M->my_missile.exist 
-#define MY_MISSILE_X_LOC 	M->my_missile.x.value()
-#define MY_MISSILE_Y_LOC 	M->my_missile.y.value()
-#define MY_MISSILE_SEQNUM 	M->my_missile.seqNum
+#define MY_MISSILE_EXIST	M->missileExist() 
+#define MY_MISSILE_X_LOC 	M->missileXLoc().value()
+#define MY_MISSILE_Y_LOC 	M->missileYLoc().value()
+#define MY_MISSILE_DIR		M->missileDir().value()
+#define MY_MISSILE_SEQNUM 	M->missileSeqNum()
 
 /* events */
 
@@ -563,10 +577,13 @@ void sendHitMessage(unsigned char *shooterId, unsigned int other_missileSeqNum);
 void sendHitResponseMessage(unsigned char *victimId, unsigned int other_missileSeqNum);
 void sendMsgPrint(Message *p);
 void recvMsgPrint(Message *p);
-void missileStatusPrint(Missile *p);
+void myMissileStatusPrint();
 bool isRatIdEquals(const unsigned char* myRatId, const unsigned char* recvRatId);
 double getCurrentTime();
+unsigned int getCurrentMissileId();
+void incrCurrentMissileId();
 void joinPhase();
+void playPhase();
 void hitPhase();
 
 void process_recv_JoinMessage(JoinMessage *p);
