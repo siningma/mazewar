@@ -744,6 +744,13 @@ void recvMsgPrint(Message *p) {
 	printf("\n\n");
 }
 
+void printRatId(const unsigned char* ratId) {
+	for (int i = 0 ; i < UUID_SIZE; i++) {
+		printf("%x", ratId[i]);
+	}
+	printf("\n");
+}
+
 void myMissileStatusPrint() {
 	for (int i = 0; i < 100; i++)
 		printf("-");

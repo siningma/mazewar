@@ -116,7 +116,7 @@ SOFTWARE.
 #define HIT_PHASE	3 	/* player in hit phase */
 
 
-#define DEBUG	1 	/* if debug mode is enabled   
+#define DEBUG	1 	/* if debug mode is enabled */ 
 
 /* types */
 
