@@ -115,6 +115,9 @@ SOFTWARE.
 #define JOIN_PHASE	2 	/* player in join phase */
 #define HIT_PHASE	3 	/* player in hit phase */
 
+
+#define DEBUG	1 	/* if debug mode is enabled   
+
 /* types */
 
 typedef	struct sockaddr_in			Sockaddr;
@@ -250,7 +253,7 @@ typedef	RatAppearance *			RatLook;
 /* defined in display.c */
 extern RatApp_type 			Rats2Display;
 
-void printRatId(unsigned char* ratId) {
+void printRatId(const unsigned char* ratId) {
 	for (int i = 0 ; i < UUID_SIZE; i++) {
 		printf("%x", ratId[i]);
 	}

@@ -612,7 +612,9 @@ void sendKeepAliveMessage() {
 	KeepAliveMessage keepAliveMsg(M->my_ratId.value(), getMessageId(), 
 									MY_X_LOC, MY_Y_LOC, MY_DIR, MY_SCORE, 
 									MY_MISSILE_EXIST, MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC, MY_MISSILE_SEQNUM);
+	#ifdef DEBUG
 	sendMsgPrint(&keepAliveMsg);
+	#endif
 
 	unsigned char msg_buf[HEADER_SIZE + 14];
 	memset(msg_buf, 0, HEADER_SIZE + 14);
@@ -634,7 +636,9 @@ void sendKeepAliveMessage() {
 
 void sendLeaveMessage() {
 	LeaveMessage leaveMsg(M->my_ratId.value(), getMessageId());
+	#ifdef DEBUG
 	sendMsgPrint(&leaveMsg);
+	#endif
 
 	unsigned char msg_buf[HEADER_SIZE];
 	memset(msg_buf, 0, HEADER_SIZE);
@@ -648,6 +652,9 @@ void sendLeaveMessage() {
 
 void sendJoinMessage() {
 	JoinMessage joinMsg(M->my_ratId.value(), getMessageId(), M->myName_);
+	#ifdef DEBUG
+	sendMsgPrint(&joinMsg);
+	#endif
 
 	unsigned char msg_buf[HEADER_SIZE + 21];
 	memset(msg_buf, 0, HEADER_SIZE + 21);
@@ -663,8 +670,9 @@ void sendJoinMessage() {
 
 void sendJoinResponseMessage(unsigned char *senderId) {
 	JoinResponseMessage joinResponseMsg(M->my_ratId.value(), getMessageId(), M->myName_, senderId);
-
-	sendMsgPrint(&keepAliveMsg);
+	#ifdef DEBUG
+	sendMsgPrint(&joinResponseMsg);
+	#endif
 
 	unsigned char msg_buf[HEADER_SIZE + 37];
 	memset(msg_buf, 0, HEADER_SIZE + 37);
@@ -681,6 +689,9 @@ void sendJoinResponseMessage(unsigned char *senderId) {
 
 void sendHitMessage(unsigned char *shooterId, unsigned int other_missileSeqNum) {
 	HitMessage hitMsg(M->my_ratId.value(), getMessageId(), shooterId, other_missileSeqNum);
+	#ifdef DEBUG
+	sendMsgPrint(&hitMsg);
+	#endif	
 
 	unsigned char msg_buf[HEADER_SIZE + 20];
 	memset(msg_buf, 0, HEADER_SIZE + 20);
@@ -696,6 +707,7 @@ void sendHitMessage(unsigned char *shooterId, unsigned int other_missileSeqNum) 
 
 void sendHitResponseMessage(unsigned char *victimId, unsigned int other_missileSeqNum) {
 	HitResponseMessage hitResponseMsg(M->my_ratId.value(), getMessageId(), victimId, other_missileSeqNum);
+	sendMsgPrint(&hitResponseMsg);
 
 	unsigned char msg_buf[HEADER_SIZE + 20];
 	memset(msg_buf, 0, HEADER_SIZE + 20);
