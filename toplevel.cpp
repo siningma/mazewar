@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
     strncpy(M->myName_, ratName, NAMESIZE);
     free(ratName);	
 
-    printf("RatName size: %u\n", (unsigned int)sizeof(M->myName_));
+    printf("RatName size: %u, %d\n", (unsigned int)sizeof(M->myName_), strlen(M->myName_));
     printf("My RatName: %s\n", M->myName_);
 	printf("My RatId: ");
     for (int i = 0 ; i < UUID_SIZE; i++) {
@@ -833,10 +833,10 @@ void manageMissiles()
 		unsigned int step = (getCurrentTime() - lastMissilePosUpdateTime) / MISSILE_UPDATE_INTERVAL;
 		if (step > 0) {
 			switch(MY_MISSILE_DIR) {
-				case NORTH:	missileXLocIs(Loc(MY_MISSILE_X_LOC + step)); break;
-				case SOUTH:	missileXLocIs(Loc(MY_MISSILE_X_LOC - step)); break;
-				case EAST:	missileXLocIs(Loc(MY_MISSILE_Y_LOC + step)); break;
-				case WEST:	missileXLocIs(Loc(MY_MISSILE_Y_LOC - step)); break;
+				case NORTH:	M->missileXLocIs(Loc(MY_MISSILE_X_LOC + step)); break;
+				case SOUTH:	M->missileXLocIs(Loc(MY_MISSILE_X_LOC - step)); break;
+				case EAST:	M->missileYLocIs(Loc(MY_MISSILE_Y_LOC + step)); break;
+				case WEST:	M->missileYLocIs(Loc(MY_MISSILE_Y_LOC - step)); break;
 				default:
 					M->missileExistIs(false);
 					incrCurrentMissileId();
