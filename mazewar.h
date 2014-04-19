@@ -253,12 +253,7 @@ typedef	RatAppearance *			RatLook;
 /* defined in display.c */
 extern RatApp_type 			Rats2Display;
 
-void printRatId(const unsigned char* ratId) {
-	for (int i = 0 ; i < UUID_SIZE; i++) {
-		printf("%x", ratId[i]);
-	}
-	printf("\n");
-}
+void printRatId(const unsigned char* ratId);
 
 /* variables "exported" by the mazewar "module" */
 class MazewarInstance :  public Fwk::NamedInterface  {
