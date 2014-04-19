@@ -250,6 +250,13 @@ typedef	RatAppearance *			RatLook;
 /* defined in display.c */
 extern RatApp_type 			Rats2Display;
 
+void printRatId(unsigned char* ratId) {
+	for (int i = 0 ; i < UUID_SIZE; i++) {
+		printf("%x", ratId[i]);
+	}
+	printf("\n");
+}
+
 /* variables "exported" by the mazewar "module" */
 class MazewarInstance :  public Fwk::NamedInterface  {
  public:
@@ -395,10 +402,7 @@ public:
 	virtual void print() {
 		printf("Message type: 0x%x\n", msgType);
 		printf("RatId: ");
-	    for (int i = 0; i < UUID_SIZE; i++) {
-	    	printf("%x", this->ratId[i]);
-	    }
-	    printf("\n");
+		printRatId(this->ratId);
 	    printf("Message Id: %u\n", msgId);
 	}
 };
@@ -414,6 +418,12 @@ public:
 		memset(this->name, 0, NAMESIZE);
 		memcpy(this->name, name, NAMESIZE);
 	}
+
+	void print() {
+		printf("JoinMessage: \n");
+		Message::print();
+		printf("len: %u, name: %s\n", len, name);
+	}
 };
 
 /* Join Response message struct */
@@ -421,7 +431,7 @@ class JoinResponseMessage: public Message {
 public:
 	unsigned char senderId[UUID_SIZE];
 	unsigned char len;
-	char name[];
+	char name[NAMESIZE];
 
 	JoinResponseMessage(unsigned char* ratId, unsigned int msgId, char *name, unsigned char* senderId): Message(ratId, JNRS, msgId) {
 		this->len = NAMESIZE;
@@ -431,6 +441,14 @@ public:
 		memset(this->senderId, 0, UUID_SIZE);
 		memcpy(this->senderId, senderId, UUID_SIZE);	
 	}	
+
+	void print() {
+		printf("JoinResponseMessage: \n");
+		Message::print();
+		printf("SenderId: ");
+		printRatId(this->senderId);
+		printf("len: %u, name: %s\n", len, name);
+	}
 };
 
 /* KeepAlive message struct */
@@ -459,6 +477,7 @@ public:
 	}
 
 	void print() {
+		printf("KeepAliveMessage: \n");
 		Message::print();
 		printf("ratPosX: %u, ratPosY: %u, ratDir: %u\n", ratPosX, ratPosY, ratDir);
 		printf("score: %d, missileFlag: %u, missilePosX: %u, missilePosY: %u, missileSeqNum: %d\n", score, missileFlag, missilePosX, missilePosY, missileSeqNum);
@@ -469,6 +488,11 @@ public:
 class LeaveMessage: public Message {
 public:
 	LeaveMessage(unsigned char* ratId, unsigned int msgId): Message(ratId, LEAV, msgId) {}
+
+	void print() {
+		printf("LeaveMessage: \n");
+		Message::print();
+	}
 };
 
 /* Hit message struct */
@@ -484,8 +508,11 @@ public:
 	}
 
 	void print() {
+		printf("HitMessage: \n");
 		Message::print();
-
+		printf("ShooterId: ");
+		printRatId(this->shooterId);
+		printf("missileSeqNum: %u\n", missileSeqNum);
 	}
 };
 
@@ -499,6 +526,14 @@ public:
 		this->missileSeqNum = missileSeqNum;
 		memset(this->victimId, 0, UUID_SIZE);
 		memcpy(this->victimId, victimId, UUID_SIZE);
+	}
+
+	void print() {
+		printf("HitResponseMessage: \n");
+		Message::print();
+		printf("VictimId: ");
+		printRatId(this->victimId);
+		printf("missileSeqNum: %u\n", missileSeqNum);
 	}
 };
 

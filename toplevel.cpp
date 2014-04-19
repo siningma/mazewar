@@ -59,10 +59,7 @@ int main(int argc, char *argv[])
     printf("RatName size: %u, %d\n", (unsigned int)sizeof(M->myName_), strlen(M->myName_));
     printf("My RatName: %s\n", M->myName_);
 	printf("My RatId: ");
-    for (int i = 0 ; i < UUID_SIZE; i++) {
-    	printf("%x", M->my_ratId.value()[i]);
-    }
-    printf("\n");
+	printRatId(M->my_ratId.value());
 
     myMissileStatusPrint();
 
@@ -180,10 +177,7 @@ play(void)
 		for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.begin(); it != M->otherRatInfo_map.end();) {
 			if((getCurrentTime() - it->second.lastKeepAliveRecvTime) >= KEEPALIVE_TIMEOUT) {
 				printf("No KeepAliveMessage Received for more than 10 seconds.\nRemove ratId: ");
-				for (int i = 0; i < UUID_SIZE; i++) {
-			    	printf("%x", it->first.m_ratId[i]);
-			    }
-			    printf("\n");
+				printRatId(it->first.m_ratId);
 				M->otherRatInfo_map.erase(it++);
 			}
 			else
@@ -670,6 +664,8 @@ void sendJoinMessage() {
 void sendJoinResponseMessage(unsigned char *senderId) {
 	JoinResponseMessage joinResponseMsg(M->my_ratId.value(), getMessageId(), M->myName_, senderId);
 
+	sendMsgPrint(&keepAliveMsg);
+
 	unsigned char msg_buf[HEADER_SIZE + 37];
 	memset(msg_buf, 0, HEADER_SIZE + 37);
 	memcpy(msg_buf, &joinResponseMsg.msgType, 1);
@@ -773,12 +769,12 @@ bool isRatIdEquals(const unsigned char* myRatId, const unsigned char* recvRatId)
 }
 
 void joinPhase() {
-	// update first JoinMessage send time only once
-	if (firstJoinMsgSendTime == 0)
-		firstJoinMsgSendTime = getCurrentTime();
-
 	// send JoinMessage every JOIN_INTERVAL
 	if (getCurrentTime() - lastJoinMsgSendTime >= JOIN_INTERVAL) {
+		// update first JoinMessage send time only once
+		if (firstJoinMsgSendTime == 0)
+			firstJoinMsgSendTime = getCurrentTime();
+
 		sendJoinMessage();
 		lastJoinMsgSendTime = getCurrentTime();	
 	}
@@ -794,10 +790,7 @@ void playPhase() {
 			// I am hit by a missile, send HitMessage and go to HIT_PHASE
 			// I can only be hit by only one missile at one time
 			printf("I am hit by a missile from ratId: ");
-			for (int i = 0 ; i < UUID_SIZE; i++) {
-		    	printf("%x", it->first.m_ratId[i]);
-		    }
-		    printf("\n");
+			printRatId(it->first.m_ratId);
 
 			M->myCurrPhaseStateIs(HIT_PHASE);
 			break;
@@ -963,10 +956,7 @@ void process_recv_JoinMessage(JoinMessage *p) {
 			memcpy(it->second.ratName, p->name, NAMESIZE);
 
 			printf("Receive JoinMessage and update ratName: %s, RatId: ", it->second.ratName);
-			for (int i = 0 ; i < UUID_SIZE; i++) {
-		    	printf("%x", it->first.m_ratId[i]);
-		    }
-		    printf("\n");
+			printRatId(it->first.m_ratId);
 		}	
 	} else {
 		MW_RatId other_ratId(p->ratId);
@@ -977,10 +967,7 @@ void process_recv_JoinMessage(JoinMessage *p) {
 		M->otherRatInfo_map.insert(pair<MW_RatId, OtherRat>(other_ratId, other));
 		
 		printf("Receive JoinMessage and store ratName: %s, RatId: ", other.ratName);
-		for (int i = 0 ; i < UUID_SIZE; i++) {
-	    	printf("%x", other_ratId.value()[i]);
-	    }
-	    printf("\n");
+		printRatId(other_ratId.value());
 	}
 }
 
@@ -995,10 +982,7 @@ void process_recv_JoinResponseMessage(JoinResponseMessage *p) {
 				memcpy(it->second.ratName, p->name, NAMESIZE);
 
 				printf("Receive JoinResponseMessage and update ratName: %s, RatId: ", it->second.ratName);
-				for (int i = 0 ; i < UUID_SIZE; i++) {
-			    	printf("%x", it->first.m_ratId[i]);
-			    }
-			    printf("\n");
+				printRatId(it->first.m_ratId);
 			}	
 		} else {
 			MW_RatId other_ratId(p->ratId);
@@ -1009,10 +993,7 @@ void process_recv_JoinResponseMessage(JoinResponseMessage *p) {
 			M->otherRatInfo_map.insert(pair<MW_RatId, OtherRat>(other_ratId, other));
 			
 			printf("Receive JoinResponseMessage and store ratName: %s, RatId: ", other.ratName);
-			for (int i = 0 ; i < UUID_SIZE; i++) {
-		    	printf("%x", other_ratId.value()[i]);
-		    }
-		    printf("\n");
+			printRatId(other_ratId.value());
 		}
 	}	
 }
@@ -1054,10 +1035,7 @@ void process_recv_LeaveMessage(LeaveMessage *p) {
 		// find sent LeaveMessage ratId in my otherRatInfo table
 		// remove this rat info from my table
 		printf("Remove rat with ratId: ");
-	    for (int i = 0 ; i < UUID_SIZE; i++) {
-	    	printf("%x", it->first.m_ratId[i]);
-	    }
-		printf("\n");
+		printRatId(it->first.m_ratId);
 
 		printf("Before remove otherRatInfo_map size: %d\n", (unsigned int)M->otherRatInfo_map.size());
 		MW_RatId other_ratId(p->ratId);
