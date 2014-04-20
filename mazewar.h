@@ -241,6 +241,7 @@ typedef struct {
 	Rat rat;
 	Missile missile;
 	int score;
+	int lastScore;	/* redraw score used*/
 	double lastKeepAliveRecvTime;
 }	OtherRat;
 

@@ -596,7 +596,6 @@ UpdateScoreCard(RatIndexType ratIndex, char *name, int score)
 {
 	ClearScoreLine(ratIndex);
 	WriteScoreString(ratIndex, name, score);
-	InvertScoreLine(ratIndex);
 }
 
 /* ----------------------------------------------------------------------- */
