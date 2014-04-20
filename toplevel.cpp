@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
     printf("RatName size: %u, %d\n", (unsigned int)sizeof(M->myName_), strlen(M->myName_));
     printf("My RatName: %s\n", M->myName_);
 	printf("My RatId: ");
-	printRatId(M->my_ratId.m_ratId;
+	printRatId(M->my_ratId.m_ratId);
 
     myMissileStatusPrint();
 
@@ -1086,7 +1086,7 @@ void process_recv_LeaveMessage(LeaveMessage *p) {
 }
 
 void process_recv_HitMessage(HitMessage *p) {
-	if (isRatIdEquals(p->shooterId, M->my_ratId.m_ratId) {
+	if (isRatIdEquals(p->shooterId, M->my_ratId.m_ratId)) {
 		M->scoreIs( M->score().value() + 11 );
 		// store my missile with some seqNum hit someone
 
@@ -1095,7 +1095,7 @@ void process_recv_HitMessage(HitMessage *p) {
 }
 
 void process_recv_HitResponseMessage(HitResponseMessage *p) {
-	if (isRatIdEquals(p->victimId, M->my_ratId.m_ratId) {
+	if (isRatIdEquals(p->victimId, M->my_ratId.m_ratId)) {
 		M->scoreIs( M->score().value() - 5 );
 
 	}
