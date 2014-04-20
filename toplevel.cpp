@@ -18,7 +18,7 @@ MazewarInstance::Ptr M;
 static Sockaddr         groupAddr;
 #define MAX_OTHER_RATS  (MAX_RATS - 1)
 
-static unsigned int currentMessageId = 0;
+static uint32_t currentMessageId = 0;
 
 // last timestamp when JoinMessage is sent. This is only updated in JOIN_PHASE, once 300ms
 double lastJoinMsgSendTime = 0;
@@ -182,7 +182,7 @@ play(void)
 		}
 
 		// remove one entry 5s after receiving HitMessage
-		for (map<unsigned int, VictimRat>::iterator it = M->hitVictimMap.begin(); it != M->hitVictimMap.end();) {
+		for (map<uint32_t, VictimRat>::iterator it = M->hitVictimMap.begin(); it != M->hitVictimMap.end();) {
 			if (getCurrentTime() - it->second.recvHitMessageTimestamp >= VICTIMRAT_STORE_TIMEOUT) {
 				M->hitVictimMap.erase(it++);
 			} else
@@ -517,8 +517,9 @@ void ConvertIncoming(Message *p, const char* buf)
 	unsigned char ratId[UUID_SIZE];
 	memset(ratId, 0, UUID_SIZE);
 	memcpy(ratId, buf + 2, UUID_SIZE);
-	unsigned int msgId = 0; 
+	uint32_t msgId = 0; 
 	memcpy(&msgId, buf + 2 + UUID_SIZE, 4);
+	msgId = ntohl(msgId);
 
 	// ignore receving messages that sent by myself
 	bool isMsgSentByMe = isRatIdEquals(M->my_ratId.m_ratId, ratId);
@@ -578,7 +579,9 @@ void ConvertIncoming(Message *p, const char* buf)
 			unsigned char ratPosY = buf[HEADER_SIZE + 1];
 			unsigned char ratDir = buf[HEADER_SIZE + 2];
 			int score = 0;
-			memcpy(&score, buf + HEADER_SIZE + 3, 4);
+			uint32_t msg_score = 0;
+			memcpy(&msg_score, buf + HEADER_SIZE + 3, 4);
+			score = (int)ntohl(msg_score);
 			unsigned char missileFlag = buf[HEADER_SIZE + 7];
 
 			// if missileFlag is not zero, set missile info
@@ -587,7 +590,7 @@ void ConvertIncoming(Message *p, const char* buf)
 			} else {
 				unsigned char missilePosX = buf[HEADER_SIZE + 8];
 				unsigned char missilePosY = buf[HEADER_SIZE + 9];
-				unsigned int missileSeqNum = 0;
+				uint32_t missileSeqNum = 0;
 				memcpy(&missileSeqNum, buf + HEADER_SIZE + 10, 4);
 				p = new KeepAliveMessage(ratId, msgId, ratPosX, ratPosY, ratDir, score, missileFlag, missilePosX, missilePosY, missileSeqNum);
 			}
@@ -617,8 +620,9 @@ void ConvertIncoming(Message *p, const char* buf)
     		unsigned char shooterId[UUID_SIZE];
     		memset(shooterId, 0, UUID_SIZE);
     		memcpy(shooterId, buf + HEADER_SIZE, UUID_SIZE);
-    		unsigned int missileSeqNum = 0;
+    		uint32_t missileSeqNum = 0;
     		memcpy(&missileSeqNum, buf + HEADER_SIZE + UUID_SIZE, 4);
+    		missileSeqNum = ntohl(missileSeqNum);
     		p = new HitMessage(ratId, msgId, shooterId, missileSeqNum);
 
     		#ifdef DEBUG
@@ -634,8 +638,9 @@ void ConvertIncoming(Message *p, const char* buf)
     		unsigned char victimId[UUID_SIZE];
     		memset(victimId, 0, UUID_SIZE);
     		memcpy(victimId, buf + HEADER_SIZE, UUID_SIZE);
-    		unsigned int missileSeqNum = 0;
+    		uint32_t missileSeqNum = 0;
     		memcpy(&missileSeqNum, buf + HEADER_SIZE + UUID_SIZE, 4);
+    		missileSeqNum = ntohl(missileSeqNum);
     		p = new HitResponseMessage(ratId, msgId, victimId, missileSeqNum);
 
     		#ifdef DEBUG
@@ -673,15 +678,15 @@ void sendKeepAliveMessage() {
 	memset(msg_buf, 0, HEADER_SIZE + 14);
 	msg_buf[0] = keepAliveMsg.msgType;
 	memcpy(msg_buf + 2, keepAliveMsg.ratId, UUID_SIZE);
-	memcpy(msg_buf + 2 + UUID_SIZE, &keepAliveMsg.msgId, 4);
+	memcpy(msg_buf + 2 + UUID_SIZE, &htonl(keepAliveMsg.msgId), 4);
 	msg_buf[HEADER_SIZE] = keepAliveMsg.ratPosX;
 	msg_buf[HEADER_SIZE + 1] = keepAliveMsg.ratPosY;
 	msg_buf[HEADER_SIZE + 2] = keepAliveMsg.ratDir;
-	memcpy(msg_buf + HEADER_SIZE + 3, &keepAliveMsg.score, 4);
+	memcpy(msg_buf + HEADER_SIZE + 3, &htonl((uint32_t)keepAliveMsg.score), 4);
 	msg_buf[HEADER_SIZE + 7] = keepAliveMsg.missileFlag;
 	msg_buf[HEADER_SIZE + 8] = keepAliveMsg.missilePosX;
 	msg_buf[HEADER_SIZE + 9] = keepAliveMsg.missilePosY;
-	memcpy(msg_buf + HEADER_SIZE + 10, &keepAliveMsg.missileSeqNum, 4);
+	memcpy(msg_buf + HEADER_SIZE + 10, &htonl(keepAliveMsg.missileSeqNum), 4);
 
 	sendto(M->theSocket(), msg_buf, HEADER_SIZE + 14, 0, 
 			(struct sockaddr *)&groupAddr, sizeof(Sockaddr));
@@ -697,7 +702,7 @@ void sendLeaveMessage() {
 	memset(msg_buf, 0, HEADER_SIZE);
 	msg_buf[0] = leaveMsg.msgType;
 	memcpy(msg_buf + 2, leaveMsg.ratId, UUID_SIZE);
-	memcpy(msg_buf + 2 + UUID_SIZE, &leaveMsg.msgId, 4);
+	memcpy(msg_buf + 2 + UUID_SIZE, &htonl(leaveMsg.msgId), 4);
 
 	sendto(M->theSocket(), msg_buf, HEADER_SIZE, 0, 
 		(struct sockaddr *)&groupAddr, sizeof(Sockaddr));
@@ -713,7 +718,7 @@ void sendJoinMessage() {
 	memset(msg_buf, 0, HEADER_SIZE + 21);
 	msg_buf[0] = joinMsg.msgType;
 	memcpy(&msg_buf[2], joinMsg.ratId, UUID_SIZE);
-	memcpy(&msg_buf[2 + UUID_SIZE], &joinMsg.msgId, 4);
+	memcpy(&msg_buf[2 + UUID_SIZE], &htonl(joinMsg.msgId), 4);
 	msg_buf[HEADER_SIZE] = joinMsg.len;
 	memcpy(&msg_buf[HEADER_SIZE + 1], joinMsg.name, (size_t)joinMsg.len);
 
@@ -731,7 +736,7 @@ void sendJoinResponseMessage(unsigned char *senderId) {
 	memset(msg_buf, 0, HEADER_SIZE + 37);
 	memcpy(msg_buf, &joinResponseMsg.msgType, 1);
 	memcpy(msg_buf + 2, joinResponseMsg.ratId, UUID_SIZE);
-	memcpy(msg_buf + 2 + UUID_SIZE, &joinResponseMsg.msgId, 4);
+	memcpy(msg_buf + 2 + UUID_SIZE, &htonl(joinResponseMsg.msgId), 4);
 	memcpy(msg_buf + HEADER_SIZE, joinResponseMsg.senderId, UUID_SIZE);
 	memcpy(msg_buf + HEADER_SIZE + UUID_SIZE, &joinResponseMsg.len, 1);
 	memcpy(msg_buf + HEADER_SIZE + UUID_SIZE + 1, joinResponseMsg.name, (size_t)joinResponseMsg.len);
@@ -740,7 +745,7 @@ void sendJoinResponseMessage(unsigned char *senderId) {
 		(struct sockaddr *)&groupAddr, sizeof(Sockaddr));
 }
 
-void sendHitMessage(unsigned char *shooterId, unsigned int other_missileSeqNum) {
+void sendHitMessage(unsigned char *shooterId, uint32_t other_missileSeqNum) {
 	HitMessage hitMsg(M->my_ratId.m_ratId, getMessageId(), shooterId, other_missileSeqNum);
 	#ifdef DEBUG
 	sendMsgPrint(&hitMsg);
@@ -750,15 +755,15 @@ void sendHitMessage(unsigned char *shooterId, unsigned int other_missileSeqNum) 
 	memset(msg_buf, 0, HEADER_SIZE + 20);
 	memcpy(msg_buf, &hitMsg.msgType, 1);
 	memcpy(msg_buf + 2, hitMsg.ratId, UUID_SIZE);
-	memcpy(msg_buf + 2 + UUID_SIZE, &hitMsg.msgId, 4);
+	memcpy(msg_buf + 2 + UUID_SIZE, &htonl(hitMsg.msgId), 4);
 	memcpy(msg_buf + HEADER_SIZE, hitMsg.shooterId, UUID_SIZE);
-	memcpy(msg_buf + HEADER_SIZE + UUID_SIZE, &hitMsg.missileSeqNum, 4);
+	memcpy(msg_buf + HEADER_SIZE + UUID_SIZE, &htonl(hitMsg.missileSeqNum), 4);
 
 	sendto(M->theSocket(), msg_buf, HEADER_SIZE + 20, 0, 
 		(struct sockaddr *)&groupAddr, sizeof(Sockaddr));
 }
 
-void sendHitResponseMessage(unsigned char *victimId, unsigned int missileSeqNum) {
+void sendHitResponseMessage(unsigned char *victimId, uint32_t missileSeqNum) {
 	HitResponseMessage hitResponseMsg(M->my_ratId.m_ratId, getMessageId(), victimId, missileSeqNum);
 	#ifdef DEBUG
 	sendMsgPrint(&hitResponseMsg);
@@ -768,9 +773,9 @@ void sendHitResponseMessage(unsigned char *victimId, unsigned int missileSeqNum)
 	memset(msg_buf, 0, HEADER_SIZE + 20);
 	memcpy(msg_buf, &hitResponseMsg.msgType, 1);
 	memcpy(msg_buf + 2, hitResponseMsg.ratId, UUID_SIZE);
-	memcpy(msg_buf + 2 + UUID_SIZE, &hitResponseMsg.msgId, 4);
+	memcpy(msg_buf + 2 + UUID_SIZE, &htonl(hitResponseMsg.msgId), 4);
 	memcpy(msg_buf + HEADER_SIZE, hitResponseMsg.victimId, UUID_SIZE);
-	memcpy(msg_buf + HEADER_SIZE + UUID_SIZE, &hitResponseMsg.missileSeqNum, 4);
+	memcpy(msg_buf + HEADER_SIZE + UUID_SIZE, &htonl(hitResponseMsg.missileSeqNum), 4);
 
 	sendto(M->theSocket(), msg_buf, HEADER_SIZE + 20, 0, 
 		(struct sockaddr *)&groupAddr, sizeof(Sockaddr));
@@ -843,7 +848,7 @@ void UpdateOtherRatsScoreCard() {
 }
 
 /* One Rat gets a new message Id */
-unsigned int getMessageId() {
+uint32_t getMessageId() {
 	return currentMessageId++;
 }
 
@@ -1133,13 +1138,13 @@ void process_recv_LeaveMessage(LeaveMessage *p) {
 
 		MW_RatId other_ratId(p->ratId);
 		M->otherRatInfoMap.erase(other_ratId);
-		//printf("After remove otherRatInfoMap size: %d\n", (unsigned int)M->otherRatInfoMap.size());
+		//printf("After remove otherRatInfoMap size: %d\n", (uint32_t)M->otherRatInfoMap.size());
 	}
 }
 
 void process_recv_HitMessage(HitMessage *p) {
 	if (isRatIdEquals(p->shooterId, M->my_ratId.m_ratId)) {
-		map<unsigned int, VictimRat>::iterator it = M->hitVictimMap.find(p->missileSeqNum);
+		map<uint32_t, VictimRat>::iterator it = M->hitVictimMap.find(p->missileSeqNum);
 
 		// only accept the first rat who claims a hit
 		// missile sequence number does not exist
