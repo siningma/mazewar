@@ -468,7 +468,7 @@ int recvPacket(int socket, char* payload_buf, int payload_buf_len, struct sockad
 		memset(payload_buf, 0, payload_buf_len);
 
 		while(recvLen != payload_buf_len) {
-			cc = recvfrom(socket, payload_buf + recvLen, payload_buf_len - recvLen, 0,
+			int cc = recvfrom(socket, payload_buf + recvLen, payload_buf_len - recvLen, 0,
 			        src_addr, &fromLen);
 
 		    if (cc < 0 && errno != EINTR) 
