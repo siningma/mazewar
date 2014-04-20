@@ -837,8 +837,8 @@ void UpdateOtherRatsScoreCard() {
 	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.begin(); it != M->otherRatInfoMap.end(); ++it) {
 		if (strlen(it->second.ratName) > 0) {
 			UpdateScoreCard(MY_RAT_INDEX + i, it->second.ratName, it->second.score);
+			++i;
 		}
-		++i;
 	}
 }
 
@@ -1115,6 +1115,15 @@ void process_recv_KeepAliveMessage(KeepAliveMessage *p) {
 }
 
 void process_recv_LeaveMessage(LeaveMessage *p) {
+	// clear all other rats scores in the screen
+	int i = 1;
+	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.begin(); it != M->otherRatInfoMap.end(); ++it) {
+		if (strlen(it->second.ratName) > 0) {
+			ClearScoreLine(MY_RAT_INDEX + i);
+			++i;
+		}
+	}
+
 	map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.find(p->ratId);
 	if (it != M->otherRatInfoMap.end()) {
 		// find sent LeaveMessage ratId in my otherRatInfo table
@@ -1122,11 +1131,9 @@ void process_recv_LeaveMessage(LeaveMessage *p) {
 		printf("Remove rat with ratId: ");
 		printRatId(it->first.m_ratId);
 
-		// printf("Before remove otherRatInfoMap size: %d\n", (unsigned int)M->otherRatInfoMap.size());
 		MW_RatId other_ratId(p->ratId);
 		M->otherRatInfoMap.erase(other_ratId);
-		printf("After remove otherRatInfoMap size: %d\n", (unsigned int)M->otherRatInfoMap.size());
-
+		//printf("After remove otherRatInfoMap size: %d\n", (unsigned int)M->otherRatInfoMap.size());
 	}
 }
 
@@ -1137,7 +1144,7 @@ void process_recv_HitMessage(HitMessage *p) {
 		// only accept the first rat who claims a hit
 		// missile sequence number does not exist
 		if (it == M->hitVictimMap.end()) {
-			printf("Receive HitMessage with seqNum %u from ratId: \n", p->missileSeqNum);
+			printf("Receive HitMessage with seqNum %u from ratId: ", p->missileSeqNum);
 			printRatId(p->ratId);
 
 			M->scoreIs( MY_SCORE + 11 );
@@ -1171,14 +1178,14 @@ void process_recv_HitMessage(HitMessage *p) {
 
 void process_recv_HitResponseMessage(HitResponseMessage *p) {
 	if (isRatIdEquals(p->victimId, M->my_ratId.m_ratId)) {
-		printf("Receive HitResponseMessage with seqNum %u from ratId: \n", p->missileSeqNum);
+		printf("Receive HitResponseMessage with seqNum %u from ratId: ", p->missileSeqNum);
 		printRatId(p->ratId);
 
 		M->scoreIs( MY_SCORE - 5 );
 		UpdateScoreCard(M->myRatId().value());
 		// regenerate a position for me, and send KeepAliveMessage
 		NewPosition(M);
-		DoViewUpdate();
+		updateView = TRUE;
 
 		M->myCurrPhaseStateIs(PLAY_PHASE);
 		memset(M->hitMissileShooterId.m_ratId, 0, UUID_SIZE);
