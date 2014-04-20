@@ -534,7 +534,7 @@ void ConvertIncoming(Message *p, const char* buf)
 			unsigned char ratPosY = buf[HEADER_SIZE + 1];
 			unsigned char ratDir = buf[HEADER_SIZE + 2];
 			int score = 0;
-			memcpy(&score, buf + HEADER_SIZE + 2, 4);
+			memcpy(&score, buf + HEADER_SIZE + 3, 4);
 			unsigned char missileFlag = buf[HEADER_SIZE + 7];
 
 			// if missileFlag is not zero, set missile info

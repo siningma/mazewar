@@ -409,7 +409,7 @@ public:
 
 	JoinMessage(unsigned char* ratId, unsigned int msgId, unsigned char len, char *name): Message(ratId, JOIN, msgId) {
 		this->len = len;
-		memset(this->name, 0, len);
+		memset(this->name, 0, NAMESIZE);
 		memcpy(this->name, name, (size_t)this->len);
 	}
 
@@ -429,7 +429,7 @@ public:
 
 	JoinResponseMessage(unsigned char* ratId, unsigned int msgId, unsigned char len, char *name, unsigned char* senderId): Message(ratId, JNRS, msgId) {
 		this->len = len;
-		memset(this->name, 0, len);
+		memset(this->name, 0, NAMESIZE);
 		memcpy(this->name, name, (size_t)this->len);
 
 		memset(this->senderId, 0, UUID_SIZE);
