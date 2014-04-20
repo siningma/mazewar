@@ -122,7 +122,7 @@ play(void)
 				break;
 
 			case EVENT_NETWORK:
-				processPacket(&event);
+				// processPacket(&event);
 				break;
 
 			case EVENT_INT:
@@ -138,7 +138,7 @@ play(void)
 				break;
 
 			case EVENT_NETWORK:
-				processPacket(&event);
+				// processPacket(&event);
 				break;
 			}
 
@@ -514,6 +514,9 @@ void ConvertIncoming(Message *p, const char* buf)
 	    	#ifdef DEBUG
 	    	recvMsgPrint(p);
 	    	#endif
+
+	    	JoinMessage *joinMsg = dynamic_cast<JoinMessage *>(p);
+			process_recv_JoinMessage(joinMsg);
     		break;
     	}
     	case JNRS:
@@ -528,6 +531,9 @@ void ConvertIncoming(Message *p, const char* buf)
 	    	p = new JoinResponseMessage(ratId, msgId, name_len, name, senderId);
 
 	    	recvMsgPrint(p);
+
+	    	JoinResponseMessage *joinResponseMsg = dynamic_cast<JoinResponseMessage *>(p);
+			process_recv_JoinResponseMessage(joinResponseMsg);
     		break;
     	}
     	case KPLV:
