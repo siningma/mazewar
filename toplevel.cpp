@@ -951,7 +951,7 @@ void manageMissiles()
 				}
 			}
 
-			#ifdef _DEBUG_
+			#ifdef DEBUG
 			for (int i = 0; i < 100; i++)
 				printf("$");
 			printf("\n");
@@ -961,6 +961,9 @@ void manageMissiles()
 				printf("$");
 			printf("\n");
 			#endif
+
+			sendKeepAliveMessage();
+			lastKeepAliveMsgSendTime = getCurrentTime();
 			// missile hit the wall
 			if (M->maze_[MY_MISSILE_X_LOC][MY_MISSILE_Y_LOC] || MY_MISSILE_EXIST == false) {
 				printf("My missile hit the wall. missilePosX: %u, missilePosY: %u\n", MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC);
@@ -971,10 +974,7 @@ void manageMissiles()
 				M->missileSeqNumIs(MY_MISSILE_SEQNUM + 1);
 				break;
 			}
-			sendKeepAliveMessage();
 		}
-
-		sendKeepAliveMessage();
 		lastMissilePosUpdateTime = getCurrentTime();
 	} 
 
