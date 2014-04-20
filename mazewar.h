@@ -594,6 +594,7 @@ void ConvertOutgoing(Message *);
 void manageMissiles(void);
 void DoViewUpdate(void);
 void sendPacketToPlayer(RatId, Message *);
+void processPacket(MWEvent *);
 void netInit(void);
 void sendKeepAliveMessage();
 void sendLeaveMessage();
