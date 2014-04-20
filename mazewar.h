@@ -384,8 +384,6 @@ public:
 	unsigned char ratId[UUID_SIZE];
 	unsigned int msgId;
 
-	Message() {}
-
 	Message(unsigned char* ratId, unsigned char msgType, unsigned int msgId) : reserved(0) {
 		this->msgType = msgType;
 		this->msgId = msgId;

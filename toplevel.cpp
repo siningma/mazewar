@@ -585,7 +585,8 @@ void ConvertIncoming(Message *p, const char* buf)
     		break;
     	}
     	default:
-    	break;
+    		printf("Receive invalid message type\n");
+    		break;
     }
 }
 
@@ -922,6 +923,7 @@ void sendPacketToPlayer(RatId ratId, Message *msg)
 void processPacket (MWEvent *eventPacket)
 {
 	Message *msg = eventPacket->eventDetail;
+	recvMsgPrint(msg);
 
 	switch(msg->msgType) {
 		case JOIN:
@@ -960,6 +962,9 @@ void processPacket (MWEvent *eventPacket)
 			process_recv_HitResponseMessage(hitResponseMsg);
 			break;
 		}
+		default:
+			printf("Receive invalid message type\n");
+			break;
 	}
 
 	// delete msg pointer should work here
