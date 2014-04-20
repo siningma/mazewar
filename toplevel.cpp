@@ -122,7 +122,6 @@ play(void)
 				break;
 
 			case EVENT_NETWORK:
-				processPacket(&event);
 				break;
 
 			case EVENT_INT:
@@ -138,7 +137,6 @@ play(void)
 				break;
 
 			case EVENT_NETWORK:
-				processPacket(&event);
 				break;
 			}
 
@@ -514,6 +512,8 @@ void ConvertIncoming(Message *p, const char* buf)
 	    	#ifdef DEBUG
 	    	recvMsgPrint(p);
 	    	#endif
+
+	    	process_recv_JoinMessage(p);
     		break;
     	}
     	case JNRS:
@@ -528,6 +528,8 @@ void ConvertIncoming(Message *p, const char* buf)
 	    	p = new JoinResponseMessage(ratId, msgId, name_len, name, senderId);
 
 	    	recvMsgPrint(p);
+
+	    	process_recv_JoinResponseMessage(p);
     		break;
     	}
     	case KPLV:
@@ -551,6 +553,8 @@ void ConvertIncoming(Message *p, const char* buf)
 			}
 	    	
 	    	recvMsgPrint(p);
+
+	    	process_recv_KeepAliveMessage(p);
 	    	break;
     	}
     	case LEAV:
@@ -558,6 +562,8 @@ void ConvertIncoming(Message *p, const char* buf)
     		p = new LeaveMessage(ratId, msgId);
 
     		recvMsgPrint(p);
+
+    		process_recv_LeaveMessage(p);
     		break;
     	}
     	case HITM:
@@ -570,6 +576,8 @@ void ConvertIncoming(Message *p, const char* buf)
     		p = new HitMessage(ratId, msgId, shooterId, missileSeqNum);
 
     		recvMsgPrint(p);
+
+    		process_recv_HitMessage(p);
     		break;
     	}
     	case HTRS:
@@ -582,6 +590,8 @@ void ConvertIncoming(Message *p, const char* buf)
     		p = new HitResponseMessage(ratId, msgId, victimId, missileSeqNum);
 
     		recvMsgPrint(p);
+
+    		process_recv_HitResponseMessage(p);
     		break;
     	}
     	default:
@@ -912,63 +922,6 @@ void sendPacketToPlayer(RatId ratId, Message *msg)
 		   (Sockaddr) destSocket, sizeof(Sockaddr)) < 0)
 	  { MWError("Sample error") };
 */
-}
-
-/* ----------------------------------------------------------------------- */
-
-/* Message has been converted from byte stream to data structure
- * processPacket function is used to update shared state
- */
-
-void processPacket (MWEvent *eventPacket)
-{
-	Message *msg = eventPacket->eventDetail;
-	recvMsgPrint(msg);
-
-	switch(msg->msgType) {
-		case JOIN:
-		{
-			JoinMessage *joinMsg = (JoinMessage *)msg;
-			process_recv_JoinMessage(joinMsg);
-			break;
-		}
-		case JNRS:
-		{
-			JoinResponseMessage *joinResponseMsg = (JoinResponseMessage *)msg;
-			process_recv_JoinResponseMessage(joinResponseMsg);
-			break;
-		}
-		case KPLV:
-		{
-			KeepAliveMessage *keepAliveMsg = (KeepAliveMessage *)msg;
-			process_recv_KeepAliveMessage(keepAliveMsg);
-			break;
-		}
-		case LEAV:
-		{
-			LeaveMessage *leaveMsg = (LeaveMessage *)msg;
-			process_recv_LeaveMessage(leaveMsg);
-			break;
-		}
-		case HITM:
-		{
-			HitMessage *hitMsg = (HitMessage *)msg;
-			process_recv_HitMessage(hitMsg);
-			break;
-		}
-		case HTRS:
-		{
-			HitResponseMessage *hitResponseMsg = (HitResponseMessage *)msg;
-			process_recv_HitResponseMessage(hitResponseMsg);
-			break;
-		}
-		default:
-			printf("Receive invalid message type\n");
-			break;
-	}
-
-	// delete msg pointer should work here
-	// delete msg;
 }
 
 void process_recv_JoinMessage(JoinMessage *p) {
