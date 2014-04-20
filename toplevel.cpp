@@ -754,8 +754,8 @@ void sendHitMessage(unsigned char *shooterId, unsigned int other_missileSeqNum) 
 		(struct sockaddr *)&groupAddr, sizeof(Sockaddr));
 }
 
-void sendHitResponseMessage(unsigned char *victimId, unsigned int other_missileSeqNum) {
-	HitResponseMessage hitResponseMsg(M->my_ratId.m_ratId, getMessageId(), victimId, other_missileSeqNum);
+void sendHitResponseMessage(unsigned char *victimId, unsigned int missileSeqNum) {
+	HitResponseMessage hitResponseMsg(M->my_ratId.m_ratId, getMessageId(), victimId, missileSeqNum);
 	sendMsgPrint(&hitResponseMsg);
 
 	char msg_buf[HEADER_SIZE + 20];
@@ -880,7 +880,7 @@ void playPhase() {
 			memcpy(M->hitMissileShooterId.m_ratId, it->first.m_ratId, UUID_SIZE);
 			M->hitMissileSeqNum = it->second.missile.seqNum;
 			M->myCurrPhaseStateIs(HIT_PHASE);
-			break;
+			return;
 		}
 	}
 }
@@ -944,6 +944,7 @@ void manageMissiles()
 					}
 				}
 
+				#ifdef _DEBUG_
 				for (int i = 0; i < 100; i++)
 					printf("$");
 				printf("\n");
@@ -952,6 +953,7 @@ void manageMissiles()
 				for (int i = 0; i < 100; i++)
 					printf("$");
 				printf("\n");
+				#endif
 				// missile hit the wall
 				if (M->maze_[MY_MISSILE_X_LOC][MY_MISSILE_Y_LOC] || MY_MISSILE_EXIST == false) {
 					printf("My missile hit the wall. missilePosX: %u, missilePosY: %u\n", MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC);
@@ -1122,7 +1124,7 @@ void process_recv_LeaveMessage(LeaveMessage *p) {
 }
 
 void process_recv_HitMessage(HitMessage *p) {
-	if (isRatIdEquals(p->shooterId, M->my_ratId.m_ratId) && p->missileSeqNum != -1) {
+	if (isRatIdEquals(p->shooterId, M->my_ratId.m_ratId)) {
 		map<unsigned int, VictimRat>::iterator it = M->hitVictimMap.find(p->missileSeqNum);
 
 		// only accept the first rat who claims a hit
@@ -1152,7 +1154,8 @@ void process_recv_HitMessage(HitMessage *p) {
 			// missile sequence number exists and maps to the same player Id, needs to send HitResponseMessage	
 			if (isRatIdEquals(p->ratId, it->second.victimId.m_ratId)) {
 				sendHitResponseMessage(p->ratId, p->missileSeqNum);
-			} else{	// missile sequence number exists but maps to a different player Id	
+			} else{	// missile sequence number exists but maps to a different player Id
+				// ignore this HitMessage
 			}
 		}
 	}
