@@ -490,7 +490,7 @@ void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, st
     switch (msgType) {
     	case JOIN:
     	{
-    		unsigned char payload_buf[21];
+    		char payload_buf[21];
 	    	memset(payload_buf, 0, 21);
 	    	int cc = recvPacket(socket, payload_buf, 21, src_addr, addrlen);
 	    	if (cc < 0 || isMsgSentByMe)
@@ -507,7 +507,7 @@ void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, st
     	}
     	case JNRS:
     	{
-    		unsigned char payload_buf[37];
+    		char payload_buf[37];
 	    	memset(payload_buf, 0, 37);
 	    	int cc = recvPacket(socket, payload_buf, 37, src_addr, addrlen);
 	    	if (cc < 0 || isMsgSentByMe)
@@ -527,7 +527,7 @@ void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, st
     	}
     	case KPLV:
     	{
-	    	unsigned char payload_buf[14];
+	    	char payload_buf[14];
 	    	memset(payload_buf, 0, 14);
 	    	int cc = recvPacket(socket, payload_buf, 14, src_addr, addrlen);
 	    	if (cc < 0 || isMsgSentByMe)
@@ -566,7 +566,7 @@ void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, st
     	}
     	case HITM:
     	{
-    		unsigned char payload_buf[20];
+    		char payload_buf[20];
     		memset(payload_buf, 0, 20);
     		int cc = recvPacket(socket, payload_buf, 20, src_addr, addrlen);
     		if (cc < 0)
@@ -582,7 +582,7 @@ void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, st
     	}
     	case HTRS:
     	{
-    		unsigned char payload_buf[20];
+    		char payload_buf[20];
     		memset(payload_buf, 0, 20);
     		int cc = recvPacket(socket, payload_buf, 20, src_addr, addrlen);
     		if (cc < 0)
@@ -616,7 +616,7 @@ void sendKeepAliveMessage() {
 	sendMsgPrint(&keepAliveMsg);
 	#endif
 
-	unsigned char msg_buf[HEADER_SIZE + 14];
+	char msg_buf[HEADER_SIZE + 14];
 	memset(msg_buf, 0, HEADER_SIZE + 14);
 	memcpy(msg_buf, &keepAliveMsg.msgType, 1);
 	memcpy(msg_buf + 2, &keepAliveMsg.ratId, UUID_SIZE);
@@ -640,7 +640,7 @@ void sendLeaveMessage() {
 	sendMsgPrint(&leaveMsg);
 	#endif
 
-	unsigned char msg_buf[HEADER_SIZE];
+	char msg_buf[HEADER_SIZE];
 	memset(msg_buf, 0, HEADER_SIZE);
 	memcpy(msg_buf, &leaveMsg.msgType, 1);
 	memcpy(msg_buf + 2, &leaveMsg.ratId, UUID_SIZE);
@@ -656,7 +656,7 @@ void sendJoinMessage() {
 	sendMsgPrint(&joinMsg);
 	#endif
 
-	unsigned char msg_buf[HEADER_SIZE + 21];
+	char msg_buf[HEADER_SIZE + 21];
 	memset(msg_buf, 0, HEADER_SIZE + 21);
 	memcpy(msg_buf, &joinMsg.msgType, 1);
 	memcpy(msg_buf + 2, &joinMsg.ratId, UUID_SIZE);
@@ -674,7 +674,7 @@ void sendJoinResponseMessage(unsigned char *senderId) {
 	sendMsgPrint(&joinResponseMsg);
 	#endif
 
-	unsigned char msg_buf[HEADER_SIZE + 37];
+	char msg_buf[HEADER_SIZE + 37];
 	memset(msg_buf, 0, HEADER_SIZE + 37);
 	memcpy(msg_buf, &joinResponseMsg.msgType, 1);
 	memcpy(msg_buf + 2, &joinResponseMsg.ratId, UUID_SIZE);
@@ -693,7 +693,7 @@ void sendHitMessage(unsigned char *shooterId, unsigned int other_missileSeqNum) 
 	sendMsgPrint(&hitMsg);
 	#endif	
 
-	unsigned char msg_buf[HEADER_SIZE + 20];
+	char msg_buf[HEADER_SIZE + 20];
 	memset(msg_buf, 0, HEADER_SIZE + 20);
 	memcpy(msg_buf, &hitMsg.msgType, 1);
 	memcpy(msg_buf + 2, &hitMsg.ratId, UUID_SIZE);
@@ -709,7 +709,7 @@ void sendHitResponseMessage(unsigned char *victimId, unsigned int other_missileS
 	HitResponseMessage hitResponseMsg(M->my_ratId.value(), getMessageId(), victimId, other_missileSeqNum);
 	sendMsgPrint(&hitResponseMsg);
 
-	unsigned char msg_buf[HEADER_SIZE + 20];
+	char msg_buf[HEADER_SIZE + 20];
 	memset(msg_buf, 0, HEADER_SIZE + 20);
 	memcpy(msg_buf, &hitResponseMsg.msgType, 1);
 	memcpy(msg_buf + 2, &hitResponseMsg.ratId, UUID_SIZE);
