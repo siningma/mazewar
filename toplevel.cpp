@@ -793,15 +793,9 @@ void printOtherRatsInfo() {
 }
 
 void myStatusPrint() {
-	for (int i = 0; i < 100; i++)
-		printf("-");
-	printf("\n");
 	printf("My Status: \n");
 	printf("PosX: %u, PosY: %u, Dir: %u, score: %d\n", MY_X_LOC, MY_Y_LOC, MY_DIR, MY_SCORE);
-	printf("My Missile Status: \n");
-	printf("Exist: %d, X: %u, Y: %u, dir: %u, SeqNum: %d\n", MY_MISSILE_EXIST, MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC, MY_MISSILE_DIR, MY_MISSILE_SEQNUM);
-	for (int i = 0; i < 100; i++)
-		printf("-");
+	printf("My Missile Exist: %d\n", MY_MISSILE_EXIST);
 }
 
 /* One Rat gets a new message Id */
