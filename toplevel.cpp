@@ -935,13 +935,12 @@ void process_recv_JoinMessage(JoinMessage *p) {
 	map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.find(p->ratId);
 	if (it != M->otherRatInfo_map.end()) {
 		// if find JoinMessage ratId in my otherRatInfo table
-		// update thia player's name
-		if (!memcmp(it->second.ratName, p->name, (size_t)p->len)) {			
-			memcpy(it->second.ratName, p->name, (size_t)p->len);
+		// update thia player's name	
+		memset(it->second.ratName, 0, NAMESIZE);
+		memcpy(it->second.ratName, p->name, (size_t)p->len);
 
-			printf("Receive JoinMessage and update ratName: %s, RatId: ", it->second.ratName);
-			printRatId(it->first.m_ratId);
-		}	
+		printf("Receive JoinMessage and update ratName: %s, RatId: ", it->second.ratName);
+		printRatId(it->first.m_ratId);
 	} else {
 		MW_RatId other_ratId(p->ratId);
 		OtherRat other;
@@ -964,13 +963,12 @@ void process_recv_JoinResponseMessage(JoinResponseMessage *p) {
 		map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.find(p->ratId);
 		if (it != M->otherRatInfo_map.end()) {
 			// if find JoinReponseMessage ratId in my otherRatInfo table
-			// update this play's name
-			if (!memcmp(it->second.ratName, p->name, (size_t)p->len)) {			
-				memcpy(it->second.ratName, p->name, (size_t)p->len);
+			// update this play's name		
+			memset(it->second.ratName, 0, NAMESIZE);
+			memcpy(it->second.ratName, p->name, (size_t)p->len);
 
-				printf("Receive JoinResponseMessage and update ratName: %s, RatId: ", it->second.ratName);
-				printRatId(it->first.m_ratId);
-			}	
+			printf("Receive JoinResponseMessage and update ratName: %s, RatId: ", it->second.ratName);
+			printRatId(it->first.m_ratId);
 		} else {
 			MW_RatId other_ratId(p->ratId);
 			OtherRat other;
