@@ -450,7 +450,7 @@ char *GetRatName(RatIndexType ratId)
 /* ----------------------------------------------------------------------- */
 
 int recvPacket(int socket, char* payload_buf, int payload_buf_len, struct sockaddr *src_addr, bool isMsgSentByMe) {
-	int cc;
+	int recvLen = 0;
 	int	ret;
 	fd_set	fdmask;
 	FD_ZERO(&fdmask);
@@ -459,7 +459,7 @@ int recvPacket(int socket, char* payload_buf, int payload_buf_len, struct sockad
 	struct timeval timeout;
 	timeout.tv_sec = 0;
 	timeout.tv_usec = 0;
-	while ((ret = select(32, &fdmask, NULL, NULL, &timeout)) == -1)
+	while ((ret = select(socket + 1, &fdmask, NULL, NULL, &timeout)) == -1)
 		if (errno != EINTR)
 	  		MWError("select error on events");
 
@@ -467,17 +467,17 @@ int recvPacket(int socket, char* payload_buf, int payload_buf_len, struct sockad
 		socklen_t fromLen = sizeof(*src_addr);
 		memset(payload_buf, 0, payload_buf_len);
 
-		cc = recvfrom(socket, payload_buf, payload_buf_len, 0,
-		        src_addr, &fromLen);
-		if (!isMsgSentByMe)
-			printf("*********Recive packet payload length: %d ********\n", cc);
+		while(recvLen != payload_buf_len) {
+			cc = recvfrom(socket, payload_buf + recvLen, payload_buf_len - recvLen, 0,
+			        src_addr, &fromLen);
 
-		if (cc <= 0) {
 		    if (cc < 0 && errno != EINTR) 
 				perror("event recvfrom");
-		}	
+
+			recvLen += cc;
+		}
 	}
-	return cc;
+	return recvLen;
 }
 
 /* This is just for the sample version, rewrite your own if necessary */
@@ -499,7 +499,7 @@ void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sock
 		printf("Message type: 0x%x\n", msgType);
 		printf("RatId: ");
 		printRatId(ratId);
-		printf("Message Id: %u\n\n", msgId);
+		printf("Message Id: %u\n", msgId);
 	}
 
     switch (msgType) {
