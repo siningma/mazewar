@@ -369,6 +369,8 @@ void shoot()
 	M->missileXLocIs(Loc(MY_X_LOC));
 	M->missileYLocIs(Loc(MY_Y_LOC));
 	M->missileDirIs(Direction(MY_DIR));
+	// must update here
+	lastMissilePosUpdateTime = getCurrentTime();
 }
 
 /* ----------------------------------------------------------------------- */
