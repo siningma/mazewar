@@ -450,7 +450,6 @@ char *GetRatName(RatIndexType ratId)
 /* ----------------------------------------------------------------------- */
 
 int recvPacket(int socket, char* payload_buf, int payload_buf_len, struct sockaddr *src_addr, bool isMsgSentByMe) {
-	int recvLen = 0;
 	int	ret;
 	fd_set	fdmask;
 	FD_ZERO(&fdmask);
@@ -463,12 +462,13 @@ int recvPacket(int socket, char* payload_buf, int payload_buf_len, struct sockad
 		if (errno != EINTR)
 	  		MWError("select error on events");
 
+	int recvLen = 0;
 	if(FD_ISSET(socket, &fdmask))	{
 		socklen_t fromLen = sizeof(*src_addr);
 		memset(payload_buf, 0, payload_buf_len);
 
 		while(recvLen != payload_buf_len) {
-			int cc = recvfrom(socket, payload_buf + recvLen, payload_buf_len - recvLen, 0,
+			int cc = recvfrom(socket, payload_buf + recvLen, payload_buf_len, 0,
 			        src_addr, &fromLen);
 
 		    if (cc < 0 && errno != EINTR) 
