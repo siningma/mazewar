@@ -245,6 +245,7 @@ typedef struct _OtherRat {
 	double lastKeepAliveRecvTime;
 
 	_OtherRat(): score(0), lastScore(INT_MAX) {}
+	
 }	OtherRat;
 
 typedef struct {
