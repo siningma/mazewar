@@ -448,7 +448,7 @@ char *GetRatName(RatIndexType ratId)
 
 /* ----------------------------------------------------------------------- */
 
-int recvPacket(int socket, unsigned char* payload_buf, int payload_buf_len, struct sockaddr *src_addr, socklen_t *addrlen) {
+int recvPacket(int socket, char* payload_buf, int payload_buf_len, struct sockaddr *src_addr, socklen_t *addrlen) {
 	int cc;
 	int	ret;
 	fd_set	fdmask;
