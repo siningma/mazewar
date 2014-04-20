@@ -782,12 +782,12 @@ void printOtherRatsNames() {
 
 void printOtherRatsInfo() {
 	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.begin(); it != M->otherRatInfo_map.end(); ++it) {
-		printf("RatName: %s, RatId: ", it->second.ratName);
+		printf("Other rat RatName: %s, RatId: ", it->second.ratName);
 		printRatId(it->first.m_ratId);
 		printf("Rat ratPosX: %u, ratPosY: %u, ratDir: %u, score: %d\n", it->second.rat.x.value(), it->second.rat.y.value(), it->second.rat.dir.value(), it->second.score);
 		printf("Missile exist: %u, missilePosX: %u, missilePosY: %u, missileSeqNum: %u\n", it->second.missile.exist, it->second.missile.x.value(), it->second.missile.y.value(), it->second.missile.seqNum);	
 	}
-	printf("\n\n");
+	printf("\n");
 }
 
 void myStatusPrint() {
@@ -800,7 +800,6 @@ void myStatusPrint() {
 	printf("Exist: %d, X: %u, Y: %u, dir: %u, SeqNum: %d\n", MY_MISSILE_EXIST, MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC, MY_MISSILE_DIR, MY_MISSILE_SEQNUM);
 	for (int i = 0; i < 100; i++)
 		printf("-");
-	printf("\n");
 }
 
 /* One Rat gets a new message Id */
@@ -891,6 +890,7 @@ void manageMissiles()
 
 				// missile hit the wall
 				if (M->maze_[MY_MISSILE_X_LOC][MY_MISSILE_Y_LOC] || MY_MISSILE_EXIST == false) {
+					printf("My missile hit the wall. missilePosX: %u, missilePosY: %u\n", MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC);
 					M->missileExistIs(false);
 					M->missileXLocIs(0);
 					M->missileYLocIs(0);
