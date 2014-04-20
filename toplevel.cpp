@@ -549,7 +549,7 @@ void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sock
 			unsigned char ratPosX = payload_buf[0];
 			unsigned char ratPosY = payload_buf[1];
 			unsigned char ratDir = payload_buf[2];
-			int score;
+			int score = 0;
 			memcpy(&score, payload_buf + 3, 4);
 			unsigned char missileFlag = payload_buf[7];
 
@@ -637,16 +637,16 @@ void sendKeepAliveMessage() {
 
 	char msg_buf[HEADER_SIZE + 14];
 	memset(msg_buf, 0, HEADER_SIZE + 14);
-	memcpy(msg_buf, &keepAliveMsg.msgType, 1);
+	msg_buf[0] = keepAliveMsg.msgType;
 	memcpy(msg_buf + 2, keepAliveMsg.ratId, UUID_SIZE);
 	memcpy(msg_buf + 2 + UUID_SIZE, &keepAliveMsg.msgId, 4);
-	memcpy(msg_buf + HEADER_SIZE, &keepAliveMsg.ratPosX, 1);
-	memcpy(msg_buf + HEADER_SIZE + 1, &keepAliveMsg.ratPosY, 1);
-	memcpy(msg_buf + HEADER_SIZE + 2, &keepAliveMsg.ratDir, 1);
+	msg_buf[HEADER_SIZE] = keepAliveMsg.ratPosX;
+	msg_buf[HEADER_SIZE + 1] = keepAliveMsg.ratPosY;
+	msg_buf[HEADER_SIZE + 2] = keepAliveMsg.ratDir;
 	memcpy(msg_buf + HEADER_SIZE + 3, &keepAliveMsg.score, 4);
-	memcpy(msg_buf + HEADER_SIZE + 7, &keepAliveMsg.missileFlag, 1);
-	memcpy(msg_buf + HEADER_SIZE + 8, &keepAliveMsg.missilePosX, 1);
-	memcpy(msg_buf + HEADER_SIZE + 9, &keepAliveMsg.missilePosY, 1);
+	msg_buf[HEADER_SIZE + 7] = keepAliveMsg.missileFlag;
+	msg_buf[HEADER_SIZE + 8] = keepAliveMsg.missilePosX;
+	msg_buf[HEADER_SIZE + 9] = keepAliveMsg.missilePosY;
 	memcpy(msg_buf + HEADER_SIZE + 10, &keepAliveMsg.missileSeqNum, 4);
 
 	sendto(M->theSocket(), msg_buf, HEADER_SIZE + 14, 0, 
@@ -661,7 +661,7 @@ void sendLeaveMessage() {
 
 	char msg_buf[HEADER_SIZE];
 	memset(msg_buf, 0, HEADER_SIZE);
-	memcpy(msg_buf, &leaveMsg.msgType, 1);
+	msg_buf[0] = leaveMsg.msgType;
 	memcpy(msg_buf + 2, leaveMsg.ratId, UUID_SIZE);
 	memcpy(msg_buf + 2 + UUID_SIZE, &leaveMsg.msgId, 4);
 
