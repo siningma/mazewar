@@ -511,7 +511,9 @@ void ConvertIncoming(Message *p, const char* buf)
 	    	memcpy(name, buf + HEADER_SIZE + 1, (size_t)name_len);
 	    	p = new JoinMessage(ratId, msgId, name_len, name);
 
+	    	#ifdef DEBUG
 	    	recvMsgPrint(p);
+	    	#endif
     		break;
     	}
     	case JNRS:
@@ -638,7 +640,7 @@ void sendLeaveMessage() {
 
 void sendJoinMessage() {
 	JoinMessage joinMsg(M->my_ratId.m_ratId, getMessageId(), strlen(M->myName_), M->myName_);
-	#ifdef DEBUG
+	#ifdef _DEBUG_
 	sendMsgPrint(&joinMsg);
 	#endif
 
@@ -738,11 +740,10 @@ void printRatId(const unsigned char* ratId) {
 }
 
 void printOtherRatInfo_map() {
-	printf("Other rat info map: \n");
+	printf("Out of join phase, other rats info: \n");
 	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.begin(); it != M->otherRatInfo_map.end(); ++it) {
-		printf("RatId: ");
+		printf("RatName: %s, RatId: ", it->second.ratName);
 		printRatId(it->first.m_ratId);
-		printf(", RatName: %s\n", it->second.ratName);
 	}
 	printf("\n");
 }
@@ -970,8 +971,9 @@ void process_recv_JoinMessage(JoinMessage *p) {
 	if (it != M->otherRatInfo_map.end()) {
 		// if find JoinMessage ratId in my otherRatInfo table
 		// update thia player's name
-		if (!memcmp(it->second.ratName, p->name, NAMESIZE)) {			
-			memcpy(it->second.ratName, p->name, NAMESIZE);
+		memset(it->second.ratName, 0, NAMESIZE);
+		if (!memcmp(it->second.ratName, p->name, (size_t)p->len)) {			
+			memcpy(it->second.ratName, p->name, (size_t)p->len);
 
 			printf("Receive JoinMessage and update ratName: %s, RatId: ", it->second.ratName);
 			printRatId(it->first.m_ratId);
@@ -979,14 +981,17 @@ void process_recv_JoinMessage(JoinMessage *p) {
 	} else {
 		MW_RatId other_ratId(p->ratId);
 		OtherRat other;
-		memcpy(other.ratName, p->name, NAMESIZE);
+		memset(other.ratName, 0, NAMESIZE);
+		memcpy(other.ratName, p->name, (size_t)p->len);
 		other.score = 0;
 		other.lastKeepAliveRecvTime = getCurrentTime();
-		M->otherRatInfo_map.insert(pair<MW_RatId, OtherRat>(other_ratId, other));
+		M->otherRatInfo_map.insert(std::make_pair(other_ratId, other));
 		
 		printf("Receive JoinMessage and store ratName: %s, RatId: ", other.ratName);
 		printRatId(other_ratId.m_ratId);
 	}
+
+	sendJoinResponseMessage(p->ratId);
 }
 
 void process_recv_JoinResponseMessage(JoinResponseMessage *p) {
@@ -996,8 +1001,9 @@ void process_recv_JoinResponseMessage(JoinResponseMessage *p) {
 		if (it != M->otherRatInfo_map.end()) {
 			// if find JoinReponseMessage ratId in my otherRatInfo table
 			// update this play's name
-			if (!memcmp(it->second.ratName, p->name, NAMESIZE)) {			
-				memcpy(it->second.ratName, p->name, NAMESIZE);
+			memset(it->second.ratName, 0, NAMESIZE);
+			if (!memcmp(it->second.ratName, p->name, (size_t)p->len)) {			
+				memcpy(it->second.ratName, p->name, (size_t)p->len);
 
 				printf("Receive JoinResponseMessage and update ratName: %s, RatId: ", it->second.ratName);
 				printRatId(it->first.m_ratId);
@@ -1005,10 +1011,11 @@ void process_recv_JoinResponseMessage(JoinResponseMessage *p) {
 		} else {
 			MW_RatId other_ratId(p->ratId);
 			OtherRat other;
-			memcpy(other.ratName, p->name, NAMESIZE);
+			memset(other.ratName, 0, NAMESIZE);
+			memcpy(other.ratName, p->name, (size_t)p->len);
 			other.score = 0;
 			other.lastKeepAliveRecvTime = getCurrentTime();
-			M->otherRatInfo_map.insert(pair<MW_RatId, OtherRat>(other_ratId, other));
+			M->otherRatInfo_map.insert(std::make_pair(other_ratId, other));
 			
 			printf("Receive JoinResponseMessage and store ratName: %s, RatId: ", other.ratName);
 			printRatId(other_ratId.m_ratId);
@@ -1043,7 +1050,7 @@ void process_recv_KeepAliveMessage(KeepAliveMessage *p) {
 		other.missile.seqNum = p->missileSeqNum;
 		other.score = p->score;
 		other.lastKeepAliveRecvTime = getCurrentTime();
-		M->otherRatInfo_map.insert(pair<MW_RatId, OtherRat>(other_ratId, other));
+		M->otherRatInfo_map.insert(std::make_pair(other_ratId, other));
 	}
 }
 
