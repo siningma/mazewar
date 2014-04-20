@@ -521,11 +521,11 @@ void ConvertIncoming(Message *p, const char* buf)
     	{
 	    	unsigned char senderId[UUID_SIZE];
 	    	memset(senderId, 0, UUID_SIZE);
-	    	memcpy(senderId, buf[HEADER_SIZE], UUID_SIZE);
+	    	memcpy(senderId, buf + HEADER_SIZE, UUID_SIZE);
 	    	unsigned char name_len = buf[HEADER_SIZE + UUID_SIZE];
 	    	char name[NAMESIZE];
 	    	memset(name, 0, NAMESIZE);
-	    	memcpy(name, HEADER_SIZE + UUID_SIZE + 1, (size_t)name_len);
+	    	memcpy(name, buf + HEADER_SIZE + UUID_SIZE + 1, (size_t)name_len);
 	    	p = new JoinResponseMessage(ratId, msgId, name_len, name, senderId);
 
 	    	recvMsgPrint(p);
@@ -569,6 +569,8 @@ void ConvertIncoming(Message *p, const char* buf)
     		unsigned int missileSeqNum = 0;
     		memcpy(&missileSeqNum, buf + UUID_SIZE, 4);
     		p = new HitMessage(ratId, msgId, shooterId, missileSeqNum);
+
+    		recvMsgPrint(p);
     		break;
     	}
     	case HTRS:
@@ -579,6 +581,8 @@ void ConvertIncoming(Message *p, const char* buf)
     		unsigned int missileSeqNum = 0;
     		memcpy(&missileSeqNum, buf + UUID_SIZE, 4);
     		p = new HitResponseMessage(ratId, msgId, victimId, missileSeqNum);
+
+    		recvMsgPrint(p);
     		break;
     	}
     	default:
@@ -665,7 +669,7 @@ void sendJoinResponseMessage(unsigned char *senderId) {
 	memcpy(msg_buf + 2, joinResponseMsg.ratId, UUID_SIZE);
 	memcpy(msg_buf + 2 + UUID_SIZE, &joinResponseMsg.msgId, 4);
 	memcpy(msg_buf + HEADER_SIZE, joinResponseMsg.senderId, UUID_SIZE);
-	memcpy(msg_buf + HEADER_SIZE + UUID_SIZE, &joinResponseMsg.len, 1);
+	memcpy(msg_buf + HEADER_SIZE + UUID_SIZE, &joinResponseMsg.len, 1);©
 	memcpy(msg_buf + HEADER_SIZE + UUID_SIZE + 1, joinResponseMsg.name, (size_t)joinResponseMsg.len);
 
 	sendto(M->theSocket(), msg_buf, HEADER_SIZE + 37, 0, 
