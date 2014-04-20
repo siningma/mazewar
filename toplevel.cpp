@@ -933,17 +933,8 @@ void sendPacketToPlayer(RatId ratId, Message *msg)
 
 void process_recv_JoinMessage(JoinMessage *p) {
 	map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.find(p->ratId);
-	if (it != M->otherRatInfo_map.end()) {
-		// if find JoinMessage ratId in my otherRatInfo table
-		// update thia player's name
-		memset(it->second.ratName, 0, NAMESIZE);
-		if (!memcmp(it->second.ratName, p->name, (size_t)p->len)) {			
-			memcpy(it->second.ratName, p->name, (size_t)p->len);
-
-			printf("Receive JoinMessage and update ratName: %s, RatId: ", it->second.ratName);
-			printRatId(it->first.m_ratId);
-		}	
-	} else {
+	// name cannot be changed, when receive
+	if (it == M->otherRatInfo_map.end()) {
 		MW_RatId other_ratId(p->ratId);
 		OtherRat other;
 		memset(other.ratName, 0, NAMESIZE);
@@ -961,19 +952,11 @@ void process_recv_JoinMessage(JoinMessage *p) {
 
 void process_recv_JoinResponseMessage(JoinResponseMessage *p) {
 	// Receiving JoinResponseMessage is valid only in JOIN_PHASE and JoinResponseMessage is intended for me 
-	if (M->myCurrPhaseState() == JOIN_PHASE && isRatIdEquals(p->senderId, M->my_ratId.m_ratId)) {
-		map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.find(p->ratId);
-		if (it != M->otherRatInfo_map.end()) {
-			// if find JoinReponseMessage ratId in my otherRatInfo table
-			// update this play's name
-			memset(it->second.ratName, 0, NAMESIZE);
-			if (!memcmp(it->second.ratName, p->name, (size_t)p->len)) {			
-				memcpy(it->second.ratName, p->name, (size_t)p->len);
+	if (M->myCurrPhaseState() == JOIN_PHASE && isRatIdEquals(p->senderId, M->my_ratId.m_ratId) == true) {
+		printf("in process recv joinResponseMsg\n");
 
-				printf("Receive JoinResponseMessage and update ratName: %s, RatId: ", it->second.ratName);
-				printRatId(it->first.m_ratId);
-			}	
-		} else {
+		map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.find(p->ratId);
+		if (it == M->otherRatInfo_map.end()) {
 			MW_RatId other_ratId(p->ratId);
 			OtherRat other;
 			memset(other.ratName, 0, NAMESIZE);
@@ -1027,7 +1010,7 @@ void process_recv_LeaveMessage(LeaveMessage *p) {
 		printf("Remove rat with ratId: ");
 		printRatId(it->first.m_ratId);
 
-		printf("Before remove otherRatInfo_map size: %d\n", (unsigned int)M->otherRatInfo_map.size());
+		// printf("Before remove otherRatInfo_map size: %d\n", (unsigned int)M->otherRatInfo_map.size());
 		MW_RatId other_ratId(p->ratId);
 		M->otherRatInfo_map.erase(other_ratId);
 		printf("After remove otherRatInfo_map size: %d\n", (unsigned int)M->otherRatInfo_map.size());
