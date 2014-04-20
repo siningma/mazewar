@@ -610,8 +610,8 @@ void ConvertOutgoing(Message *p)
 
 void sendKeepAliveMessage() {
 	KeepAliveMessage keepAliveMsg(M->my_ratId.value(), getMessageId(), 
-									MY_X_LOC, MY_Y_LOC, MY_DIR, MY_SCORE, 
-									MY_MISSILE_EXIST, MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC, MY_MISSILE_SEQNUM);
+									(unsigned char)MY_X_LOC, (unsigned char)MY_Y_LOC, (unsigned char)MY_DIR, MY_SCORE, 
+									(unsigned char)MY_MISSILE_EXIST, (unsigned char)MY_MISSILE_X_LOC, (unsigned char)MY_MISSILE_Y_LOC, MY_MISSILE_SEQNUM);
 	#ifdef DEBUG
 	sendMsgPrint(&keepAliveMsg);
 	#endif
@@ -662,7 +662,7 @@ void sendJoinMessage() {
 	memcpy(msg_buf + 2, &joinMsg.ratId, UUID_SIZE);
 	memcpy(msg_buf + 2 + UUID_SIZE, &joinMsg.msgId, 4);
 	memcpy(msg_buf + HEADER_SIZE, &joinMsg.len, 1);
-	memcpy(msg_buf + HEADER_SIZE + 1, joinMsg.name, joinMsg.len);
+	memcpy(msg_buf + HEADER_SIZE + 1, joinMsg.name, (size_t)joinMsg.len);
 
 	sendto(M->theSocket(), msg_buf, HEADER_SIZE + 21, 0, 
 		(struct sockaddr *)&groupAddr, sizeof(Sockaddr));
@@ -681,7 +681,7 @@ void sendJoinResponseMessage(unsigned char *senderId) {
 	memcpy(msg_buf + 2 + UUID_SIZE, &joinResponseMsg.msgId, 4);
 	memcpy(msg_buf + HEADER_SIZE, joinResponseMsg.senderId, UUID_SIZE);
 	memcpy(msg_buf + HEADER_SIZE + UUID_SIZE, &joinResponseMsg.len, 1);
-	memcpy(msg_buf + HEADER_SIZE + UUID_SIZE + 1, joinResponseMsg.name, joinResponseMsg.len);
+	memcpy(msg_buf + HEADER_SIZE + UUID_SIZE + 1, joinResponseMsg.name, (size_t)joinResponseMsg.len);
 
 	sendto(M->theSocket(), msg_buf, HEADER_SIZE + 37, 0, 
 		(struct sockaddr *)&groupAddr, sizeof(Sockaddr));
