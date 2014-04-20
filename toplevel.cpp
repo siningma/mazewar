@@ -487,7 +487,6 @@ void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sock
 	memcpy(ratId, header_buf + 2, UUID_SIZE);
 	unsigned int msgId = 0; 
 	memcpy(&msgId, header_buf + 2 + UUID_SIZE, 4);
-	msgId = ntohl(msgId);
 
 	// ignore receving messages that sent by myself
 	bool isMsgSentByMe = isRatIdEquals(M->my_ratId.m_ratId, ratId);
@@ -680,7 +679,7 @@ void sendJoinMessage() {
 	memset(msg_buf, 0, HEADER_SIZE + 21);
 	msg_buf[0] = joinMsg.msgType;
 	memcpy(&msg_buf[2], joinMsg.ratId, UUID_SIZE);
-	memcpy(&msg_buf[2 + UUID_SIZE], &htonl(joinMsg.msgId), 4);
+	memcpy(&msg_buf[2 + UUID_SIZE], &joinMsg.msgId, 4);
 	msg_buf[HEADER_SIZE] = joinMsg.len;
 	memcpy(&msg_buf[HEADER_SIZE + 1], joinMsg.name, (size_t)joinMsg.len);
 
