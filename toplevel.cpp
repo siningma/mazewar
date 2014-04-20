@@ -491,6 +491,14 @@ void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sock
 	// ignore receving messages that sent by myself
 	bool isMsgSentByMe = isRatIdEquals(M->my_ratId.m_ratId, ratId);
 
+	if (!isMsgSentByMe) {
+		printf("Recive Message Header\n");
+		printf("Message type: 0x%x\n", msgType);
+		printf("RatId: ");
+		printRatId(ratId);
+		printf("Message Id: %u\n", msgId);
+	}
+
     switch (msgType) {
     	case JOIN:
     	{
