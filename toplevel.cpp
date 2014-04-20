@@ -56,7 +56,6 @@ int main(int argc, char *argv[])
     strncpy(M->myName_, ratName, NAMESIZE);
     free(ratName);	
 
-    printf("RatName size: %u, %d\n", (unsigned int)sizeof(M->myName_), strlen(M->myName_));
     printf("My RatName: %s\n", M->myName_);
 	printf("My RatId: ");
 	printRatId(M->my_ratId.m_ratId);
@@ -669,7 +668,7 @@ void sendJoinResponseMessage(unsigned char *senderId) {
 	memcpy(msg_buf + 2, joinResponseMsg.ratId, UUID_SIZE);
 	memcpy(msg_buf + 2 + UUID_SIZE, &joinResponseMsg.msgId, 4);
 	memcpy(msg_buf + HEADER_SIZE, joinResponseMsg.senderId, UUID_SIZE);
-	memcpy(msg_buf + HEADER_SIZE + UUID_SIZE, &joinResponseMsg.len, 1);©
+	memcpy(msg_buf + HEADER_SIZE + UUID_SIZE, &joinResponseMsg.len, 1);
 	memcpy(msg_buf + HEADER_SIZE + UUID_SIZE + 1, joinResponseMsg.name, (size_t)joinResponseMsg.len);
 
 	sendto(M->theSocket(), msg_buf, HEADER_SIZE + 37, 0, 
