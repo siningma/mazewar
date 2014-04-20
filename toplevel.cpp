@@ -651,7 +651,7 @@ void ConvertIncoming(Message *p, const char* buf)
     		break;
     }
 
-    // delete p;
+    delete p;
 }
 
 /* ----------------------------------------------------------------------- */
