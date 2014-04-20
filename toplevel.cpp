@@ -449,8 +449,8 @@ char *GetRatName(RatIndexType ratId)
 
 /* ----------------------------------------------------------------------- */
 
-int recvPacket(int socket, char* payload_buf, int payload_buf_len, struct sockaddr *src_addr) {
-	int cc = -1;
+int recvPacket(int socket, char* payload_buf, int payload_buf_len, struct sockaddr *src_addr, bool isMsgSentByMe) {
+	int cc;
 	int	ret;
 	fd_set	fdmask;
 	FD_ZERO(&fdmask);
@@ -469,6 +469,9 @@ int recvPacket(int socket, char* payload_buf, int payload_buf_len, struct sockad
 
 		cc = recvfrom(socket, payload_buf, payload_buf_len, 0,
 		        src_addr, &fromLen);
+		if (!isMsgSentByMe)
+			printf("*********Recive packet payload length: %d ********\n", cc);
+
 		if (cc <= 0) {
 		    if (cc < 0 && errno != EINTR) 
 				perror("event recvfrom");
@@ -503,7 +506,7 @@ void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sock
     	case JOIN:
     	{
     		char payload_buf[21];
-	    	int cc = recvPacket(socket, payload_buf, 21, src_addr);
+	    	int cc = recvPacket(socket, payload_buf, 21, src_addr, isMsgSentByMe);
 	    	if (cc < 0 || isMsgSentByMe)
 	    		return;
 	    	else {
@@ -523,7 +526,7 @@ void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sock
     	case JNRS:
     	{
     		char payload_buf[37];
-	    	int cc = recvPacket(socket, payload_buf, 37, src_addr);
+	    	int cc = recvPacket(socket, payload_buf, 37, src_addr, isMsgSentByMe);
 	    	if (cc < 0 || isMsgSentByMe)
 	    		return;
 	    	else {
@@ -546,7 +549,7 @@ void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sock
     	case KPLV:
     	{
 	    	char payload_buf[14];
-	    	int cc = recvPacket(socket, payload_buf, 14, src_addr);
+	    	int cc = recvPacket(socket, payload_buf, 14, src_addr, isMsgSentByMe);
 	    	if (cc < 0 || isMsgSentByMe)
 	    		return;
 	    	else {
@@ -588,7 +591,7 @@ void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sock
     	case HITM:
     	{
     		char payload_buf[20];
-    		int cc = recvPacket(socket, payload_buf, 20, src_addr);
+    		int cc = recvPacket(socket, payload_buf, 20, src_addr, isMsgSentByMe);
     		if (cc < 0 || isMsgSentByMe)
     			return;
     		else {
@@ -607,7 +610,7 @@ void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sock
     	case HTRS:
     	{
     		char payload_buf[20];
-    		int cc = recvPacket(socket, payload_buf, 20, src_addr);
+    		int cc = recvPacket(socket, payload_buf, 20, src_addr, isMsgSentByMe);
     		if (cc < 0 || isMsgSentByMe)
     			return;
     		else {

@@ -615,7 +615,7 @@ void incrCurrentMissileId();
 void joinPhase();
 void playPhase();
 void hitPhase();
-int recvPacket(int socket, char* payload_buf, int payload_buf_len, struct sockaddr *src_addr);
+int recvPacket(int socket, char* payload_buf, int payload_buf_len, struct sockaddr *src_addr, bool isMsgSentByMe);
 
 void process_recv_JoinMessage(JoinMessage *p);
 void process_recv_JoinResponseMessage(JoinResponseMessage *p);
