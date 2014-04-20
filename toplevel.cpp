@@ -784,7 +784,7 @@ void printOtherRatsNames() {
 
 void printOtherRatsInfo() {
 	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.begin(); it != M->otherRatInfo_map.end(); ++it) {
-		printf("Other rat RatName: %s, RatId: ", it->second.ratName);
+		printf("Other rat Status: \nRatName: %s, RatId: ", it->second.ratName);
 		printRatId(it->first.m_ratId);
 		printf("Rat ratPosX: %u, ratPosY: %u, ratDir: %u, score: %d\n", it->second.rat.x.value(), it->second.rat.y.value(), it->second.rat.dir.value(), it->second.score);
 		printf("Missile exist: %u, missilePosX: %u, missilePosY: %u, missileSeqNum: %u\n", it->second.missile.exist, it->second.missile.x.value(), it->second.missile.y.value(), it->second.missile.seqNum);	
@@ -894,8 +894,10 @@ void manageMissiles()
 					M->missileYLocIs(0);
 					M->missileDirIs(0);
 					M->missileSeqNumIs(MY_MISSILE_SEQNUM + 1);
+					sendKeepAliveMessage();
 					break;
 				}
+				sendKeepAliveMessage();
 			}
 		}
 
