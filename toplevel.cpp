@@ -448,7 +448,7 @@ char *GetRatName(RatIndexType ratId)
 
 /* ----------------------------------------------------------------------- */
 
-int recvPacket(int socket, char* payload_buf, int payload_buf_len, struct sockaddr *src_addr, socklen_t *addrlen) {
+int recvPacket(int socket, char* payload_buf, int payload_buf_len, struct sockaddr *src_addr) {
 	int cc = 0;
 	int	ret;
 	fd_set	fdmask;
@@ -458,13 +458,16 @@ int recvPacket(int socket, char* payload_buf, int payload_buf_len, struct sockad
 	struct timeval timeout;
 	timeout.tv_sec = 0;
 	timeout.tv_usec = 0;
-	while ((ret = select(socket + 1, &fdmask, NULL, NULL, &timeout)) == -1)
+	while ((ret = select(32, &fdmask, NULL, NULL, &timeout)) == -1)
 		if (errno != EINTR)
 	  		MWError("select error on events");
 
 	if(FD_ISSET(socket, &fdmask))	{
+		socklen_t fromLen = sizeof(*src_addr);
+		memset(payload_buf, 0, payload_buf_len);
+
 		cc = recvfrom(socket, payload_buf, payload_buf_len, 0,
-		        src_addr, addrlen);
+		        src_addr, fromLen);
 		if (cc <= 0) {
 		    if (cc < 0 && errno != EINTR) 
 				perror("event recvfrom");
@@ -474,7 +477,7 @@ int recvPacket(int socket, char* payload_buf, int payload_buf_len, struct sockad
 }
 
 /* This is just for the sample version, rewrite your own if necessary */
-void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sockaddr *src_addr, socklen_t *addrlen)
+void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sockaddr *src_addr)
 {
 	// receive packet header
 	unsigned char msgType = header_buf[0];
@@ -491,8 +494,7 @@ void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sock
     	case JOIN:
     	{
     		char payload_buf[21];
-	    	memset(payload_buf, 0, 21);
-	    	int cc = recvPacket(socket, payload_buf, 21, src_addr, addrlen);
+	    	int cc = recvPacket(socket, payload_buf, 21, src_addr);
 	    	if (cc <= 0 || isMsgSentByMe)
 	    		return;
 	    	else
@@ -510,8 +512,7 @@ void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sock
     	case JNRS:
     	{
     		char payload_buf[37];
-	    	memset(payload_buf, 0, 37);
-	    	int cc = recvPacket(socket, payload_buf, 37, src_addr, addrlen);
+	    	int cc = recvPacket(socket, payload_buf, 37, src_addr);
 	    	if (cc <= 0 || isMsgSentByMe)
 	    		return;
 	    	else 
@@ -532,8 +533,7 @@ void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sock
     	case KPLV:
     	{
 	    	char payload_buf[14];
-	    	memset(payload_buf, 0, 14);
-	    	int cc = recvPacket(socket, payload_buf, 14, src_addr, addrlen);
+	    	int cc = recvPacket(socket, payload_buf, 14, src_addr);
 	    	if (cc <= 0 || isMsgSentByMe)
 	    		return;
 	    	else
@@ -573,8 +573,7 @@ void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sock
     	case HITM:
     	{
     		char payload_buf[20];
-    		memset(payload_buf, 0, 20);
-    		int cc = recvPacket(socket, payload_buf, 20, src_addr, addrlen);
+    		int cc = recvPacket(socket, payload_buf, 20, src_addr);
     		if (cc <= 0 || isMsgSentByMe)
     			return;
     		else
@@ -591,8 +590,7 @@ void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sock
     	case HTRS:
     	{
     		char payload_buf[20];
-    		memset(payload_buf, 0, 20);
-    		int cc = recvPacket(socket, payload_buf, 20, src_addr, addrlen);
+    		int cc = recvPacket(socket, payload_buf, 20, src_addr);
     		if (cc <= 0 || isMsgSentByMe)
     			return;
     		else

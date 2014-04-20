@@ -477,8 +477,8 @@ public:
 	void print() {
 		printf("KeepAliveMessage: \n");
 		Message::print();
-		printf("ratPosX: %d, ratPosY: %d, ratDir: %d\n", (short)ratPosX, (short)ratPosY, (short)ratDir);
-		printf("score: %d, missileFlag: %d, missilePosX: %d, missilePosY: %d, missileSeqNum: %d\n", score, missileFlag, (short)missilePosX, (short)missilePosY, missileSeqNum);
+		printf("ratPosX: %d, ratPosY: %d, ratDir: %d, score: %d\n", (short)ratPosX, (short)ratPosY, (short)ratDir, score);
+		printf("missileFlag: %d, missilePosX: %d, missilePosY: %d, missileSeqNum: %d\n", score, missileFlag, (short)missilePosX, (short)missilePosY, missileSeqNum);
 	}
 };
 
@@ -595,7 +595,7 @@ void MWError(char *);
 Score GetRatScore(RatIndexType);
 char  *GetRatName(RatIndexType);
 unsigned int getMessageId();
-void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sockaddr *src_addr, socklen_t *addrlen);
+void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sockaddr *src_addr);
 void ConvertOutgoing(Message *);
 void manageMissiles(void);
 void DoViewUpdate(void);
@@ -619,7 +619,7 @@ void incrCurrentMissileId();
 void joinPhase();
 void playPhase();
 void hitPhase();
-int recvPacket(int socket, char* payload_buf, int payload_buf_len, struct sockaddr *src_addr, socklen_t *addrlen);
+int recvPacket(int socket, char* payload_buf, int payload_buf_len, struct sockaddr *src_addr);
 
 void process_recv_JoinMessage(JoinMessage *p);
 void process_recv_JoinResponseMessage(JoinResponseMessage *p);
