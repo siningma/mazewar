@@ -236,12 +236,15 @@ public:
 	}
 };
 
-typedef struct {
+typedef struct _OtherRat {
 	char ratName[NAMESIZE];
 	Rat rat;
 	Missile missile;
 	int score;
+	int lastScore;	/* redraw score used*/
 	double lastKeepAliveRecvTime;
+
+	_OtherRat(): score(0), lastScore(INT_MAX) {}
 }	OtherRat;
 
 typedef struct {
