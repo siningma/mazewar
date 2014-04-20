@@ -888,6 +888,7 @@ void manageMissiles()
 					}
 				}
 
+				myStatusPrint();
 				// missile hit the wall
 				if (M->maze_[MY_MISSILE_X_LOC][MY_MISSILE_Y_LOC] || MY_MISSILE_EXIST == false) {
 					printf("My missile hit the wall. missilePosX: %u, missilePosY: %u\n", MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC);
