@@ -928,44 +928,42 @@ void manageMissiles()
 	// update my missile info once 200ms
 	// TODO: when shoot a missile, must update lastMissilePosUpdateTime
 	if (MY_MISSILE_EXIST == true) {
-		unsigned int step = (getCurrentTime() - lastMissilePosUpdateTime) / MISSILE_UPDATE_INTERVAL;
-		if (step > 0) {
-			for (unsigned int i = 0; i < step; i++) {
-				switch(MY_MISSILE_DIR) {
-					case NORTH:	M->missileXLocIs(Loc(MY_MISSILE_X_LOC + 1)); break;
-					case SOUTH:	M->missileXLocIs(Loc(MY_MISSILE_X_LOC - 1)); break;
-					case EAST:	M->missileYLocIs(Loc(MY_MISSILE_Y_LOC + 1)); break;
-					case WEST:	M->missileYLocIs(Loc(MY_MISSILE_Y_LOC - 1)); break;
-					default:
-					{
-						M->missileExistIs(false);
-						M->missileSeqNumIs(MY_MISSILE_SEQNUM + 1);
-						break;
-					}
-				}
-
-				#ifdef _DEBUG_
-				for (int i = 0; i < 100; i++)
-					printf("$");
-				printf("\n");
-				printf("Manage My Missile Status: \n");
-				printf("Exist: %d, X: %u, Y: %u, dir: %u, SeqNum: %d\n", MY_MISSILE_EXIST, MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC, MY_MISSILE_DIR, MY_MISSILE_SEQNUM);
-				for (int i = 0; i < 100; i++)
-					printf("$");
-				printf("\n");
-				#endif
-				// missile hit the wall
-				if (M->maze_[MY_MISSILE_X_LOC][MY_MISSILE_Y_LOC] || MY_MISSILE_EXIST == false) {
-					printf("My missile hit the wall. missilePosX: %u, missilePosY: %u\n", MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC);
+		int step = (getCurrentTime() - lastMissilePosUpdateTime) / MISSILE_UPDATE_INTERVAL;
+		for (unsigned int i = 0; step > 0 && i < step; i++) {
+			switch(MY_MISSILE_DIR) {
+				case NORTH:	M->missileXLocIs(Loc(MY_MISSILE_X_LOC + 1)); break;
+				case SOUTH:	M->missileXLocIs(Loc(MY_MISSILE_X_LOC - 1)); break;
+				case EAST:	M->missileYLocIs(Loc(MY_MISSILE_Y_LOC + 1)); break;
+				case WEST:	M->missileYLocIs(Loc(MY_MISSILE_Y_LOC - 1)); break;
+				default:
+				{
 					M->missileExistIs(false);
-					M->missileXLocIs(0);
-					M->missileYLocIs(0);
-					M->missileDirIs(0);
 					M->missileSeqNumIs(MY_MISSILE_SEQNUM + 1);
 					break;
 				}
-				sendKeepAliveMessage();
 			}
+
+			#ifdef _DEBUG_
+			for (int i = 0; i < 100; i++)
+				printf("$");
+			printf("\n");
+			printf("Manage My Missile Status: \n");
+			printf("Exist: %d, X: %u, Y: %u, dir: %u, SeqNum: %d\n", MY_MISSILE_EXIST, MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC, MY_MISSILE_DIR, MY_MISSILE_SEQNUM);
+			for (int i = 0; i < 100; i++)
+				printf("$");
+			printf("\n");
+			#endif
+			// missile hit the wall
+			if (M->maze_[MY_MISSILE_X_LOC][MY_MISSILE_Y_LOC] || MY_MISSILE_EXIST == false) {
+				printf("My missile hit the wall. missilePosX: %u, missilePosY: %u\n", MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC);
+				M->missileExistIs(false);
+				M->missileXLocIs(0);
+				M->missileYLocIs(0);
+				M->missileDirIs(0);
+				M->missileSeqNumIs(MY_MISSILE_SEQNUM + 1);
+				break;
+			}
+			sendKeepAliveMessage();
 		}
 
 		sendKeepAliveMessage();
