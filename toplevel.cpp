@@ -616,12 +616,14 @@ void ConvertIncoming(Message *p, const char* buf)
     	{
     		unsigned char shooterId[UUID_SIZE];
     		memset(shooterId, 0, UUID_SIZE);
-    		memcpy(shooterId, buf, UUID_SIZE);
+    		memcpy(shooterId, buf + HEADER_SIZE, UUID_SIZE);
     		unsigned int missileSeqNum = 0;
-    		memcpy(&missileSeqNum, buf + UUID_SIZE, 4);
+    		memcpy(&missileSeqNum, buf + HEADER_SIZE + UUID_SIZE, 4);
     		p = new HitMessage(ratId, msgId, shooterId, missileSeqNum);
 
+    		#ifdef DEBUG
     		recvMsgPrint(p);
+    		#endif
 
     		HitMessage *hitMsg = dynamic_cast<HitMessage *>(p);
 			process_recv_HitMessage(hitMsg);
@@ -631,12 +633,14 @@ void ConvertIncoming(Message *p, const char* buf)
     	{
     		unsigned char victimId[UUID_SIZE];
     		memset(victimId, 0, UUID_SIZE);
-    		memcpy(victimId, buf, UUID_SIZE);
+    		memcpy(victimId, buf + HEADER_SIZE, UUID_SIZE);
     		unsigned int missileSeqNum = 0;
-    		memcpy(&missileSeqNum, buf + UUID_SIZE, 4);
+    		memcpy(&missileSeqNum, buf + HEADER_SIZE + UUID_SIZE, 4);
     		p = new HitResponseMessage(ratId, msgId, victimId, missileSeqNum);
 
+    		#ifdef DEBUG
     		recvMsgPrint(p);
+    		#endif
 
 			HitResponseMessage *hitResponseMsg = dynamic_cast<HitResponseMessage *>(p);
 			process_recv_HitResponseMessage(hitResponseMsg);
@@ -756,7 +760,9 @@ void sendHitMessage(unsigned char *shooterId, unsigned int other_missileSeqNum) 
 
 void sendHitResponseMessage(unsigned char *victimId, unsigned int missileSeqNum) {
 	HitResponseMessage hitResponseMsg(M->my_ratId.m_ratId, getMessageId(), victimId, missileSeqNum);
+	#ifdef DEBUG
 	sendMsgPrint(&hitResponseMsg);
+	#endif
 
 	char msg_buf[HEADER_SIZE + 20];
 	memset(msg_buf, 0, HEADER_SIZE + 20);
@@ -880,6 +886,10 @@ void playPhase() {
 			memcpy(M->hitMissileShooterId.m_ratId, it->first.m_ratId, UUID_SIZE);
 			M->hitMissileSeqNum = it->second.missile.seqNum;
 			M->myCurrPhaseStateIs(HIT_PHASE);
+
+			firstHitMsgSendTime	= getCurrentTime();
+			sendHitMessage(M->hitMissileShooterId.m_ratId, M->hitMissileSeqNum);
+			lastHitMsgSendTime = getCurrentTime();
 			return;
 		}
 	}
@@ -887,10 +897,6 @@ void playPhase() {
 
 void hitPhase() {
 	if (getCurrentTime() - lastHitMsgSendTime >= HIT_INTERVAL) {
-		if (firstHitMsgSendTime = 0)
-			firstHitMsgSendTime	= getCurrentTime();
-
-
 		sendHitMessage(M->hitMissileShooterId.m_ratId, M->hitMissileSeqNum);
 		lastHitMsgSendTime = getCurrentTime();
 	}
@@ -929,7 +935,7 @@ void manageMissiles()
 	// TODO: when shoot a missile, must update lastMissilePosUpdateTime
 	if (MY_MISSILE_EXIST == true) {
 		int step = (getCurrentTime() - lastMissilePosUpdateTime) / MISSILE_UPDATE_INTERVAL;
-		for (unsigned int i = 0; step > 0 && i < step; i++) {
+		for (int i = 0; step > 0 && i < step; i++) {
 			switch(MY_MISSILE_DIR) {
 				case NORTH:	M->missileXLocIs(Loc(MY_MISSILE_X_LOC + 1)); break;
 				case SOUTH:	M->missileXLocIs(Loc(MY_MISSILE_X_LOC - 1)); break;
