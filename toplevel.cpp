@@ -882,7 +882,7 @@ void hitPhase() {
 			firstHitMsgSendTime	= getCurrentTime();
 
 
-		sendHitMessage(M->shooterId.m_ratId, M->hitMissileSeqNum);
+		sendHitMessage(M->hitMissileShooterId.m_ratId, M->hitMissileSeqNum);
 		lastHitMsgSendTime = getCurrentTime();
 	}
 
@@ -1111,7 +1111,7 @@ void process_recv_LeaveMessage(LeaveMessage *p) {
 }
 
 void process_recv_HitMessage(HitMessage *p) {
-	if (isRatIdEquals(p->shooterId, M->my_ratId.m_ratId) && p->missileSeqNum >= 0) {
+	if (isRatIdEquals(p->shooterId, M->my_ratId.m_ratId) && p->missileSeqNum != -1) {
 		map<unsigned int, VictimRat>::iterator it = M->hitVictimMap.find(p->missileSeqNum);
 
 		// only accept the first rat who claims a hit

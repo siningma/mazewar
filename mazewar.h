@@ -327,7 +327,7 @@ class MazewarInstance :  public Fwk::NamedInterface  {
     std::map<unsigned int, VictimRat> hitVictimMap;
 protected:
 	MazewarInstance(string s) : Fwk::NamedInterface(s), dir_(0), dirPeek_(0), myRatId_(0), score_(0),
-		xloc_(1), yloc_(3), xPeek_(0), yPeek_(0), my_currPhaseState(JOIN_PHASE) {
+		xloc_(1), yloc_(3), xPeek_(0), yPeek_(0), my_currPhaseState(JOIN_PHASE), hitMissileSeqNum(-1) {
 		myAddr_ = (Sockaddr*)malloc(sizeof(Sockaddr));
 		if(!myAddr_) {
 			printf("Error allocating sockaddr variable");
