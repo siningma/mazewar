@@ -678,18 +678,18 @@ void sendKeepAliveMessage() {
 	memset(msg_buf, 0, HEADER_SIZE + 14);
 	msg_buf[0] = keepAliveMsg.msgType;
 	memcpy(msg_buf + 2, keepAliveMsg.ratId, UUID_SIZE);
-	uint32_t msg_msgId = keepAliveMsg.msgId;
-	memcpy(msg_buf + 2 + UUID_SIZE, &htonl(msg_msgId), 4);
+	uint32_t msg_msgId = htonl(keepAliveMsg.msgId);
+	memcpy(msg_buf + 2 + UUID_SIZE, &msg_msgId, 4);
 	msg_buf[HEADER_SIZE] = keepAliveMsg.ratPosX;
 	msg_buf[HEADER_SIZE + 1] = keepAliveMsg.ratPosY;
 	msg_buf[HEADER_SIZE + 2] = keepAliveMsg.ratDir;
-	int msg_score = keepAliveMsg.score;
-	memcpy(msg_buf + HEADER_SIZE + 3, &htonl((uint32_t)msg_score), 4);
+	uint32_t msg_score = htonl((uint32_t)keepAliveMsg.score);
+	memcpy(msg_buf + HEADER_SIZE + 3, &msg_score, 4);
 	msg_buf[HEADER_SIZE + 7] = keepAliveMsg.missileFlag;
 	msg_buf[HEADER_SIZE + 8] = keepAliveMsg.missilePosX;
 	msg_buf[HEADER_SIZE + 9] = keepAliveMsg.missilePosY;
-	uint32_t msg_missileSeqNum = keepAliveMsg.missileSeqNum;
-	memcpy(msg_buf + HEADER_SIZE + 10, &htonl(msg_missileSeqNum), 4);
+	uint32_t msg_missileSeqNum = htonl(keepAliveMsg.missileSeqNum);
+	memcpy(msg_buf + HEADER_SIZE + 10, &msg_missileSeqNum, 4);
 
 	sendto(M->theSocket(), msg_buf, HEADER_SIZE + 14, 0, 
 			(struct sockaddr *)&groupAddr, sizeof(Sockaddr));
