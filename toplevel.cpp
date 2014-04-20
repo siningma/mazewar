@@ -476,7 +476,9 @@ int recvPacket(int socket, char* payload_buf, int payload_buf_len, struct sockad
 
 			recvLen += cc;
 		}
-	}
+	} else 
+		printf("No payload data receive\n");
+
 	return recvLen;
 }
 
