@@ -110,6 +110,7 @@ SOFTWARE.
 #define KEEPALIVE_TIMEOUT	10000 	/* KeepAliveMessage timeout time */
 #define JOIN_PHASE_LASTTIME	3000	/* join phase last time */
 #define HIT_PHASE_LASTTIME 	2000	/* hit phase last time */
+#define VICTIMRAT_STORE_TIMEOUT 	5000 	/* victim rat store data in table timeout time */
 
 #define PLAY_PHASE	1 	/* player in play phase */
 #define JOIN_PHASE	2 	/* player in join phase */
@@ -243,6 +244,11 @@ typedef struct {
 	double lastKeepAliveRecvTime;
 }	OtherRat;
 
+typedef struct {
+	MW_RatId victimId;
+	double recvHitMessageTimestamp;
+}	VictimRat;
+
 typedef	RatAppearance			RatApp_type [MAX_RATS];
 typedef	RatAppearance *			RatLook;
 
@@ -312,7 +318,13 @@ class MazewarInstance :  public Fwk::NamedInterface  {
     MW_RatId my_ratId;
     Missile my_missile;
 
-    std::map<MW_RatId, OtherRat> otherRatInfo_map; 
+    // this is used to store data for sending HitMessage
+    // one rat can only be hit by one missile at one time
+    unsigned int hitMissileSeqNum;
+    MW_RatId hitMissileShooterId;
+
+    std::map<MW_RatId, OtherRat> otherRatInfoMap;
+    std::map<unsigned int, VictimRat> hitVictimMap;
 protected:
 	MazewarInstance(string s) : Fwk::NamedInterface(s), dir_(0), dirPeek_(0), myRatId_(0), score_(0),
 		xloc_(1), yloc_(3), xPeek_(0), yPeek_(0), my_currPhaseState(JOIN_PHASE) {
@@ -612,6 +624,7 @@ double getCurrentTime();
 void joinPhase();
 void playPhase();
 void hitPhase();
+bool checkConflict(int, int);
 
 void process_recv_JoinMessage(JoinMessage *p);
 void process_recv_JoinResponseMessage(JoinResponseMessage *p);

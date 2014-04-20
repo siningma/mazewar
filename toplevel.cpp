@@ -26,13 +26,16 @@ double lastJoinMsgSendTime = 0;
 // last timestamp when HitMessage is sent. This is only updated in HIT_PHASE, once 200ms
 double lastHitMsgSendTime = 0;
 
-// first JoinMessage sent time. JOIN_PHASE lasts 3 s
+// first JoinMessage sent time. JOIN_PHASE lasts 3s
 double firstJoinMsgSendTime = 0;
+
+// first HitMessage sent time. HIT_PHASE lasts 2s
+double firstHitMsgSendTime = 0;
 
 // last timestamp when KeepAliveMessage is sent. This is sent once 200ms. 
 double lastKeepAliveMsgSendTime = 0;
 
-// last timestamp the missile position get updated in manageMissile()
+// last timestamp the missile position get updated in manageMissiles
 double lastMissilePosUpdateTime = 0;
 
 
@@ -169,14 +172,21 @@ play(void)
 		}
 
 		// check if there is any other player has not send any KeepAliveMessage for more than 10 seconds
-		for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.begin(); it != M->otherRatInfo_map.end();) {
+		for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.begin(); it != M->otherRatInfoMap.end();) {
 			if((getCurrentTime() - it->second.lastKeepAliveRecvTime) >= KEEPALIVE_TIMEOUT) {
 				printf("No KeepAliveMessage Received for more than 10 seconds.\nRemove ratId: ");
 				printRatId(it->first.m_ratId);
-				M->otherRatInfo_map.erase(it++);
-			}
-			else
+				M->otherRatInfoMap.erase(it++);
+			} else
 				it++;	
+		}
+
+		// remove one entry 5s after receiving HitMessage
+		for (map<unsigned int, VictimRat>::iterator it = M->hitVictimMap.begin(); it != M->hitVictimMap.end();) {
+			if (getCurrentTime() - it->second.recvHitMessageTimestamp >= VICTIMRAT_STORE_TIMEOUT) {
+				M->hitVictimMap.erase(it++);
+			} else
+				it++;
 		}
 	}
 }
@@ -231,6 +241,9 @@ forward(void)
 		MWError("bad direction in Forward");
 	}
 	if ((MY_X_LOC != tx) || (MY_Y_LOC != ty)) {
+		if (checkConflict(tx, ty))
+			return;
+
 		M->xlocIs(Loc(tx));
 		M->ylocIs(Loc(ty));
 		updateView = TRUE;
@@ -253,6 +266,9 @@ void backward()
 		MWError("bad direction in Backward");
 	}
 	if ((MY_X_LOC != tx) || (MY_Y_LOC != ty)) {
+		if (checkConflict(tx, ty))
+			return;
+
 		M->xlocIs(Loc(tx));
 		M->ylocIs(Loc(ty));
 		updateView = TRUE;
@@ -361,7 +377,7 @@ void peekStop()
 
 void shoot()
 {
-	M->scoreIs( M->score().value()-1 );
+	M->scoreIs( MY_SCORE-1 );
 	UpdateScoreCard(M->myRatId().value());
 
 	// I shoot a missile
@@ -397,13 +413,22 @@ void NewPosition(MazewarInstance::Ptr m)
 	Loc newY(0);
 	Direction dir(0); /* start on occupied square */
 
-	while (M->maze_[newX.value()][newY.value()]) {
+	bool occupied = false;
+	while (M->maze_[newX.value()][newY.value()] || occupied == true) {
 	  /* MAZE[XY]MAX is a power of 2 */
 	  newX = Loc(random() & (MAZEXMAX - 1));
 	  newY = Loc(random() & (MAZEYMAX - 1));
 
 	  /* In real game, also check that square is
-	     unoccupied by another rat */
+	     unoccupied by another rat */  
+	  for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.begin(); it != M->otherRatInfoMap.end(); ++it) {
+	  	if (newX.value() == it->second.x.value() && newY.value() == it->second.rat.y.value()) {
+	  		occupied = true;
+	  		break;
+	  	}
+	  	else
+	  		occupied = false;
+	  }
 	}
 
 	/* prevent a blank wall at first glimpse */
@@ -775,7 +800,7 @@ void printRatId(const unsigned char* ratId) {
 
 void printOtherRatsNames() {
 	printf("Out of join phase, other rats info: \n");
-	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.begin(); it != M->otherRatInfo_map.end(); ++it) {
+	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.begin(); it != M->otherRatInfoMap.end(); ++it) {
 		printf("RatName: %s, RatId: ", it->second.ratName);
 		printRatId(it->first.m_ratId);
 	}
@@ -783,7 +808,7 @@ void printOtherRatsNames() {
 }
 
 void printOtherRatsInfo() {
-	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.begin(); it != M->otherRatInfo_map.end(); ++it) {
+	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.begin(); it != M->otherRatInfoMap.end(); ++it) {
 		printf("Other rat Status: \nRatName: %s, RatId: ", it->second.ratName);
 		printRatId(it->first.m_ratId);
 		printf("Rat ratPosX: %u, ratPosY: %u, ratDir: %u, score: %d\n", it->second.rat.x.value(), it->second.rat.y.value(), it->second.rat.dir.value(), it->second.score);
@@ -835,13 +860,16 @@ void joinPhase() {
 }
 
 void playPhase() {
-	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.begin(); it != M->otherRatInfo_map.end(); ++it) {
+	// check if I am hit by a missile
+	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.begin(); it != M->otherRatInfoMap.end(); ++it) {
 		if (it->second.missile.exist == true && it->second.missile.x.value() == MY_X_LOC && it->second.missile.y.value() == MY_Y_LOC) {
 			// I am hit by a missile, send HitMessage and go to HIT_PHASE
 			// I can only be hit by only one missile at one time
-			printf("I am hit by a missile from ratId: ");
+			printf("I am hit by a missile with seqNum %u from ratId: ", it->second.missile.seqNum);
 			printRatId(it->first.m_ratId);
 
+			memcpy(M->hitMissileShooterId.m_ratId, it->first.m_ratId, UUID_SIZE);
+			M->hitMissileSeqNum = it->second.missile.seqNum;
 			M->myCurrPhaseStateIs(HIT_PHASE);
 			break;
 		}
@@ -849,7 +877,30 @@ void playPhase() {
 }
 
 void hitPhase() {
+	if (getCurrentTime() - lastHitMsgSendTime >= HIT_INTERVAL) {
+		if (firstHitMsgSendTime = 0)
+			firstHitMsgSendTime	= getCurrentTime();
 
+
+		sendHitMessage(M->shooterId.m_ratId, M->hitMissileSeqNum);
+		lastHitMsgSendTime = getCurrentTime();
+	}
+
+	if (firstHitMsgSendTime != 0 && getCurrentTime() - firstHitMsgSendTime >= HIT_PHASE_LASTTIME) {
+		M->myCurrPhaseStateIs(PLAY_PHASE);
+
+		memset(M->hitMissileShooterId.m_ratId, 0, UUID_SIZE);
+		M->hitMissileSeqNum = -1;
+		firstHitMsgSendTime = 0;
+	}
+}
+
+bool checkConflict(int tx, int ty) {
+	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.begin(); it != M->otherRatInfoMap.end(); ++it) {
+		if (tx == it->second.missile.x.value() && ty == it->second.missile.y.value())
+			return true;
+	}
+	return false;
 }
 
 /* ----------------------------------------------------------------------- */
@@ -870,7 +921,7 @@ void manageMissiles()
 	if (MY_MISSILE_EXIST == true) {
 		unsigned int step = (getCurrentTime() - lastMissilePosUpdateTime) / MISSILE_UPDATE_INTERVAL;
 		if (step > 0) {
-			for (int i = 0; i < step; i++) {
+			for (unsigned int i = 0; i < step; i++) {
 				switch(MY_MISSILE_DIR) {
 					case NORTH:	M->missileXLocIs(Loc(MY_MISSILE_X_LOC + 1)); break;
 					case SOUTH:	M->missileXLocIs(Loc(MY_MISSILE_X_LOC - 1)); break;
@@ -884,8 +935,14 @@ void manageMissiles()
 					}
 				}
 
-				printf("My Missile Status: \n");
+				for (int i = 0; i < 100; i++)
+					printf("$");
+				printf("\n");
+				printf("Manage My Missile Status: \n");
 				printf("Exist: %d, X: %u, Y: %u, dir: %u, SeqNum: %d\n", MY_MISSILE_EXIST, MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC, MY_MISSILE_DIR, MY_MISSILE_SEQNUM);
+				for (int i = 0; i < 100; i++)
+					printf("$");
+				printf("\n");
 				// missile hit the wall
 				if (M->maze_[MY_MISSILE_X_LOC][MY_MISSILE_Y_LOC] || MY_MISSILE_EXIST == false) {
 					printf("My missile hit the wall. missilePosX: %u, missilePosY: %u\n", MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC);
@@ -894,13 +951,13 @@ void manageMissiles()
 					M->missileYLocIs(0);
 					M->missileDirIs(0);
 					M->missileSeqNumIs(MY_MISSILE_SEQNUM + 1);
-					sendKeepAliveMessage();
 					break;
 				}
 				sendKeepAliveMessage();
 			}
 		}
 
+		sendKeepAliveMessage();
 		lastMissilePosUpdateTime = getCurrentTime();
 	} 
 
@@ -954,8 +1011,8 @@ void sendPacketToPlayer(RatId ratId, Message *msg)
 
 
 void process_recv_JoinMessage(JoinMessage *p) {
-	map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.find(p->ratId);
-	if (it != M->otherRatInfo_map.end()) {
+	map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.find(p->ratId);
+	if (it != M->otherRatInfoMap.end()) {
 		// if find JoinMessage ratId in my otherRatInfo table
 		// update thia player's name	
 		memset(it->second.ratName, 0, NAMESIZE);
@@ -970,7 +1027,7 @@ void process_recv_JoinMessage(JoinMessage *p) {
 		memcpy(other.ratName, p->name, (size_t)p->len);
 		other.score = 0;
 		other.lastKeepAliveRecvTime = getCurrentTime();
-		M->otherRatInfo_map.insert(std::make_pair(other_ratId, other));
+		M->otherRatInfoMap.insert(std::make_pair(other_ratId, other));
 		
 		printf("Receive JoinMessage and store ratName: %s, RatId: ", other.ratName);
 		printRatId(other_ratId.m_ratId);
@@ -982,8 +1039,8 @@ void process_recv_JoinMessage(JoinMessage *p) {
 void process_recv_JoinResponseMessage(JoinResponseMessage *p) {
 	// Receiving JoinResponseMessage is valid only in JOIN_PHASE and JoinResponseMessage is intended for me 
 	if (M->myCurrPhaseState() == JOIN_PHASE && isRatIdEquals(p->senderId, M->my_ratId.m_ratId) == true) {
-		map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.find(p->ratId);
-		if (it != M->otherRatInfo_map.end()) {
+		map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.find(p->ratId);
+		if (it != M->otherRatInfoMap.end()) {
 			// if find JoinReponseMessage ratId in my otherRatInfo table
 			// update this play's name		
 			memset(it->second.ratName, 0, NAMESIZE);
@@ -998,7 +1055,7 @@ void process_recv_JoinResponseMessage(JoinResponseMessage *p) {
 			memcpy(other.ratName, p->name, (size_t)p->len);
 			other.score = 0;
 			other.lastKeepAliveRecvTime = getCurrentTime();
-			M->otherRatInfo_map.insert(std::make_pair(other_ratId, other));
+			M->otherRatInfoMap.insert(std::make_pair(other_ratId, other));
 			
 			printf("Receive JoinResponseMessage and store ratName: %s, RatId: ", other.ratName);
 			printRatId(other_ratId.m_ratId);
@@ -1007,8 +1064,8 @@ void process_recv_JoinResponseMessage(JoinResponseMessage *p) {
 }
 
 void process_recv_KeepAliveMessage(KeepAliveMessage *p) {
-	map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.find(p->ratId);
-	if (it != M->otherRatInfo_map.end()) {
+	map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.find(p->ratId);
+	if (it != M->otherRatInfoMap.end()) {
 		// find send KeepAliveMessage ratId in my otherRatInfo table
 		// update other Rat info in my table
 		OtherRat *other = &it->second;
@@ -1033,40 +1090,75 @@ void process_recv_KeepAliveMessage(KeepAliveMessage *p) {
 		other.missile.seqNum = p->missileSeqNum;
 		other.score = p->score;
 		other.lastKeepAliveRecvTime = getCurrentTime();
-		M->otherRatInfo_map.insert(std::make_pair(other_ratId, other));
+		M->otherRatInfoMap.insert(std::make_pair(other_ratId, other));
 	}
 }
 
 void process_recv_LeaveMessage(LeaveMessage *p) {
-	map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.find(p->ratId);
-	if (it != M->otherRatInfo_map.end()) {
+	map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.find(p->ratId);
+	if (it != M->otherRatInfoMap.end()) {
 		// find sent LeaveMessage ratId in my otherRatInfo table
 		// remove this rat info from my table
 		printf("Remove rat with ratId: ");
 		printRatId(it->first.m_ratId);
 
-		// printf("Before remove otherRatInfo_map size: %d\n", (unsigned int)M->otherRatInfo_map.size());
+		// printf("Before remove otherRatInfoMap size: %d\n", (unsigned int)M->otherRatInfoMap.size());
 		MW_RatId other_ratId(p->ratId);
-		M->otherRatInfo_map.erase(other_ratId);
-		printf("After remove otherRatInfo_map size: %d\n", (unsigned int)M->otherRatInfo_map.size());
+		M->otherRatInfoMap.erase(other_ratId);
+		printf("After remove otherRatInfoMap size: %d\n", (unsigned int)M->otherRatInfoMap.size());
 
 	}
 }
 
 void process_recv_HitMessage(HitMessage *p) {
-	if (isRatIdEquals(p->shooterId, M->my_ratId.m_ratId)) {
-		M->scoreIs( M->score().value() + 11 );
-		// store my missile with seqNum hit someone in the table
+	if (isRatIdEquals(p->shooterId, M->my_ratId.m_ratId) && p->missileSeqNum >= 0) {
+		map<unsigned int, VictimRat>::iterator it = M->hitVictimMap.find(p->missileSeqNum);
 
-		sendHitResponseMessage(p->ratId, p->missileSeqNum);
+		// only accept the first rat who claims a hit
+		// missile sequence number does not exist
+		if (it == M->hitVictimMap.end()) {
+			printf("Receive HitMessage with seqNum %u from ratId: \n", p->missileSeqNum);
+			printRatId(p->ratId);
+
+			M->scoreIs( MY_SCORE + 11 );
+			// store my missile with seqNum hit someone in the table
+			VictimRat victimRat;
+			memset(victimRat.victimId.m_ratId, 0, UUID_SIZE);
+			memcpy(victimRat.victimId.m_ratId, p->ratId, UUID_SIZE);
+			victimRat.recvHitMessageTimestamp = getCurrentTime();
+
+			M->hitVictimMap.insert(std::make_pair(p->missileSeqNum, victimRat));
+			sendHitResponseMessage(p->ratId, p->missileSeqNum);
+
+			// clear my missile state data
+			M->missileExistIs(false);
+			M->missileXLocIs(0);
+			M->missileYLocIs(0);
+			M->missileDirIs(0);
+			M->missileSeqNumIs(MY_MISSILE_SEQNUM + 1);
+			sendKeepAliveMessage();
+		} else {		
+			// missile sequence number exists and maps to the same player Id, needs to send HitResponseMessage	
+			if (isRatIdEquals(p->ratId, it->second.victimId.m_ratId)) {
+				sendHitResponseMessage(p->ratId, p->missileSeqNum);
+			} else{	// missile sequence number exists but maps to a different player Id	
+			}
+		}
 	}
 }
 
 void process_recv_HitResponseMessage(HitResponseMessage *p) {
 	if (isRatIdEquals(p->victimId, M->my_ratId.m_ratId)) {
-		M->scoreIs( M->score().value() - 5 );
+		printf("Receive HitResponseMessage with seqNum %u from ratId: \n", p->missileSeqNum);
+		printRatId(p->ratId);
 
+		M->scoreIs( MY_SCORE - 5 );
 		// regenerate a position for me, and send KeepAliveMessage
+		NewPosition(M);
+		M->myCurrPhaseStateIs(PLAY_PHASE);
+		memset(M->hitMissileShooterId.m_ratId, 0, UUID_SIZE);
+		M->hitMissileSeqNum = -1;
+		firstHitMsgSendTime = 0;
 
 		sendKeepAliveMessage();
 	}
