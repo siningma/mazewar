@@ -507,7 +507,7 @@ void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sock
 	    	char name[NAMESIZE];
 	    	memset(name, 0, NAMESIZE);
 	    	memcpy(name, payload_buf + 1, (size_t)name_len);
-	    	p = new JoinMessage(ratId, msgId, name);
+	    	p = new JoinMessage(ratId, msgId, name_len, name);
 
 	    	recvMsgPrint(p);
     		break;
@@ -530,7 +530,7 @@ void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sock
 	    	char name[NAMESIZE];
 	    	memset(name, 0, NAMESIZE);
 	    	memcpy(name, payload_buf + 17, (size_t)name_len);
-	    	p = new JoinResponseMessage(ratId, msgId, name, senderId);
+	    	p = new JoinResponseMessage(ratId, msgId, name_len, name, senderId);
 
 	    	recvMsgPrint(p);
     		break;
@@ -670,7 +670,7 @@ void sendLeaveMessage() {
 }
 
 void sendJoinMessage() {
-	JoinMessage joinMsg(M->my_ratId.m_ratId, getMessageId(), M->myName_);
+	JoinMessage joinMsg(M->my_ratId.m_ratId, getMessageId(), NAMESIZE, M->myName_);
 	#ifdef DEBUG
 	sendMsgPrint(&joinMsg);
 	#endif
@@ -688,7 +688,7 @@ void sendJoinMessage() {
 }
 
 void sendJoinResponseMessage(unsigned char *senderId) {
-	JoinResponseMessage joinResponseMsg(M->my_ratId.m_ratId, getMessageId(), M->myName_, senderId);
+	JoinResponseMessage joinResponseMsg(M->my_ratId.m_ratId, getMessageId(), NAMESIZE, M->myName_, senderId);
 	#ifdef DEBUG
 	sendMsgPrint(&joinResponseMsg);
 	#endif
