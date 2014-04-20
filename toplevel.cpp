@@ -628,7 +628,7 @@ void sendKeepAliveMessage() {
 	char msg_buf[HEADER_SIZE + 14];
 	memset(msg_buf, 0, HEADER_SIZE + 14);
 	memcpy(msg_buf, &keepAliveMsg.msgType, 1);
-	memcpy(msg_buf + 2, &keepAliveMsg.ratId, UUID_SIZE);
+	memcpy(msg_buf + 2, keepAliveMsg.ratId, UUID_SIZE);
 	memcpy(msg_buf + 2 + UUID_SIZE, &keepAliveMsg.msgId, 4);
 	memcpy(msg_buf + HEADER_SIZE, &keepAliveMsg.ratPosX, 1);
 	memcpy(msg_buf + HEADER_SIZE + 1, &keepAliveMsg.ratPosY, 1);
@@ -652,7 +652,7 @@ void sendLeaveMessage() {
 	char msg_buf[HEADER_SIZE];
 	memset(msg_buf, 0, HEADER_SIZE);
 	memcpy(msg_buf, &leaveMsg.msgType, 1);
-	memcpy(msg_buf + 2, &leaveMsg.ratId, UUID_SIZE);
+	memcpy(msg_buf + 2, leaveMsg.ratId, UUID_SIZE);
 	memcpy(msg_buf + 2 + UUID_SIZE, &leaveMsg.msgId, 4);
 
 	sendto(M->theSocket(), msg_buf, HEADER_SIZE, 0, 
@@ -668,7 +668,7 @@ void sendJoinMessage() {
 	char msg_buf[HEADER_SIZE + 21];
 	memset(msg_buf, 0, HEADER_SIZE + 21);
 	memcpy(msg_buf, &joinMsg.msgType, 1);
-	memcpy(msg_buf + 2, &joinMsg.ratId, UUID_SIZE);
+	memcpy(msg_buf + 2, joinMsg.ratId, UUID_SIZE);
 	memcpy(msg_buf + 2 + UUID_SIZE, &joinMsg.msgId, 4);
 	memcpy(msg_buf + HEADER_SIZE, &joinMsg.len, 1);
 	memcpy(msg_buf + HEADER_SIZE + 1, joinMsg.name, (size_t)joinMsg.len);
@@ -686,7 +686,7 @@ void sendJoinResponseMessage(unsigned char *senderId) {
 	char msg_buf[HEADER_SIZE + 37];
 	memset(msg_buf, 0, HEADER_SIZE + 37);
 	memcpy(msg_buf, &joinResponseMsg.msgType, 1);
-	memcpy(msg_buf + 2, &joinResponseMsg.ratId, UUID_SIZE);
+	memcpy(msg_buf + 2, joinResponseMsg.ratId, UUID_SIZE);
 	memcpy(msg_buf + 2 + UUID_SIZE, &joinResponseMsg.msgId, 4);
 	memcpy(msg_buf + HEADER_SIZE, joinResponseMsg.senderId, UUID_SIZE);
 	memcpy(msg_buf + HEADER_SIZE + UUID_SIZE, &joinResponseMsg.len, 1);
@@ -705,7 +705,7 @@ void sendHitMessage(unsigned char *shooterId, unsigned int other_missileSeqNum) 
 	char msg_buf[HEADER_SIZE + 20];
 	memset(msg_buf, 0, HEADER_SIZE + 20);
 	memcpy(msg_buf, &hitMsg.msgType, 1);
-	memcpy(msg_buf + 2, &hitMsg.ratId, UUID_SIZE);
+	memcpy(msg_buf + 2, hitMsg.ratId, UUID_SIZE);
 	memcpy(msg_buf + 2 + UUID_SIZE, &hitMsg.msgId, 4);
 	memcpy(msg_buf + HEADER_SIZE, hitMsg.shooterId, UUID_SIZE);
 	memcpy(msg_buf + HEADER_SIZE + UUID_SIZE, &hitMsg.missileSeqNum, 4);
@@ -721,7 +721,7 @@ void sendHitResponseMessage(unsigned char *victimId, unsigned int other_missileS
 	char msg_buf[HEADER_SIZE + 20];
 	memset(msg_buf, 0, HEADER_SIZE + 20);
 	memcpy(msg_buf, &hitResponseMsg.msgType, 1);
-	memcpy(msg_buf + 2, &hitResponseMsg.ratId, UUID_SIZE);
+	memcpy(msg_buf + 2, hitResponseMsg.ratId, UUID_SIZE);
 	memcpy(msg_buf + 2 + UUID_SIZE, &hitResponseMsg.msgId, 4);
 	memcpy(msg_buf + HEADER_SIZE, hitResponseMsg.victimId, UUID_SIZE);
 	memcpy(msg_buf + HEADER_SIZE + UUID_SIZE, &hitResponseMsg.missileSeqNum, 4);
