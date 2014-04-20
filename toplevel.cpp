@@ -499,7 +499,7 @@ void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, st
 	    	unsigned char name_len = payload_buf[0];
 	    	char name[NAMESIZE];
 	    	memset(name, 0, NAMESIZE);
-	    	memcpy(name, payload_buf + 1, name_len);
+	    	memcpy(name, payload_buf + 1, (size_t)name_len);
 	    	p = new JoinMessage(ratId, msgId, name);
 
 	    	recvMsgPrint(p);
@@ -519,7 +519,7 @@ void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, st
 	    	unsigned char name_len = payload_buf[17];
 	    	char name[NAMESIZE];
 	    	memset(name, 0, NAMESIZE);
-	    	memcpy(name, payload_buf + 17, name_len);
+	    	memcpy(name, payload_buf + 17, (size_t)name_len);
 	    	p = new JoinResponseMessage(ratId, msgId, name, senderId);
 
 	    	recvMsgPrint(p);
@@ -752,7 +752,7 @@ void printRatId(const unsigned char* ratId) {
 }
 
 void printOtherRatInfo_map() {
-	printf("Other rat info map: ");
+	printf("Other rat info map: \n");
 	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.begin(); it != M->otherRatInfo_map.end(); ++it) {
 		printf("RatId: ");
 		printRatId(it->first.m_ratId);
@@ -811,7 +811,7 @@ void joinPhase() {
 	if (firstJoinMsgSendTime != 0 && getCurrentTime() - firstJoinMsgSendTime >= JOIN_PHASE_LASTTIME) {
 		M->myCurrPhaseStateIs(PLAY_PHASE);
 
-		print
+		printOtherRatInfo_map();
 	}
 }
 

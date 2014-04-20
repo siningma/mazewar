@@ -414,7 +414,7 @@ public:
 	JoinMessage(unsigned char* ratId, unsigned int msgId, char *name): Message(ratId, JOIN, msgId) {
 		this->len = NAMESIZE;
 		memset(this->name, 0, NAMESIZE);
-		memcpy(this->name, name, NAMESIZE);
+		memcpy(this->name, name, (size_t)this->len);
 	}
 
 	void print() {
@@ -434,7 +434,7 @@ public:
 	JoinResponseMessage(unsigned char* ratId, unsigned int msgId, char *name, unsigned char* senderId): Message(ratId, JNRS, msgId) {
 		this->len = NAMESIZE;
 		memset(this->name, 0, NAMESIZE);
-		memcpy(this->name, name, NAMESIZE);
+		memcpy(this->name, name, (size_t)this->len);
 
 		memset(this->senderId, 0, UUID_SIZE);
 		memcpy(this->senderId, senderId, UUID_SIZE);	
