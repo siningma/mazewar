@@ -818,9 +818,9 @@ void printOtherRatsInfo() {
 		printf("Missile exist: %u, missilePosX: %u, missilePosY: %u, missileSeqNum: %u\n", it->second.missile.exist, it->second.missile.x.value(), it->second.missile.y.value(), it->second.missile.seqNum);	
 	
 		// draw other rats score to the screen
-		if (strlen(it->second.ratName) > 0 && it->second.lastScore != it->second.store) {
+		if (strlen(it->second.ratName) > 0 && it->second.lastScore != it->second.score) {
 			UpdateScoreCard(MY_RAT_INDEX + i, it->second.ratName, it->second.score);
-			it->second.lastScore == it->second.store;
+			it->second.lastScore == it->second.score;
 		}
 		++i;
 	}
