@@ -646,6 +646,8 @@ void ConvertIncoming(Message *p, const char* buf)
     		printf("Receive invalid message type\n");
     		break;
     }
+
+    // delete p;
 }
 
 /* ----------------------------------------------------------------------- */
@@ -808,11 +810,16 @@ void printOtherRatsNames() {
 }
 
 void printOtherRatsInfo() {
-	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.begin(); it != M->otherRatInfoMap.end(); ++it) {
+	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.begin(), int i = 1; it != M->otherRatInfoMap.end(); ++it, ++i) {
 		printf("Other rat Status: \nRatName: %s, RatId: ", it->second.ratName);
 		printRatId(it->first.m_ratId);
 		printf("Rat ratPosX: %u, ratPosY: %u, ratDir: %u, score: %d\n", it->second.rat.x.value(), it->second.rat.y.value(), it->second.rat.dir.value(), it->second.score);
 		printf("Missile exist: %u, missilePosX: %u, missilePosY: %u, missileSeqNum: %u\n", it->second.missile.exist, it->second.missile.x.value(), it->second.missile.y.value(), it->second.missile.seqNum);	
+	
+		// draw other rats score to the screen
+		if (strlen(it->second.ratName) > 0) {
+			UpdateScoreCard(MY_RAT_INDEX + i, it->second.ratName, it->second.score);
+		}
 	}
 	printf("\n");
 }
@@ -910,6 +917,8 @@ void ratStates()
 {
 	myStatusPrint();
 	printOtherRatsInfo();
+
+
 }
 
 /* ----------------------------------------------------------------------- */

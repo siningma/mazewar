@@ -781,6 +781,37 @@ WriteScoreString(RatIndexType rat)
 			 buf, strlen(buf));
 }
 
+void
+WriteScoreString(RatIndexType rat, char *ratName, int score)
+{
+	char buf[64];
+	int	leftEdge;
+
+	sprintf(buf, "%d", score);
+
+	XClearArea(dpy, mwWindow, SCORE_X_ORIGIN,
+		   SCORE_Y_ORIGIN +
+		   rat.value() * (scoreFontInfo->max_bounds.ascent +
+			  scoreFontInfo->max_bounds.descent),
+		   SCORE_X_DIM,
+		   (scoreFontInfo->max_bounds.ascent +
+		    scoreFontInfo->max_bounds.descent),
+		   FALSE);
+	XDrawImageString(dpy, mwWindow, copyGC, SCORE_X_ORIGIN,
+			 SCORE_Y_ORIGIN +
+			 rat.value() * (scoreFontInfo->max_bounds.ascent +
+				scoreFontInfo->max_bounds.descent) +
+			 scoreFontInfo->max_bounds.ascent,
+			 ratName, strlen(ratName));
+	leftEdge = SCORE_X_DIM - XTextWidth(scoreFontInfo, buf, strlen(buf));
+	XDrawImageString(dpy, mwWindow, copyGC, leftEdge+SCORE_X_ORIGIN,
+			 SCORE_Y_ORIGIN +
+			 rat.value() * (scoreFontInfo->max_bounds.ascent +
+				scoreFontInfo->max_bounds.descent) +
+			 scoreFontInfo->max_bounds.ascent,
+			 buf, strlen(buf));
+}
+
 /* ----------------------------------------------------------------------- */
 
 /*
