@@ -816,18 +816,11 @@ void printOtherRatsNames() {
 }
 
 void printOtherRatsInfo() {
-	int i = 1;
 	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.begin(); it != M->otherRatInfoMap.end(); ++it) {
 		printf("Other rat Status: \nRatName: %s, RatId: ", it->second.ratName);
 		printRatId(it->first.m_ratId);
 		printf("Rat ratPosX: %u, ratPosY: %u, ratDir: %u, score: %d\n", it->second.rat.x.value(), it->second.rat.y.value(), it->second.rat.dir.value(), it->second.score);
-		printf("Missile exist: %u, missilePosX: %u, missilePosY: %u, missileSeqNum: %u\n", it->second.missile.exist, it->second.missile.x.value(), it->second.missile.y.value(), it->second.missile.seqNum);	
-	
-		// draw other rats score to the screen
-		if (strlen(it->second.ratName) > 0) {
-			UpdateScoreCard(MY_RAT_INDEX + i, it->second.ratName, it->second.score);
-		}
-		++i;
+		printf("Missile exist: %u, missilePosX: %u, missilePosY: %u, missileSeqNum: %u\n", it->second.missile.exist, it->second.missile.x.value(), it->second.missile.y.value(), it->second.missile.seqNum);
 	}
 	printf("\n");
 }
@@ -836,6 +829,15 @@ void myStatusPrint() {
 	printf("My Status: \n");
 	printf("PosX: %u, PosY: %u, Dir: %u, score: %d\n", MY_X_LOC, MY_Y_LOC, MY_DIR, MY_SCORE);
 	printf("My Missile Exist: %d\n", MY_MISSILE_EXIST);
+}
+
+void UpdateOtherRatsScoreCard() {
+	// draw other rats score to the screen
+	for (int i = 0, map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.begin(); it != M->otherRatInfoMap.end(); ++i, ++it) {
+		if (strlen(it->second.ratName) > 0) {
+			UpdateScoreCard(MY_RAT_INDEX + i, it->second.ratName, it->second.score);
+		}
+	}
 }
 
 /* One Rat gets a new message Id */
@@ -927,6 +929,7 @@ void ratStates()
 	myStatusPrint();
 	printOtherRatsInfo();
 	#endif
+	UpdateOtherRatsScoreCard();
 }
 
 /* ----------------------------------------------------------------------- */
@@ -1172,6 +1175,8 @@ void process_recv_HitResponseMessage(HitResponseMessage *p) {
 		UpdateScoreCard(M->myRatId().value());
 		// regenerate a position for me, and send KeepAliveMessage
 		NewPosition(M);
+		DoViewUpdate();
+
 		M->myCurrPhaseStateIs(PLAY_PHASE);
 		memset(M->hitMissileShooterId.m_ratId, 0, UUID_SIZE);
 		M->hitMissileSeqNum = -1;

@@ -619,6 +619,7 @@ void recvMsgPrint(Message *p);
 void myStatusPrint();
 void printOtherRatsNames();
 void printOtherRatsInfo();
+void UpdateOtherRatsScoreCard();
 void myMissileStatusPrint();
 bool isRatIdEquals(const unsigned char* myRatId, const unsigned char* recvRatId);
 double getCurrentTime();
