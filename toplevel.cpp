@@ -422,7 +422,7 @@ void NewPosition(MazewarInstance::Ptr m)
 	  /* In real game, also check that square is
 	     unoccupied by another rat */  
 	  for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.begin(); it != M->otherRatInfoMap.end(); ++it) {
-	  	if (newX.value() == it->second.x.value() && newY.value() == it->second.rat.y.value()) {
+	  	if (newX.value() == it->second.rat.x.value() && newY.value() == it->second.rat.y.value()) {
 	  		occupied = true;
 	  		break;
 	  	}
