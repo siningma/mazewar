@@ -603,6 +603,7 @@ void sendHitMessage(unsigned char *shooterId, unsigned int other_missileSeqNum);
 void sendHitResponseMessage(unsigned char *victimId, unsigned int other_missileSeqNum);
 void sendMsgPrint(Message *p);
 void recvMsgPrint(Message *p);
+void myStatusPrint();
 void printOtherRatsNames();
 void printOtherRatsInfo();
 void myMissileStatusPrint();
