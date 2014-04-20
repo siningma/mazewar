@@ -85,6 +85,7 @@ play(void)
 	MWEvent		event;
 	Message	*incoming;
 
+	event.eventSource = groupAddr;
 	event.eventDetail = incoming;
 
 	while (TRUE) {
@@ -467,7 +468,7 @@ int recvPacket(int socket, char* payload_buf, int payload_buf_len, struct sockad
 		memset(payload_buf, 0, payload_buf_len);
 
 		cc = recvfrom(socket, payload_buf, payload_buf_len, 0,
-		        src_addr, fromLen);
+		        src_addr, &fromLen);
 		if (cc <= 0) {
 		    if (cc < 0 && errno != EINTR) 
 				perror("event recvfrom");
