@@ -923,8 +923,10 @@ bool checkConflict(int tx, int ty) {
 /* This is just for the sample version, rewrite your own */
 void ratStates()
 {
+	#ifdef _DEBUG_
 	myStatusPrint();
 	printOtherRatsInfo();
+	#endif
 }
 
 /* ----------------------------------------------------------------------- */
