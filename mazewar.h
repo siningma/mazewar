@@ -477,8 +477,8 @@ public:
 	void print() {
 		printf("KeepAliveMessage: \n");
 		Message::print();
-		printf("ratPosX: %d, ratPosY: %d, ratDir: %d, score: %d\n", (short)ratPosX, (short)ratPosY, (short)ratDir, score);
-		printf("missileFlag: %d, missilePosX: %d, missilePosY: %d, missileSeqNum: %d\n", score, missileFlag, (short)missilePosX, (short)missilePosY, missileSeqNum);
+		printf("ratPosX: %u, ratPosY: %u, ratDir: %u, score: %d\n", ratPosX, ratPosY, ratDir, score);
+		printf("missileFlag: %u, missilePosX: %u, missilePosY: %u, missileSeqNum: %d\n", missileFlag, missilePosX, missilePosY, missileSeqNum);
 	}
 };
 
