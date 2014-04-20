@@ -122,7 +122,6 @@ play(void)
 				break;
 
 			case EVENT_NETWORK:
-				// processPacket(&event);
 				break;
 
 			case EVENT_INT:
@@ -138,7 +137,6 @@ play(void)
 				break;
 
 			case EVENT_NETWORK:
-				// processPacket(&event);
 				break;
 			}
 
@@ -557,6 +555,9 @@ void ConvertIncoming(Message *p, const char* buf)
 			}
 	    	
 	    	recvMsgPrint(p);
+
+	    	KeepAliveMessage *keepAliveMsg = dynamic_cast<KeepAliveMessage *>(p);
+			process_recv_KeepAliveMessage(keepAliveMsg);
 	    	break;
     	}
     	case LEAV:
@@ -564,6 +565,9 @@ void ConvertIncoming(Message *p, const char* buf)
     		p = new LeaveMessage(ratId, msgId);
 
     		recvMsgPrint(p);
+
+    		LeaveMessage *leaveMsg = dynamic_cast<LeaveMessage *>(p);
+  			process_recv_LeaveMessage(leaveMsg);
     		break;
     	}
     	case HITM:
@@ -576,6 +580,9 @@ void ConvertIncoming(Message *p, const char* buf)
     		p = new HitMessage(ratId, msgId, shooterId, missileSeqNum);
 
     		recvMsgPrint(p);
+
+    		HitMessage *hitMsg = dynamic_cast<HitMessage *>(p);
+			process_recv_HitMessage(hitMsg);
     		break;
     	}
     	case HTRS:
@@ -588,6 +595,9 @@ void ConvertIncoming(Message *p, const char* buf)
     		p = new HitResponseMessage(ratId, msgId, victimId, missileSeqNum);
 
     		recvMsgPrint(p);
+
+			HitResponseMessage *hitResponseMsg = dynamic_cast<HitResponseMessage *>(p);
+			process_recv_HitResponseMessage(hitResponseMsg);
     		break;
     	}
     	default:
@@ -920,62 +930,6 @@ void sendPacketToPlayer(RatId ratId, Message *msg)
 */
 }
 
-/* ----------------------------------------------------------------------- */
-
-/* Message has been converted from byte stream to data structure
- * processPacket function is used to update shared state
- */
-
-void processPacket (MWEvent *eventPacket)
-{
-	printf("ProcessPacket msgType: 0x%x\n", eventPacket->eventDetail->msgType);
-	recvMsgPrint(eventPacket->eventDetail);
-
-	switch(eventPacket->eventDetail->msgType) {
-		case JOIN:
-		{
-			JoinMessage *joinMsg = dynamic_cast<JoinMessage *>(eventPacket->eventDetail);
-			process_recv_JoinMessage(joinMsg);
-			break;
-		}
-		case JNRS:
-		{
-			JoinResponseMessage *joinResponseMsg = dynamic_cast<JoinResponseMessage *>(eventPacket->eventDetail);
-			process_recv_JoinResponseMessage(joinResponseMsg);
-			break;
-		}
-		case KPLV:
-		{
-			KeepAliveMessage *keepAliveMsg = dynamic_cast<KeepAliveMessage *>(eventPacket->eventDetail);
-			process_recv_KeepAliveMessage(keepAliveMsg);
-			break;
-		}
-		case LEAV:
-		{
-			LeaveMessage *leaveMsg = dynamic_cast<LeaveMessage *>(eventPacket->eventDetail);
-			process_recv_LeaveMessage(leaveMsg);
-			break;
-		}
-		case HITM:
-		{
-			HitMessage *hitMsg = dynamic_cast<HitMessage *>(eventPacket->eventDetail);
-			process_recv_HitMessage(hitMsg);
-			break;
-		}
-		case HTRS:
-		{
-			HitResponseMessage *hitResponseMsg = dynamic_cast<HitResponseMessage *>(eventPacket->eventDetail);
-			process_recv_HitResponseMessage(hitResponseMsg);
-			break;
-		}
-		default:
-			printf("Receive invalid message type\n");
-			break;
-	}
-
-	// delete msg pointer should work here
-	// delete msg;
-}
 
 void process_recv_JoinMessage(JoinMessage *p) {
 	map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.find(p->ratId);
