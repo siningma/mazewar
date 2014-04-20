@@ -1007,7 +1007,7 @@ void process_recv_JoinMessage(JoinMessage *p) {
 		M->otherRatInfo_map.insert(pair<MW_RatId, OtherRat>(other_ratId, other));
 		
 		printf("Receive JoinMessage and store ratName: %s, RatId: ", other.ratName);
-		printRatId(other_ratId.value());
+		printRatId(other_ratId.m_ratId;
 	}
 }
 
@@ -1033,7 +1033,7 @@ void process_recv_JoinResponseMessage(JoinResponseMessage *p) {
 			M->otherRatInfo_map.insert(pair<MW_RatId, OtherRat>(other_ratId, other));
 			
 			printf("Receive JoinResponseMessage and store ratName: %s, RatId: ", other.ratName);
-			printRatId(other_ratId.value());
+			printRatId(other_ratId.m_ratId;
 		}
 	}	
 }
