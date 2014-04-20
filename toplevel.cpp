@@ -368,7 +368,7 @@ void shoot()
 	M->missileExistIs(true);
 	M->missileXLocIs(Loc(MY_X_LOC));
 	M->missileYLocIs(Loc(MY_Y_LOC));
-	M->missileDirIs(Dirction(MY_DIR));
+	M->missileDirIs(Direction(MY_DIR));
 }
 
 /* ----------------------------------------------------------------------- */
