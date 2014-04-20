@@ -810,7 +810,8 @@ void printOtherRatsNames() {
 }
 
 void printOtherRatsInfo() {
-	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.begin(), int i = 1; it != M->otherRatInfoMap.end(); ++it, ++i) {
+	int i = 1;
+	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.begin(); it != M->otherRatInfoMap.end(); ++it) {
 		printf("Other rat Status: \nRatName: %s, RatId: ", it->second.ratName);
 		printRatId(it->first.m_ratId);
 		printf("Rat ratPosX: %u, ratPosY: %u, ratDir: %u, score: %d\n", it->second.rat.x.value(), it->second.rat.y.value(), it->second.rat.dir.value(), it->second.score);
@@ -820,6 +821,7 @@ void printOtherRatsInfo() {
 		if (strlen(it->second.ratName) > 0) {
 			UpdateScoreCard(MY_RAT_INDEX + i, it->second.ratName, it->second.score);
 		}
+		++i;
 	}
 	printf("\n");
 }
