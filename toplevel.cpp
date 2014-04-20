@@ -82,10 +82,8 @@ void
 play(void)
 {
 	MWEvent		event;
-	Message	*incoming;
 
 	event.eventSource = groupAddr;
-	event.eventDetail = incoming;
 
 	while (TRUE) {
 		NextEvent(&event, M->theSocket());
