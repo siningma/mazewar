@@ -448,7 +448,7 @@ char *GetRatName(RatIndexType ratId)
 
 /* ----------------------------------------------------------------------- */
 
-int recvPacket(int socket, unsigned char* payload_buf, int len, struct sockaddr *src_addr, socklen_t *addrlen) {
+int recvPacket(int socket, unsigned char* payload_buf, int payload_buf_len, struct sockaddr *src_addr, socklen_t *addrlen) {
 	int cc;
 	int	ret;
 	fd_set	fdmask;
@@ -463,9 +463,8 @@ int recvPacket(int socket, unsigned char* payload_buf, int len, struct sockaddr 
 	  		MWError("select error on events");
 
 	if(FD_ISSET(socket, &fdmask))	{
-		cc = recvfrom(socket, payload_buf, len, 0,
+		cc = recvfrom(socket, payload_buf, payload_buf_len, 0,
 		        src_addr, addrlen);
-		printf("receive packet payload_buf size: %d\n", cc);
 		if (cc <= 0) {
 		    if (cc < 0 && errno != EINTR) 
 				perror("event recvfrom");
@@ -477,6 +476,7 @@ int recvPacket(int socket, unsigned char* payload_buf, int len, struct sockaddr 
 /* This is just for the sample version, rewrite your own if necessary */
 void ConvertIncoming(Message *p, int socket, const unsigned char* header_buf, struct sockaddr *src_addr, socklen_t *addrlen)
 {
+	// receive packet header
 	unsigned char msgType = header_buf[0];
 	unsigned char ratId[UUID_SIZE];
 	memset(ratId, 0, UUID_SIZE);
@@ -751,6 +751,15 @@ void printRatId(const unsigned char* ratId) {
 	printf("\n");
 }
 
+void printOtherRatInfo_map() {
+	printf("Other rat info map: ");
+	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfo_map.begin(); it != M->otherRatInfo_map.end(); ++it) {
+		printf("RatId: ");
+		printRatId(it->first.m_ratId);
+		printf(", RatName: %s\n", it->second.ratName);
+	}
+}
+
 void myMissileStatusPrint() {
 	for (int i = 0; i < 100; i++)
 		printf("-");
@@ -799,8 +808,11 @@ void joinPhase() {
 	}
 
 	// JOIN_PHASE will last JOIN_PHASE_LASTTIME
-	if (firstJoinMsgSendTime != 0 && getCurrentTime() - firstJoinMsgSendTime >= JOIN_PHASE_LASTTIME)
+	if (firstJoinMsgSendTime != 0 && getCurrentTime() - firstJoinMsgSendTime >= JOIN_PHASE_LASTTIME) {
 		M->myCurrPhaseStateIs(PLAY_PHASE);
+
+		print
+	}
 }
 
 void playPhase() {

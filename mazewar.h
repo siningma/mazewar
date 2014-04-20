@@ -610,6 +610,7 @@ void sendHitMessage(unsigned char *shooterId, unsigned int other_missileSeqNum);
 void sendHitResponseMessage(unsigned char *victimId, unsigned int other_missileSeqNum);
 void sendMsgPrint(Message *p);
 void recvMsgPrint(Message *p);
+void printOtherRatInfo_map();
 void myMissileStatusPrint();
 bool isRatIdEquals(const unsigned char* myRatId, const unsigned char* recvRatId);
 double getCurrentTime();
