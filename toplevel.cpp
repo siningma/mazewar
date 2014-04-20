@@ -366,8 +366,8 @@ void shoot()
 
 	// I shoot a missile
 	M->missileExistIs(true);
-	M->missilePosXIs(M->MY_X_LOC);
-	M->missilePosYIs(M->MY_Y_LOC);
+	M->missileXLocIs(M->MY_X_LOC);
+	M->missileYLocIs(M->MY_Y_LOC);
 	M->missileDirIs(M->MY_DIR);
 }
 
@@ -1067,7 +1067,7 @@ void process_recv_HitResponseMessage(HitResponseMessage *p) {
 		M->scoreIs( M->score().value() - 5 );
 
 		// regenerate a position for me, and send KeepAliveMessage
-		
+
 		sendKeepAliveMessage();
 	}
 }
