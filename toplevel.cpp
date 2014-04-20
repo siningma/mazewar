@@ -833,10 +833,12 @@ void myStatusPrint() {
 
 void UpdateOtherRatsScoreCard() {
 	// draw other rats score to the screen
-	for (int i = 0, map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.begin(); it != M->otherRatInfoMap.end(); ++i, ++it) {
+	int i = 0;
+	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.begin(); it != M->otherRatInfoMap.end(); ++it) {
 		if (strlen(it->second.ratName) > 0) {
 			UpdateScoreCard(MY_RAT_INDEX + i, it->second.ratName, it->second.score);
 		}
+		++i;
 	}
 }
 
