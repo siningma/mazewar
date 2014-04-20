@@ -596,8 +596,7 @@ UpdateScoreCard(RatIndexType ratIndex, char *name, int score)
 {
 	ClearScoreLine(ratIndex);
 	WriteScoreString(ratIndex, name, score);
-	if (Rats2Display[ratIndex.value()].visible == TRUE)
-		InvertScoreLine(ratIndex);
+	InvertScoreLine(ratIndex);
 }
 
 /* ----------------------------------------------------------------------- */
