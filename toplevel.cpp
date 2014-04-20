@@ -897,7 +897,7 @@ void hitPhase() {
 
 bool checkConflict(int tx, int ty) {
 	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.begin(); it != M->otherRatInfoMap.end(); ++it) {
-		if (tx == it->second.missile.x.value() && ty == it->second.missile.y.value())
+		if (tx == it->second.rat.x.value() && ty == it->second.rat.y.value())
 			return true;
 	}
 	return false;
