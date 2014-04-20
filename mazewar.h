@@ -51,7 +51,6 @@ SOFTWARE.
 #include <string>
 #include <map>
 #include <sys/time.h>
-#include <arpa/inet.h>
 
 #include <boost/uuid/uuid_io.hpp>         // streaming operators etc.
 #include <boost/uuid/uuid_generators.hpp> // generators
