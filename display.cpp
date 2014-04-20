@@ -594,7 +594,6 @@ UpdateScoreCard(RatIndexType ratIndex)
 void
 UpdateScoreCard(RatIndexType ratIndex, char *name, int score)
 {
-	ClearScoreLine(ratIndex);
 	WriteScoreString(ratIndex, name, score);
 }
 
