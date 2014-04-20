@@ -496,10 +496,12 @@ void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sock
     	{
     		char payload_buf[21];
 	    	int cc = recvPacket(socket, payload_buf, 21, src_addr);
-	    	if (cc <= 0 || isMsgSentByMe)
+	    	if (cc < 0 || isMsgSentByMe)
 	    		return;
-	    	else
+	    	else {
 	    		printf("Receive JoinMessage payload_buf length: %d\n", cc);
+	    		if (cc == 0) return;
+	    	}
 
 	    	unsigned char name_len = payload_buf[0];
 	    	char name[NAMESIZE];
@@ -514,10 +516,12 @@ void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sock
     	{
     		char payload_buf[37];
 	    	int cc = recvPacket(socket, payload_buf, 37, src_addr);
-	    	if (cc <= 0 || isMsgSentByMe)
+	    	if (cc < 0 || isMsgSentByMe)
 	    		return;
-	    	else 
+	    	else {
 	    		printf("Receive JoinResponseMessage payload_buf length: %d\n", cc);
+	    		if (cc == 0) return;
+	    	}
 
 	    	unsigned char senderId[UUID_SIZE];
 	    	memset(senderId, 0, UUID_SIZE);
@@ -535,10 +539,12 @@ void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sock
     	{
 	    	char payload_buf[14];
 	    	int cc = recvPacket(socket, payload_buf, 14, src_addr);
-	    	if (cc <= 0 || isMsgSentByMe)
+	    	if (cc < 0 || isMsgSentByMe)
 	    		return;
-	    	else
+	    	else {
 	    		printf("Receive KeepAliveMessage payload_buf length: %d\n", cc);
+	    		if (cc == 0) return;
+	    	}
 
 			unsigned char ratPosX = payload_buf[0];
 			unsigned char ratPosY = payload_buf[1];
@@ -575,10 +581,12 @@ void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sock
     	{
     		char payload_buf[20];
     		int cc = recvPacket(socket, payload_buf, 20, src_addr);
-    		if (cc <= 0 || isMsgSentByMe)
+    		if (cc < 0 || isMsgSentByMe)
     			return;
-    		else
+    		else {
     			printf("Receive HitMessage payload_buf length: %d\n", cc);
+    			if (cc == 0) return;
+    		}
 
     		unsigned char shooterId[UUID_SIZE];
     		memset(shooterId, 0, UUID_SIZE);
@@ -592,10 +600,12 @@ void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sock
     	{
     		char payload_buf[20];
     		int cc = recvPacket(socket, payload_buf, 20, src_addr);
-    		if (cc <= 0 || isMsgSentByMe)
+    		if (cc < 0 || isMsgSentByMe)
     			return;
-    		else
+    		else {
     			printf("Receive HitResponseMessage payload_buf length: %d\n", cc);
+    			if (cc == 0) return;
+    		}
 
     		unsigned char victimId[UUID_SIZE];
     		memset(victimId, 0, UUID_SIZE);
