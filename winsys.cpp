@@ -642,7 +642,7 @@ NextEvent(MWEvent *event, int socket)
 	  // printf("******recv called******\n");
 
 	  socklen_t fromLen = sizeof(event->eventSource);
-	  int cc;
+	  int cc = 0;
 	  char header_buf[HEADER_SIZE];
 	  memset(header_buf, 0, HEADER_SIZE);
 
@@ -655,7 +655,7 @@ NextEvent(MWEvent *event, int socket)
 	  if (cc <= 0)
 	    {
 	      if (cc < 0 && errno != EINTR)
-		perror("event recvfrom");
+			perror("event recvfrom");
 	      continue;
 	    }
 	  if (fromLen != sizeof(struct sockaddr_in))
