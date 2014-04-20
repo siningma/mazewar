@@ -451,8 +451,7 @@ char *GetRatName(RatIndexType ratId)
 
 int recvPacket(int socket, char* payload_buf, int payload_buf_len, struct sockaddr *src_addr) {
 	int cc = -1;
-	// int	ret;
-	/*
+	int	ret;
 	fd_set	fdmask;
 	FD_ZERO(&fdmask);
 	FD_SET(socket, &fdmask);
@@ -464,7 +463,7 @@ int recvPacket(int socket, char* payload_buf, int payload_buf_len, struct sockad
 		if (errno != EINTR)
 	  		MWError("select error on events");
 
-	if(FD_ISSET(socket, &fdmask))	{*/
+	if(FD_ISSET(socket, &fdmask))	{
 		socklen_t fromLen = sizeof(*src_addr);
 		memset(payload_buf, 0, payload_buf_len);
 
@@ -474,7 +473,7 @@ int recvPacket(int socket, char* payload_buf, int payload_buf_len, struct sockad
 		    if (cc < 0 && errno != EINTR) 
 				perror("event recvfrom");
 		}	
-	// }
+	}
 	return cc;
 }
 
