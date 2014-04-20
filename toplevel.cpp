@@ -496,15 +496,14 @@ void ConvertIncoming(Message *p, const char* buf)
 	// ignore receving messages that sent by myself
 	bool isMsgSentByMe = isRatIdEquals(M->my_ratId.m_ratId, ratId);
 	if (isMsgSentByMe)
-		return
-
-	if (!isMsgSentByMe) {
+		return;
+	/*
 		printf("Recive Message Header\n");
 		printf("Message type: 0x%x\n", msgType);
 		printf("RatId: ");
 		printRatId(ratId);
 		printf("Message Id: %u\n", msgId);
-	}
+	}*/
 
     switch (msgType) {
     	case JOIN:
@@ -518,25 +517,15 @@ void ConvertIncoming(Message *p, const char* buf)
 	    	recvMsgPrint(p);
     		break;
     	}
-    	/*
     	case JNRS:
     	{
-    		char payload_buf[37];
-	    	int cc = recvPacket(socket, payload_buf, 37, src_addr, isMsgSentByMe);
-	    	if (cc < 0 || isMsgSentByMe)
-	    		return;
-	    	else {
-	    		printf("Receive JoinResponseMessage payload_buf length: %d\n", cc);
-	    		if (cc == 0) return;
-	    	}
-
 	    	unsigned char senderId[UUID_SIZE];
 	    	memset(senderId, 0, UUID_SIZE);
-	    	memcpy(senderId, payload_buf, UUID_SIZE);
-	    	unsigned char name_len = payload_buf[17];
+	    	memcpy(senderId, buf[HEADER_SIZE], UUID_SIZE);
+	    	unsigned char name_len = buf[HEADER_SIZE + UUID_SIZE];
 	    	char name[NAMESIZE];
 	    	memset(name, 0, NAMESIZE);
-	    	memcpy(name, payload_buf + 17, (size_t)name_len);
+	    	memcpy(name, HEADER_SIZE + UUID_SIZE + 1, (size_t)name_len);
 	    	p = new JoinResponseMessage(ratId, msgId, name_len, name, senderId);
 
 	    	recvMsgPrint(p);
@@ -544,30 +533,21 @@ void ConvertIncoming(Message *p, const char* buf)
     	}
     	case KPLV:
     	{
-	    	char payload_buf[14];
-	    	int cc = recvPacket(socket, payload_buf, 14, src_addr, isMsgSentByMe);
-	    	if (cc < 0 || isMsgSentByMe)
-	    		return;
-	    	else {
-	    		printf("Receive KeepAliveMessage payload_buf length: %d\n", cc);
-	    		if (cc == 0) return;
-	    	}
-
-			unsigned char ratPosX = payload_buf[0];
-			unsigned char ratPosY = payload_buf[1];
-			unsigned char ratDir = payload_buf[2];
+			unsigned char ratPosX = buf[HEADER_SIZE];
+			unsigned char ratPosY = buf[HEADER_SIZE + 1];
+			unsigned char ratDir = buf[HEADER_SIZE + 2];
 			int score = 0;
-			memcpy(&score, payload_buf + 3, 4);
-			unsigned char missileFlag = payload_buf[7];
+			memcpy(&score, buf + HEADER_SIZE + 2, 4);
+			unsigned char missileFlag = buf[HEADER_SIZE + 7];
 
 			// if missileFlag is not zero, set missile info
 			if (missileFlag == 0) {
 				p = new KeepAliveMessage(ratId, msgId, ratPosX, ratPosY, ratDir, score, missileFlag);	
 			} else {
-				unsigned char missilePosX = payload_buf[8];
-				unsigned char missilePosY = payload_buf[9];
+				unsigned char missilePosX = buf[HEADER_SIZE + 8];
+				unsigned char missilePosY = buf[HEADER_SIZE + 9];
 				unsigned int missileSeqNum = 0;
-				memcpy(&missileSeqNum, payload_buf + 10, 4);
+				memcpy(&missileSeqNum, buf + HEADER_SIZE + 10, 4);
 				p = new KeepAliveMessage(ratId, msgId, ratPosX, ratPosY, ratDir, score, missileFlag, missilePosX, missilePosY, missileSeqNum);
 			}
 	    	
@@ -576,9 +556,6 @@ void ConvertIncoming(Message *p, const char* buf)
     	}
     	case LEAV:
     	{
-    		if (isMsgSentByMe)
-    			return;
-
     		p = new LeaveMessage(ratId, msgId);
 
     		recvMsgPrint(p);
@@ -586,42 +563,24 @@ void ConvertIncoming(Message *p, const char* buf)
     	}
     	case HITM:
     	{
-    		char payload_buf[20];
-    		int cc = recvPacket(socket, payload_buf, 20, src_addr, isMsgSentByMe);
-    		if (cc < 0 || isMsgSentByMe)
-    			return;
-    		else {
-    			printf("Receive HitMessage payload_buf length: %d\n", cc);
-    			if (cc == 0) return;
-    		}
-
     		unsigned char shooterId[UUID_SIZE];
     		memset(shooterId, 0, UUID_SIZE);
-    		memcpy(shooterId, payload_buf, UUID_SIZE);
+    		memcpy(shooterId, buf, UUID_SIZE);
     		unsigned int missileSeqNum = 0;
-    		memcpy(&missileSeqNum, payload_buf + UUID_SIZE, 4);
+    		memcpy(&missileSeqNum, buf + UUID_SIZE, 4);
     		p = new HitMessage(ratId, msgId, shooterId, missileSeqNum);
     		break;
     	}
     	case HTRS:
     	{
-    		char payload_buf[20];
-    		int cc = recvPacket(socket, payload_buf, 20, src_addr, isMsgSentByMe);
-    		if (cc < 0 || isMsgSentByMe)
-    			return;
-    		else {
-    			printf("Receive HitResponseMessage payload_buf length: %d\n", cc);
-    			if (cc == 0) return;
-    		}
-
     		unsigned char victimId[UUID_SIZE];
     		memset(victimId, 0, UUID_SIZE);
-    		memcpy(victimId, payload_buf, UUID_SIZE);
+    		memcpy(victimId, buf, UUID_SIZE);
     		unsigned int missileSeqNum = 0;
-    		memcpy(&missileSeqNum, payload_buf + UUID_SIZE, 4);
+    		memcpy(&missileSeqNum, buf + UUID_SIZE, 4);
     		p = new HitResponseMessage(ratId, msgId, victimId, missileSeqNum);
     		break;
-    	}*/
+    	}
     	default:
     	break;
     }
@@ -677,7 +636,7 @@ void sendLeaveMessage() {
 }
 
 void sendJoinMessage() {
-	JoinMessage joinMsg(M->my_ratId.m_ratId, getMessageId(), NAMESIZE, M->myName_);
+	JoinMessage joinMsg(M->my_ratId.m_ratId, getMessageId(), strlen(M->myName_), M->myName_);
 	#ifdef DEBUG
 	sendMsgPrint(&joinMsg);
 	#endif
@@ -695,7 +654,7 @@ void sendJoinMessage() {
 }
 
 void sendJoinResponseMessage(unsigned char *senderId) {
-	JoinResponseMessage joinResponseMsg(M->my_ratId.m_ratId, getMessageId(), NAMESIZE, M->myName_, senderId);
+	JoinResponseMessage joinResponseMsg(M->my_ratId.m_ratId, getMessageId(), strlen(M->myName_), M->myName_, senderId);
 	#ifdef DEBUG
 	sendMsgPrint(&joinResponseMsg);
 	#endif
@@ -784,6 +743,7 @@ void printOtherRatInfo_map() {
 		printRatId(it->first.m_ratId);
 		printf(", RatName: %s\n", it->second.ratName);
 	}
+	printf("\n");
 }
 
 void myMissileStatusPrint() {
