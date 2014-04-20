@@ -233,10 +233,6 @@ public:
 	bool operator<(const MW_RatId& other) const {
 		return (memcmp(this->m_ratId, other.m_ratId, UUID_SIZE) < 0);
 	}
-
-	unsigned char* value() {
-		return this->m_ratId;
-	}
 };
 
 typedef struct {

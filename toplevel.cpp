@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
     printf("RatName size: %u, %d\n", (unsigned int)sizeof(M->myName_), strlen(M->myName_));
     printf("My RatName: %s\n", M->myName_);
 	printf("My RatId: ");
-	printRatId(M->my_ratId.value());
+	printRatId(M->my_ratId.m_ratId;
 
     myMissileStatusPrint();
 
@@ -489,7 +489,7 @@ void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sock
 	memcpy(&msgId, header_buf + 2 + UUID_SIZE, 4);
 
 	// ignore receving messages that sent by myself
-	bool isMsgSentByMe = isRatIdEquals(M->my_ratId.value(), ratId);
+	bool isMsgSentByMe = isRatIdEquals(M->my_ratId.m_ratId, ratId);
 
     switch (msgType) {
     	case JOIN:
@@ -618,7 +618,7 @@ void ConvertOutgoing(Message *p)
 }
 
 void sendKeepAliveMessage() {
-	KeepAliveMessage keepAliveMsg(M->my_ratId.value(), getMessageId(), 
+	KeepAliveMessage keepAliveMsg(M->my_ratId.m_ratId, getMessageId(), 
 									(unsigned char)MY_X_LOC, (unsigned char)MY_Y_LOC, (unsigned char)MY_DIR, MY_SCORE, 
 									(unsigned char)MY_MISSILE_EXIST, (unsigned char)MY_MISSILE_X_LOC, (unsigned char)MY_MISSILE_Y_LOC, MY_MISSILE_SEQNUM);
 	#ifdef DEBUG
@@ -644,7 +644,7 @@ void sendKeepAliveMessage() {
 }
 
 void sendLeaveMessage() {
-	LeaveMessage leaveMsg(M->my_ratId.value(), getMessageId());
+	LeaveMessage leaveMsg(M->my_ratId.m_ratId, getMessageId());
 	#ifdef DEBUG
 	sendMsgPrint(&leaveMsg);
 	#endif
@@ -660,7 +660,7 @@ void sendLeaveMessage() {
 }
 
 void sendJoinMessage() {
-	JoinMessage joinMsg(M->my_ratId.value(), getMessageId(), M->myName_);
+	JoinMessage joinMsg(M->my_ratId.m_ratId, getMessageId(), M->myName_);
 	#ifdef DEBUG
 	sendMsgPrint(&joinMsg);
 	#endif
@@ -678,7 +678,7 @@ void sendJoinMessage() {
 }
 
 void sendJoinResponseMessage(unsigned char *senderId) {
-	JoinResponseMessage joinResponseMsg(M->my_ratId.value(), getMessageId(), M->myName_, senderId);
+	JoinResponseMessage joinResponseMsg(M->my_ratId.m_ratId, getMessageId(), M->myName_, senderId);
 	#ifdef DEBUG
 	sendMsgPrint(&joinResponseMsg);
 	#endif
@@ -697,7 +697,7 @@ void sendJoinResponseMessage(unsigned char *senderId) {
 }
 
 void sendHitMessage(unsigned char *shooterId, unsigned int other_missileSeqNum) {
-	HitMessage hitMsg(M->my_ratId.value(), getMessageId(), shooterId, other_missileSeqNum);
+	HitMessage hitMsg(M->my_ratId.m_ratId, getMessageId(), shooterId, other_missileSeqNum);
 	#ifdef DEBUG
 	sendMsgPrint(&hitMsg);
 	#endif	
@@ -715,7 +715,7 @@ void sendHitMessage(unsigned char *shooterId, unsigned int other_missileSeqNum) 
 }
 
 void sendHitResponseMessage(unsigned char *victimId, unsigned int other_missileSeqNum) {
-	HitResponseMessage hitResponseMsg(M->my_ratId.value(), getMessageId(), victimId, other_missileSeqNum);
+	HitResponseMessage hitResponseMsg(M->my_ratId.m_ratId, getMessageId(), victimId, other_missileSeqNum);
 	sendMsgPrint(&hitResponseMsg);
 
 	char msg_buf[HEADER_SIZE + 20];
@@ -1086,7 +1086,7 @@ void process_recv_LeaveMessage(LeaveMessage *p) {
 }
 
 void process_recv_HitMessage(HitMessage *p) {
-	if (isRatIdEquals(p->shooterId, M->my_ratId.value())) {
+	if (isRatIdEquals(p->shooterId, M->my_ratId.m_ratId) {
 		M->scoreIs( M->score().value() + 11 );
 		// store my missile with some seqNum hit someone
 
@@ -1095,7 +1095,7 @@ void process_recv_HitMessage(HitMessage *p) {
 }
 
 void process_recv_HitResponseMessage(HitResponseMessage *p) {
-	if (isRatIdEquals(p->victimId, M->my_ratId.value())) {
+	if (isRatIdEquals(p->victimId, M->my_ratId.m_ratId) {
 		M->scoreIs( M->score().value() - 5 );
 
 	}
