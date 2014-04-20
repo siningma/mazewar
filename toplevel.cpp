@@ -1078,6 +1078,7 @@ void process_recv_KeepAliveMessage(KeepAliveMessage *p) {
 		// find send KeepAliveMessage ratId in my otherRatInfo table
 		// update other Rat info in my table
 		OtherRat *other = &it->second;
+		other->rat.playing = true;
 		other->rat.x = Loc(p->ratPosX);
 		other->rat.y = Loc(p->ratPosY);
 		other->rat.dir = Direction(p->ratDir);
@@ -1090,6 +1091,7 @@ void process_recv_KeepAliveMessage(KeepAliveMessage *p) {
 	} else {
 		MW_RatId other_ratId(p->ratId);
 		OtherRat other;
+		other.rat.playing = true;
 		other.rat.x = Loc(p->ratPosX);
 		other.rat.y = Loc(p->ratPosY);
 		other.rat.dir = Direction(p->ratDir);

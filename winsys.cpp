@@ -789,14 +789,6 @@ WriteScoreString(RatIndexType rat, char *ratName, int score)
 
 	sprintf(buf, "%d", score);
 
-	/*XClearArea(dpy, mwWindow, SCORE_X_ORIGIN,
-		   SCORE_Y_ORIGIN +
-		   rat.value() * (scoreFontInfo->max_bounds.ascent +
-			  scoreFontInfo->max_bounds.descent),
-		   SCORE_X_DIM,
-		   (scoreFontInfo->max_bounds.ascent +
-		    scoreFontInfo->max_bounds.descent),
-		   FALSE);*/
 	XDrawImageString(dpy, mwWindow, copyGC, SCORE_X_ORIGIN,
 			 SCORE_Y_ORIGIN +
 			 rat.value() * (scoreFontInfo->max_bounds.ascent +
