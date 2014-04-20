@@ -483,18 +483,20 @@ int recvPacket(int socket, char* payload_buf, int payload_buf_len, struct sockad
 }
 
 /* This is just for the sample version, rewrite your own if necessary */
-void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sockaddr *src_addr)
+void ConvertIncoming(Message *p, const char* buf)
 {
 	// receive packet header
-	unsigned char msgType = header_buf[0];
+	unsigned char msgType = buf[0];
 	unsigned char ratId[UUID_SIZE];
 	memset(ratId, 0, UUID_SIZE);
-	memcpy(ratId, header_buf + 2, UUID_SIZE);
+	memcpy(ratId, buf + 2, UUID_SIZE);
 	unsigned int msgId = 0; 
-	memcpy(&msgId, header_buf + 2 + UUID_SIZE, 4);
+	memcpy(&msgId, buf + 2 + UUID_SIZE, 4);
 
 	// ignore receving messages that sent by myself
 	bool isMsgSentByMe = isRatIdEquals(M->my_ratId.m_ratId, ratId);
+	if (isMsgSentByMe)
+		return
 
 	if (!isMsgSentByMe) {
 		printf("Recive Message Header\n");
@@ -507,24 +509,16 @@ void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sock
     switch (msgType) {
     	case JOIN:
     	{
-    		char payload_buf[21];
-	    	int cc = recvPacket(socket, payload_buf, 21, src_addr, isMsgSentByMe);
-	    	if (cc < 0 || isMsgSentByMe)
-	    		return;
-	    	else {
-	    		printf("Receive JoinMessage payload_buf length: %d\n", cc);
-	    		if (cc == 0) return;
-	    	}
-
-	    	unsigned char name_len = payload_buf[0];
+	    	unsigned char name_len = buf[HEADER_SIZE];
 	    	char name[NAMESIZE];
 	    	memset(name, 0, NAMESIZE);
-	    	memcpy(name, payload_buf + 1, (size_t)name_len);
+	    	memcpy(name, buf + HEADER_SIZE + 1, (size_t)name_len);
 	    	p = new JoinMessage(ratId, msgId, name_len, name);
 
 	    	recvMsgPrint(p);
     		break;
     	}
+    	/*
     	case JNRS:
     	{
     		char payload_buf[37];
@@ -627,7 +621,7 @@ void ConvertIncoming(Message *p, int socket, const char* header_buf, struct sock
     		memcpy(&missileSeqNum, payload_buf + UUID_SIZE, 4);
     		p = new HitResponseMessage(ratId, msgId, victimId, missileSeqNum);
     		break;
-    	}
+    	}*/
     	default:
     	break;
     }

@@ -641,15 +641,12 @@ NextEvent(MWEvent *event, int socket)
 	{
 	  socklen_t fromLen = sizeof(event->eventSource);
 	  int cc = 0;
-	  char header_buf[HEADER_SIZE];
-	  memset(header_buf, 0, HEADER_SIZE);
+	  char buf[256];
+	  memset(buf, 0, 256);
 
 	  event->eventType = EVENT_NETWORK;
 	  // receive package header from socket
-	  cc = recvfrom(socket, (char*)header_buf,
-			HEADER_SIZE, 0,
-		        (struct sockaddr *)&event->eventSource,
-			&fromLen);
+	  cc = recvfrom(socket, buf, sizeof(buf), 0,(struct sockaddr *)&event->eventSource,&fromLen);
 	  if (cc <= 0)
 	    {
 	      if (cc < 0 && errno != EINTR)
@@ -658,7 +655,7 @@ NextEvent(MWEvent *event, int socket)
 	    }
 	  if (fromLen != sizeof(struct sockaddr_in))
 	    continue;
-	  ConvertIncoming(event->eventDetail, socket, header_buf, (struct sockaddr *)&event->eventSource);
+	  ConvertIncoming(event->eventDetail, buf);
 	  return;
 	}
     }
