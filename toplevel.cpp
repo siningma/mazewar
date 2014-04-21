@@ -520,9 +520,9 @@ void ConvertIncoming(Message *p, const char* buf)
 	unsigned char ratId[UUID_SIZE];
 	memset(ratId, 0, UUID_SIZE);
 	memcpy(ratId, buf + 2, UUID_SIZE);
-	uint32_t msgId = 0; 
-	memcpy(&msgId, buf + 2 + UUID_SIZE, 4);
-	msgId = ntohl(msgId);
+	uint32_t msg_msgId = 0; 
+	memcpy(&msg_msgId, buf + 2 + UUID_SIZE, 4);
+	uint32_t msgId = ntohl(msg_msgId);
 
 	// ignore receving messages that sent by myself
 	bool isMsgSentByMe = isRatIdEquals(M->my_ratId.m_ratId, ratId);
@@ -623,9 +623,9 @@ void ConvertIncoming(Message *p, const char* buf)
     		unsigned char shooterId[UUID_SIZE];
     		memset(shooterId, 0, UUID_SIZE);
     		memcpy(shooterId, buf + HEADER_SIZE, UUID_SIZE);
-    		uint32_t missileSeqNum = 0;
-    		memcpy(&missileSeqNum, buf + HEADER_SIZE + UUID_SIZE, 4);
-    		missileSeqNum = ntohl(missileSeqNum);
+    		uint32_t msg_missileSeqNum = 0;
+    		memcpy(&msg_missileSeqNum, buf + HEADER_SIZE + UUID_SIZE, 4);
+    		uint32_t missileSeqNum = ntohl(msg_missileSeqNum);
     		p = new HitMessage(ratId, msgId, shooterId, missileSeqNum);
 
     		#ifdef DEBUG
@@ -638,12 +638,16 @@ void ConvertIncoming(Message *p, const char* buf)
     	}
     	case HTRS:
     	{
+    		// if I am out of hit phase, I do not care any hit response message
+    		if (M->myCurrPhaseState() != HIT_PHASE)
+    			return;
+
     		unsigned char victimId[UUID_SIZE];
     		memset(victimId, 0, UUID_SIZE);
     		memcpy(victimId, buf + HEADER_SIZE, UUID_SIZE);
-    		uint32_t missileSeqNum = 0;
-    		memcpy(&missileSeqNum, buf + HEADER_SIZE + UUID_SIZE, 4);
-    		missileSeqNum = ntohl(missileSeqNum);
+    		uint32_t msg_missileSeqNum = 0;
+    		memcpy(&msg_missileSeqNum, buf + HEADER_SIZE + UUID_SIZE, 4);
+    		uint32_t missileSeqNum = ntohl(msg_missileSeqNum);
     		p = new HitResponseMessage(ratId, msgId, victimId, missileSeqNum);
 
     		#ifdef DEBUG
