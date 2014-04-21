@@ -236,13 +236,15 @@ public:
 	}
 };
 
-typedef struct {
+typedef struct _OtherRat {
 	char ratName[NAMESIZE];
 	RatIndexType idx;
 	Rat rat;
 	Missile missile;
 	int score;
 	double lastKeepAliveRecvTime;
+
+	_OtherRat(): idx(1), score(0) {} 
 }	OtherRat;
 
 typedef struct {

@@ -1183,11 +1183,7 @@ void process_recv_LeaveMessage(LeaveMessage *p) {
 		for (; i < MAX_RATS - 1 && M->rat(i).playing == TRUE; i++) {
 			M->ratIs(M->rat(i + 1), i);
 		}
-		M->rat(i).playing = FALSE;
-		M->rat(i).x = 0;
-		M->rat(i).y = 0;
-		M->rat(i).dir = 0;
-
+		memset(&M->rat(i), 0, sizeof(Rat));
 
 		M->myCurrOtherRatIdxIs(M->myCurrOtherRatIdx().value() - 1);	
 		M->otherRatInfoMap.erase(other_ratId);
