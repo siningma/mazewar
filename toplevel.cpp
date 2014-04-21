@@ -400,7 +400,12 @@ void shoot()
 	M->missileYLocIs(Loc(MY_Y_LOC));
 	M->missileDirIs(Direction(MY_DIR));
 
-	showMissile(MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC, 0, 0, 0, false);
+	switch (MY_MISSILE_DIR) {
+	case NORTH:	showMissile(MY_MISSILE_X_LOC + 1, MY_MISSILE_Y_LOC, 0, 0, 0, false); break;
+	case SOUTH:	showMissile(MY_MISSILE_X_LOC - 1, MY_MISSILE_Y_LOC, 0, 0, 0, false); break;
+	case EAST:	showMissile(MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC + 1, 0, 0, 0, false); break;
+	case WEST:	showMissile(MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC - 1, 0, 0, 0, false); break;
+	}
 	updateView = TRUE;
 	// must update here
 	lastMissilePosUpdateTime = getCurrentTime();
@@ -994,7 +999,6 @@ void manageMissiles()
 			// show missile if not hit the wall
 			showMissile(MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC, 0, prevMissileXLoc, prevMissileYLoc, true);
 			updateView = TRUE;
-			DoViewUpdate();
 		}
 		lastMissilePosUpdateTime = getCurrentTime();
 	} 
