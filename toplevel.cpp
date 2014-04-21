@@ -1189,9 +1189,9 @@ void checkAndResolveRatPosConflict(int otherRatPosX, int otherRatPosY, unsigned 
 }
 
 void resolveRatPosConflictPrint() {
-	printf("Rat Position Conflict. RatId: ");
+	printf("Rat Position Conflict. New Rat PosX: %u, PosY: %u, RatId: ", MY_X_LOC, MY_Y_LOC);
 	printRatId(M->my_ratId.m_ratId);
-	printf("is set to new PosX: %u, PosY: %u\n\n", MY_X_LOC, MY_Y_LOC);
+	printf("\n");
 }
 
 void process_recv_LeaveMessage(LeaveMessage *p) {
