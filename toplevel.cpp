@@ -994,6 +994,7 @@ void manageMissiles()
 			// show missile if not hit the wall
 			showMissile(MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC, 0, prevMissileXLoc, prevMissileYLoc, true);
 			updateView = TRUE;
+			DoViewUpdate();
 		}
 		lastMissilePosUpdateTime = getCurrentTime();
 	} 
