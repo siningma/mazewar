@@ -474,7 +474,7 @@ char *GetRatName(RatIndexType ratId)
 {
   if (ratId.value() ==	M->myRatId().value())
     { return(M->myName_); }
-  else { return ("Dummy"); }
+  else { return ""; }
 }
 
 /* ----------------------------------------------------------------------- */
@@ -1217,6 +1217,11 @@ void process_recv_HitMessage(HitMessage *p) {
 			sendHitResponseMessage(p->ratId, p->missileSeqNum);
 
 			// clear my missile state data
+			clearSquare(MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC);
+			if (MY_MISSILE_X_LOC == MY_X_LOC && MY_MISSILE_Y_LOC == MY_Y_LOC)
+				ShowPosition(MY_X_LOC, MY_Y_LOC, MY_DIR);
+			updateView = TRUE;
+
 			M->missileExistIs(false);
 			M->missileXLocIs(0);
 			M->missileYLocIs(0);
