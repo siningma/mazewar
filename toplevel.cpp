@@ -1218,10 +1218,18 @@ void process_recv_HitMessage(HitMessage *p) {
 			M->hitVictimMap.insert(std::make_pair(p->missileSeqNum, victimRat));
 			sendHitResponseMessage(p->ratId, p->missileSeqNum);
 
-			// clear my missile state data
+			// clear Hit Rat position in 3D view
+			/*map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.find(p->ratId);
+			if (it != M->otherRatInfoMap.end()) {
+				Rat hitRat = M->rat(it->second.idx);
+				hitRat.
+			}*/
+
+			// clear my missile state variables
 			clearSquare(MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC);
 			if (MY_MISSILE_X_LOC == MY_X_LOC && MY_MISSILE_Y_LOC == MY_Y_LOC)
 				ShowPosition(MY_X_LOC, MY_Y_LOC, MY_DIR);
+
 			updateView = TRUE;
 
 			M->missileExistIs(false);

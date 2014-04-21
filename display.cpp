@@ -135,9 +135,9 @@ ShowView(Loc x, Loc y, Direction dir)
 		TokenVisible(ratIndex);
 		if (ratLook->visible == TRUE)
 			XORToken(ratIndex);
-		// may be here update error
+	
 		if (ratLook->visible != oldVisible)
-			UpdateScoreCard(ratIndex);
+			// UpdateScoreCard(ratIndex);
 	}
 }
 
