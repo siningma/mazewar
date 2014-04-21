@@ -1004,7 +1004,6 @@ void manageMissiles()
 			// show missile if not hit the wall
 			showMissile(MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC, 0, prevMissileXLoc, prevMissileYLoc, true);
 			updateView = TRUE;
-			DoViewUpdate();
 		}
 		lastMissilePosUpdateTime = getCurrentTime();
 	} 
@@ -1117,6 +1116,14 @@ void process_recv_KeepAliveMessage(KeepAliveMessage *p) {
 		// find send KeepAliveMessage ratId in my otherRatInfo table
 		// update other Rat info in my table
 		OtherRat *other = &it->second;
+		if (other->rat.playing == false) {
+			other->idx = M->myCurrOtherRatIdx();
+			if (other->idx == MAX_RATS) 
+				MWError("Cannot have more player, reach maximum");
+
+			M->myCurrOtherRatIdxIs(M->myCurrOtherRatIdx() + 1);
+		}
+
 		other->rat.playing = true;
 		other->rat.x = Loc(p->ratPosX);
 		other->rat.y = Loc(p->ratPosY);
@@ -1126,10 +1133,19 @@ void process_recv_KeepAliveMessage(KeepAliveMessage *p) {
 		other->missile.y = Loc(p->missilePosY);
 		other->missile.seqNum = p->missileSeqNum;
 		other->score = p->score;
+		M->ratIs(other->rat, other->idx);
 		other->lastKeepAliveRecvTime = getCurrentTime();
 	} else {
 		MW_RatId other_ratId(p->ratId);
 		OtherRat other;
+		if (other.rat.playing == false) {
+			other.idx = M->myCurrOtherRatIdx();
+			if (other.idx == MAX_RATS)
+				MWError("Cannot have more player, reach maximum");
+
+			M->myCurrOtherRatIdxIs(M->myCurrOtherRatIdx() + 1);
+		}
+
 		other.rat.playing = true;
 		other.rat.x = Loc(p->ratPosX);
 		other.rat.y = Loc(p->ratPosY);
@@ -1140,6 +1156,7 @@ void process_recv_KeepAliveMessage(KeepAliveMessage *p) {
 		other.missile.seqNum = p->missileSeqNum;
 		other.score = p->score;
 		other.lastKeepAliveRecvTime = getCurrentTime();
+		M->ratIs(other.rat, other.idx);
 		M->otherRatInfoMap.insert(std::make_pair(other_ratId, other));
 	}
 }
@@ -1162,6 +1179,17 @@ void process_recv_LeaveMessage(LeaveMessage *p) {
 		printRatId(it->first.m_ratId);
 
 		MW_RatId other_ratId(p->ratId);
+		int i = it->second.idx;
+		for (; i < MAX_RATS - 1 && M->rat(i).playing == TRUE; i++) {
+			M->ratIs(M->rat(i + 1), i);
+		}
+		M->rat(i).playing = FALSE;
+		M->rat(i).x = 0;
+		M->rat(i).y = 0;
+		M->rat(i).dir = 0;
+
+
+		M->myCurrOtherRatIdxIs(M->myCurrOtherRatIdx() - 1);	
 		M->otherRatInfoMap.erase(other_ratId);
 		//printf("After remove otherRatInfoMap size: %d\n", (uint32_t)M->otherRatInfoMap.size());
 	}

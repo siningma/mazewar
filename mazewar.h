@@ -238,6 +238,7 @@ public:
 
 typedef struct {
 	char ratName[NAMESIZE];
+	RatIndexType idx;
 	Rat rat;
 	Missile missile;
 	int score;
@@ -300,6 +301,8 @@ class MazewarInstance :  public Fwk::NamedInterface  {
     void ratIs(Rat rat, RatIndexType num) { this->mazeRats_[num.value()] = rat; }
     inline unsigned char myCurrPhaseState() const { return my_currPhaseState; }
     void myCurrPhaseStateIs(unsigned char my_currPhaseState) { this->my_currPhaseState = my_currPhaseState; }
+    inline RatIndexType myCurrOtherRatIdx() const { return this->currOtherRatIdx; }
+    void myCurrOtherRatIdxIs(RatIndexType idx) { return this->currOtherRatIdx = idx; }
 
     inline bool missileExist() const { return this->my_missile.exist; } 
     void missileExistIs(bool exist) { this->my_missile.exist = exist; }
@@ -327,7 +330,7 @@ class MazewarInstance :  public Fwk::NamedInterface  {
     std::map<uint32_t, VictimRat> hitVictimMap;
 protected:
 	MazewarInstance(string s) : Fwk::NamedInterface(s), dir_(0), dirPeek_(0), myRatId_(0), score_(0),
-		xloc_(1), yloc_(3), xPeek_(0), yPeek_(0), my_currPhaseState(JOIN_PHASE), hitMissileSeqNum(-1) {
+		xloc_(1), yloc_(3), xPeek_(0), yPeek_(0), my_currPhaseState(JOIN_PHASE), hitMissileSeqNum(0), currOtherRatIdx(1) {
 		myAddr_ = (Sockaddr*)malloc(sizeof(Sockaddr));
 		if(!myAddr_) {
 			printf("Error allocating sockaddr variable");
@@ -350,6 +353,7 @@ protected:
     Loc yPeek_;
     int active_;
     unsigned char my_currPhaseState;
+    RatIndexType currOtherRatIdx;
 };
 extern MazewarInstance::Ptr M;
 
