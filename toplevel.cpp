@@ -1171,7 +1171,7 @@ void checkAndResolveRatPosConflict(int otherRatPosX, int otherRatPosY, unsigned 
 			if (MY_X_LOC + 1 < MAZEXMAX && !M->maze_[MY_X_LOC + 1][MY_Y_LOC]) {
 				M->xlocIs(MY_X_LOC + 1);
 				M->ylocIs(MY_Y_LOC);
-				resolveRatPosConflict();
+				resolveRatPosConflictPrint();
 				return;
 			}
 			if (MY_X_LOC - 1 >= 0 && !M->maze_[MY_X_LOC - 1][MY_Y_LOC]) { // check SOUTH cell
