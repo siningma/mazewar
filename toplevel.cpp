@@ -1234,11 +1234,11 @@ void checkKeepAliveTimeout() {
 	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.begin(); it != M->otherRatInfoMap.end();) {
 		if((getCurrentTime() - it->second.lastKeepAliveRecvTime) >= KEEPALIVE_TIMEOUT) {
 			// clear all other rats scores in the maze
-			int i = 1;
-			for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.begin(); it != M->otherRatInfoMap.end(); ++it) {
-				if (strlen(it->second.ratName) > 0) {
-					ClearScoreLine(MY_RAT_INDEX + i);
-					++i;
+			int j = 1;
+			for (map<MW_RatId, OtherRat>::iterator iter = M->otherRatInfoMap.begin(); iter != M->otherRatInfoMap.end(); ++iter) {
+				if (strlen(iter->second.ratName) > 0) {
+					ClearScoreLine(MY_RAT_INDEX + j);
+					++j;
 				}
 			}
 
