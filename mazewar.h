@@ -306,9 +306,6 @@ class MazewarInstance :  public Fwk::NamedInterface  {
     inline RatIndexType myCurrOtherRatIdx() const { return this->currOtherRatIdx; }
     void myCurrOtherRatIdxIs(RatIndexType idx) { this->currOtherRatIdx = idx; }
 
-    inline uint32_t myCurrRecvMsgId() const { return currRecvMsgId; }
-    void myCurrRecvMsgIdIs(uint32_t currRecvMsgId) { this->currRecvMsgId = currRecvMsgId; }
-
     inline bool missileExist() const { return this->my_missile.exist; } 
     void missileExistIs(bool exist) { this->my_missile.exist = exist; }
     inline Loc missileXLoc() const { return this->my_missile.x; } 
@@ -335,7 +332,7 @@ class MazewarInstance :  public Fwk::NamedInterface  {
     std::map<uint32_t, VictimRat> hitVictimMap;
 protected:
 	MazewarInstance(string s) : Fwk::NamedInterface(s), dir_(0), dirPeek_(0), myRatId_(0), score_(0),
-		xloc_(1), yloc_(3), xPeek_(0), yPeek_(0), my_currPhaseState(JOIN_PHASE), hitMissileSeqNum(0), currOtherRatIdx(1), currRecvMsgId(0) {
+		xloc_(1), yloc_(3), xPeek_(0), yPeek_(0), my_currPhaseState(JOIN_PHASE), hitMissileSeqNum(0), currOtherRatIdx(1) {
 		myAddr_ = (Sockaddr*)malloc(sizeof(Sockaddr));
 		if(!myAddr_) {
 			printf("Error allocating sockaddr variable");
@@ -357,7 +354,6 @@ protected:
     Loc xPeek_;
     Loc yPeek_;
     int active_;
-    uint32_t currRecvMsgId;
     unsigned char my_currPhaseState;
     RatIndexType currOtherRatIdx;	// this is the index in mazeRats_ array. this means that idx that will be use for next rat
 };

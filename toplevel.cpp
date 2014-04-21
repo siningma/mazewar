@@ -506,11 +506,6 @@ void ConvertIncoming(Message *p, const char* buf)
 	bool isMsgSentByMe = isRatIdEquals(M->my_ratId.m_ratId, ratId);
 	if (isMsgSentByMe)
 		return;
-	if (msgId < M->myCurrRecvMsgId())
-		return;
-
-	M->myCurrRecvMsgIdIs(msgId);
-	// printf("Receive msgId: %u, myCurrRecvMsgId: %u\n", msgId, M->myCurrRecvMsgId());
 	
 	/*
 		printf("Recive Message Header\n");
@@ -1050,11 +1045,13 @@ void process_recv_JoinMessage(JoinMessage *p) {
 	if (it != M->otherRatInfoMap.end()) {
 		// if find JoinMessage ratId in my otherRatInfo table
 		// update the player's ratName if ratName changes
-		memset(it->second.ratName, 0, NAMESIZE);
-		memcpy(it->second.ratName, p->name, (size_t)p->len);
+		if (strcmp(it->second.ratName, p->name)) {
+			memset(it->second.ratName, 0, NAMESIZE);
+			memcpy(it->second.ratName, p->name, (size_t)p->len);
 
-		printf("Receive JoinMessage and update ratName: %s, RatId: ", it->second.ratName);
-		printRatId(it->first.m_ratId);
+			printf("Receive JoinMessage and update ratName: %s, RatId: ", it->second.ratName);
+			printRatId(it->first.m_ratId);
+		}
 	} else {
 		MW_RatId other_ratId(p->ratId);
 		OtherRat other;
@@ -1078,11 +1075,13 @@ void process_recv_JoinResponseMessage(JoinResponseMessage *p) {
 		if (it != M->otherRatInfoMap.end()) {
 			// if find JoinReponseMessage ratId in my otherRatInfo table
 			// update the player's ratName if ratName changes
-			memset(it->second.ratName, 0, NAMESIZE);
-			memcpy(it->second.ratName, p->name, (size_t)p->len);
+			if (strcmp(it->second.ratName, p->name)) {
+				memset(it->second.ratName, 0, NAMESIZE);
+				memcpy(it->second.ratName, p->name, (size_t)p->len);
 
-			printf("Receive JoinResponseMessage and update ratName: %s, RatId: ", it->second.ratName);
-			printRatId(it->first.m_ratId);
+				printf("Receive JoinResponseMessage and update ratName: %s, RatId: ", it->second.ratName);
+				printRatId(it->first.m_ratId);
+			}
 		} else {
 			MW_RatId other_ratId(p->ratId);
 			OtherRat other;
