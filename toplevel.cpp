@@ -705,7 +705,8 @@ void sendLeaveMessage() {
 	memset(msg_buf, 0, HEADER_SIZE);
 	msg_buf[0] = leaveMsg.msgType;
 	memcpy(msg_buf + 2, leaveMsg.ratId, UUID_SIZE);
-	memcpy(msg_buf + 2 + UUID_SIZE, &htonl(leaveMsg.msgId), 4);
+	uint32_t msg_msgId = htonl(leaveMsg.msgId);
+	memcpy(msg_buf + 2 + UUID_SIZE, &msg_msgId, 4);
 
 	sendto(M->theSocket(), msg_buf, HEADER_SIZE, 0, 
 		(struct sockaddr *)&groupAddr, sizeof(Sockaddr));
@@ -721,7 +722,8 @@ void sendJoinMessage() {
 	memset(msg_buf, 0, HEADER_SIZE + 21);
 	msg_buf[0] = joinMsg.msgType;
 	memcpy(&msg_buf[2], joinMsg.ratId, UUID_SIZE);
-	memcpy(&msg_buf[2 + UUID_SIZE], &htonl(joinMsg.msgId), 4);
+	uint32_t msg_msgId = htonl(joinMsg.msgId);
+	memcpy(&msg_buf[2 + UUID_SIZE], &msg_msgId, 4);
 	msg_buf[HEADER_SIZE] = joinMsg.len;
 	memcpy(&msg_buf[HEADER_SIZE + 1], joinMsg.name, (size_t)joinMsg.len);
 
@@ -739,7 +741,8 @@ void sendJoinResponseMessage(unsigned char *senderId) {
 	memset(msg_buf, 0, HEADER_SIZE + 37);
 	memcpy(msg_buf, &joinResponseMsg.msgType, 1);
 	memcpy(msg_buf + 2, joinResponseMsg.ratId, UUID_SIZE);
-	memcpy(msg_buf + 2 + UUID_SIZE, &htonl(joinResponseMsg.msgId), 4);
+	uint32_t msg_msgId = htonl(joinResponseMsg.msgId);
+	memcpy(msg_buf + 2 + UUID_SIZE, &msg_msgId, 4);
 	memcpy(msg_buf + HEADER_SIZE, joinResponseMsg.senderId, UUID_SIZE);
 	memcpy(msg_buf + HEADER_SIZE + UUID_SIZE, &joinResponseMsg.len, 1);
 	memcpy(msg_buf + HEADER_SIZE + UUID_SIZE + 1, joinResponseMsg.name, (size_t)joinResponseMsg.len);
@@ -758,9 +761,11 @@ void sendHitMessage(unsigned char *shooterId, uint32_t other_missileSeqNum) {
 	memset(msg_buf, 0, HEADER_SIZE + 20);
 	memcpy(msg_buf, &hitMsg.msgType, 1);
 	memcpy(msg_buf + 2, hitMsg.ratId, UUID_SIZE);
-	memcpy(msg_buf + 2 + UUID_SIZE, &htonl(hitMsg.msgId), 4);
+	uint32_t msg_msgId = htonl(hitMsg.msgId);
+	memcpy(msg_buf + 2 + UUID_SIZE, &msg_msgId, 4);
 	memcpy(msg_buf + HEADER_SIZE, hitMsg.shooterId, UUID_SIZE);
-	memcpy(msg_buf + HEADER_SIZE + UUID_SIZE, &htonl(hitMsg.missileSeqNum), 4);
+	uint32_t msg_missileSeqNum = htonl(hitMsg.missileSeqNum);
+	memcpy(msg_buf + HEADER_SIZE + UUID_SIZE, &msg_missileSeqNum, 4);
 
 	sendto(M->theSocket(), msg_buf, HEADER_SIZE + 20, 0, 
 		(struct sockaddr *)&groupAddr, sizeof(Sockaddr));
@@ -776,9 +781,11 @@ void sendHitResponseMessage(unsigned char *victimId, uint32_t missileSeqNum) {
 	memset(msg_buf, 0, HEADER_SIZE + 20);
 	memcpy(msg_buf, &hitResponseMsg.msgType, 1);
 	memcpy(msg_buf + 2, hitResponseMsg.ratId, UUID_SIZE);
-	memcpy(msg_buf + 2 + UUID_SIZE, &htonl(hitResponseMsg.msgId), 4);
+	uint32_t msg_msgId = htonl(hitResponseMsg.msgId);
+	memcpy(msg_buf + 2 + UUID_SIZE, &msg_msgId, 4);
 	memcpy(msg_buf + HEADER_SIZE, hitResponseMsg.victimId, UUID_SIZE);
-	memcpy(msg_buf + HEADER_SIZE + UUID_SIZE, &htonl(hitResponseMsg.missileSeqNum), 4);
+	uint32_t msg_missileSeqNum = htonl(hitResponseMsg.missileSeqNum);
+	memcpy(msg_buf + HEADER_SIZE + UUID_SIZE, &msg_missileSeqNum, 4);
 
 	sendto(M->theSocket(), msg_buf, HEADER_SIZE + 20, 0, 
 		(struct sockaddr *)&groupAddr, sizeof(Sockaddr));
