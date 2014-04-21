@@ -959,6 +959,9 @@ void manageMissiles()
 	if (MY_MISSILE_EXIST == true) {
 		int step = (getCurrentTime() - lastMissilePosUpdateTime) / MISSILE_UPDATE_INTERVAL;
 		for (int i = 0; step > 0 && i < step; i++) {
+			Loc prevMissileXLoc = MY_MISSILE_X_LOC;
+			Loc prevMissileYLoc = MY_MISSILE_Y_LOC;
+			
 			switch(MY_MISSILE_DIR) {
 				case NORTH:	M->missileXLocIs(Loc(MY_MISSILE_X_LOC + 1)); break;
 				case SOUTH:	M->missileXLocIs(Loc(MY_MISSILE_X_LOC - 1)); break;
@@ -978,6 +981,8 @@ void manageMissiles()
 			printf("Exist: %d, X: %u, Y: %u, dir: %u, SeqNum: %d\n\n", MY_MISSILE_EXIST, MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC, MY_MISSILE_DIR, MY_MISSILE_SEQNUM);
 			#endif
 
+			showMissile(MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC, 0, prevMissileXLoc, prevMissileYLoc, true);
+			updateView = TRUE;
 			sendKeepAliveMessage();
 			lastKeepAliveMsgSendTime = getCurrentTime();
 			// missile hit the wall
