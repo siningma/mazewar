@@ -1118,10 +1118,10 @@ void process_recv_KeepAliveMessage(KeepAliveMessage *p) {
 		OtherRat *other = &it->second;
 		if (other->rat.playing == false) {
 			other->idx = M->myCurrOtherRatIdx();
-			if (other->idx == MAX_RATS) 
+			if (other->idx.value() == MAX_RATS) 
 				MWError("Cannot have more player, reach maximum");
 
-			M->myCurrOtherRatIdxIs(M->myCurrOtherRatIdx() + 1);
+			M->myCurrOtherRatIdxIs(M->myCurrOtherRatIdx().value() + 1);
 		}
 
 		other->rat.playing = true;
@@ -1140,10 +1140,10 @@ void process_recv_KeepAliveMessage(KeepAliveMessage *p) {
 		OtherRat other;
 		if (other.rat.playing == false) {
 			other.idx = M->myCurrOtherRatIdx();
-			if (other.idx == MAX_RATS)
+			if (other.idx.value() == MAX_RATS)
 				MWError("Cannot have more player, reach maximum");
 
-			M->myCurrOtherRatIdxIs(M->myCurrOtherRatIdx() + 1);
+			M->myCurrOtherRatIdxIs(M->myCurrOtherRatIdx().value() + 1);
 		}
 
 		other.rat.playing = true;
@@ -1179,7 +1179,7 @@ void process_recv_LeaveMessage(LeaveMessage *p) {
 		printRatId(it->first.m_ratId);
 
 		MW_RatId other_ratId(p->ratId);
-		int i = it->second.idx;
+		int i = it->second.idx.value();
 		for (; i < MAX_RATS - 1 && M->rat(i).playing == TRUE; i++) {
 			M->ratIs(M->rat(i + 1), i);
 		}
@@ -1189,7 +1189,7 @@ void process_recv_LeaveMessage(LeaveMessage *p) {
 		M->rat(i).dir = 0;
 
 
-		M->myCurrOtherRatIdxIs(M->myCurrOtherRatIdx() - 1);	
+		M->myCurrOtherRatIdxIs(M->myCurrOtherRatIdx().value() - 1);	
 		M->otherRatInfoMap.erase(other_ratId);
 		//printf("After remove otherRatInfoMap size: %d\n", (uint32_t)M->otherRatInfoMap.size());
 	}
