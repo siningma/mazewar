@@ -1163,7 +1163,7 @@ void process_recv_KeepAliveMessage(KeepAliveMessage *p) {
 void checkAndResolveRatPosConflict(int otherRatPosX, int otherRatPosY, unsigned char* other_ratId) {
 	if (MY_X_LOC == otherRatPosX && MY_Y_LOC == otherRatPosY) {
 		// there is position conflict, move rat with smaller ratId
-		if (memcmp(M->my_ratId.m_ratId, other_ratId) < 0) {	// check NORTH cell
+		if (memcmp(M->my_ratId.m_ratId, other_ratId, UUID_SIZE) < 0) {	// check NORTH cell
 			if (MY_X_LOC + 1 < MAZEXMAX && !M->maze_[MY_X_LOC + 1][MY_Y_LOC]) {
 				M->xlocIs(MY_X_LOC + 1);
 				M->ylocIs(MY_Y_LOC);
