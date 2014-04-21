@@ -53,6 +53,7 @@ int main(int argc, char *argv[])
     if (argc > 1) {
     	ratName = (char*)malloc((unsigned) (strlen(argv[1]) + 1));
     	ratName[strlen(argv[1])] = 0;
+    	strncpy(ratName, argv[1], strlen(argv[1]));
     	printf("Welcome to CS244B MazeWar!\n");
     } else {
 	    getName("Welcome to CS244B MazeWar!\n\nYour Name", &ratName);
