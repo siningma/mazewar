@@ -1164,6 +1164,7 @@ void process_recv_KeepAliveMessage(KeepAliveMessage *p) {
 		M->ratIs(other.rat, other.idx);
 		M->otherRatInfoMap.insert(std::make_pair(other_ratId, other));
 	}
+	updateView = TRUE;
 }
 
 void process_recv_LeaveMessage(LeaveMessage *p) {
