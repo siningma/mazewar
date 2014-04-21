@@ -304,7 +304,7 @@ class MazewarInstance :  public Fwk::NamedInterface  {
     inline unsigned char myCurrPhaseState() const { return my_currPhaseState; }
     void myCurrPhaseStateIs(unsigned char my_currPhaseState) { this->my_currPhaseState = my_currPhaseState; }
     inline RatIndexType myCurrOtherRatIdx() const { return this->currOtherRatIdx; }
-    void myCurrOtherRatIdxIs(RatIndexType idx) { return this->currOtherRatIdx = idx; }
+    void myCurrOtherRatIdxIs(RatIndexType idx) { this->currOtherRatIdx = idx; }
 
     inline bool missileExist() const { return this->my_missile.exist; } 
     void missileExistIs(bool exist) { this->my_missile.exist = exist; }
