@@ -1217,16 +1217,14 @@ void process_recv_LeaveMessage(LeaveMessage *p) {
 		printRatId(it->first.m_ratId);
 
 		// need to clear myCurrOtherRatIdx, so next other rat can reuse this	
-		int i = it->second.idx.value();
-		for (; i < MAX_RATS - 1 && M->rat(i).playing == TRUE; i++) {
+		ClearRatPosition(it->second.idx.value());
+		for (int i = it->second.idx.value(); i < MAX_RATS - 1 && M->rat(i + 1).playing == TRUE; i++) {
 			M->ratIs(M->rat(i + 1), i);
 		}
 
-		MW_RatId other_ratId(p->ratId);
-		ClearRatPosition(M->myCurrOtherRatIdx());
+		M->otherRatInfoMap.erase(p->ratId);
+		printf("After remove otherRatInfoMap size: %d\n", (uint32_t)M->otherRatInfoMap.size());
 		M->myCurrOtherRatIdxIs(M->myCurrOtherRatIdx().value() - 1);	
-		M->otherRatInfoMap.erase(other_ratId);
-		//printf("After remove otherRatInfoMap size: %d\n", (uint32_t)M->otherRatInfoMap.size());
 	}
 }
 
@@ -1246,12 +1244,11 @@ void checkKeepAliveTimeout() {
 			printRatId(it->first.m_ratId);
 
 			// need to clear myCurrOtherRatIdx, so next other rat can reuse this	
-			int i = it->second.idx.value();
-			for (; i < MAX_RATS - 1 && M->rat(i).playing == TRUE; i++) {
+			ClearRatPosition(it->second.idx.value());
+			for (int i = it->second.idx.value(); i < MAX_RATS - 1 && M->rat(i + 1).playing == TRUE; i++) {
 				M->ratIs(M->rat(i + 1), i);
 			}
 
-			ClearRatPosition(M->myCurrOtherRatIdx());
 			M->myCurrOtherRatIdxIs(M->myCurrOtherRatIdx().value() - 1);	
 			M->otherRatInfoMap.erase(it++);
 		} else
