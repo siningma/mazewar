@@ -971,8 +971,11 @@ void manageMissiles()
 			lastKeepAliveMsgSendTime = getCurrentTime();
 			// missile hit the wall
 			if (M->maze_[MY_MISSILE_X_LOC][MY_MISSILE_Y_LOC] || MY_MISSILE_EXIST == false) {
-				printf("My missile hit the wall. missilePosX: %u, missilePosY: %u\n", MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC);
-				clearSquare(prevMissileXLoc, prevMissileYLoc);
+				printf("My missile: %u hits the wall. missilePosX: %u, missilePosY: %u\n", MY_MISSILE_SEQNUM, MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC);
+				if (prevMissileXLoc.value() == 0 && prevMissileYLoc.value() == 0) {}
+				else
+					clearSquare(prevMissileXLoc, prevMissileYLoc);
+
 				if (prevMissileXLoc == MY_X_LOC && prevMissileYLoc == MY_Y_LOC)
 					ShowPosition(MY_X_LOC, MY_Y_LOC, MY_DIR);
 				updateView = TRUE;
@@ -1273,13 +1276,6 @@ void process_recv_HitMessage(HitMessage *p) {
 
 			M->hitVictimMap.insert(std::make_pair(p->missileSeqNum, victimRat));
 			sendHitResponseMessage(p->ratId, p->missileSeqNum);
-
-			// clear Hit Rat position in 3D view
-			/*map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.find(p->ratId);
-			if (it != M->otherRatInfoMap.end()) {
-				Rat hitRat = M->rat(it->second.idx);
-				hitRat.
-			}*/
 
 			// clear my missile state variables
 			clearSquare(MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC);
