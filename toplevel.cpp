@@ -50,7 +50,6 @@ int main(int argc, char *argv[])
     signal(SIGINT, quit);
     signal(SIGTERM, quit);
 
-    printf("argc: %d\n", argc);
     if (argc > 1) {
     	ratName = (char*)malloc((unsigned) (strlen(argv[1]) + 1));
     	ratName[strlen(argv[1])] = 0;
@@ -62,10 +61,9 @@ int main(int argc, char *argv[])
 
     M = MazewarInstance::mazewarInstanceNew(string(ratName));
     MazewarInstance* a = M.ptr();
+    memset(M->myName_, 0, NAMESIZE);
     strncpy(M->myName_, ratName, NAMESIZE);
     free(ratName);
-
-    myStatusPrint();
 
     MazeInit(argc, argv);
 
@@ -80,7 +78,8 @@ int main(int argc, char *argv[])
     printf("My RatName: %s\n", M->myName_);
 	printf("My RatId: ");
 	printRatId(M->my_ratId.m_ratId);
-    printf("%d X LOC, %d Y LOC, %d Dir\n", MY_X_LOC, MY_Y_LOC, MY_DIR);
+
+    myStatusPrint();
 
     /* So you can see what a Rat is supposed to look like, we create
     one rat in the single player mode Mazewar.
