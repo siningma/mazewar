@@ -701,7 +701,7 @@ void sendLeaveMessage() {
 
 void sendJoinMessage() {
 	JoinMessage joinMsg(M->my_ratId.m_ratId, getMessageId(), strlen(M->myName_), M->myName_);
-	#ifdef DEBUG
+	#ifdef _DEBUG_
 	sendMsgPrint(&joinMsg);
 	#endif
 
@@ -720,7 +720,7 @@ void sendJoinMessage() {
 
 void sendJoinResponseMessage(unsigned char *senderId) {
 	JoinResponseMessage joinResponseMsg(M->my_ratId.m_ratId, getMessageId(), strlen(M->myName_), M->myName_, senderId);
-	#ifdef DEBUG
+	#ifdef _DEBUG_
 	sendMsgPrint(&joinResponseMsg);
 	#endif
 
