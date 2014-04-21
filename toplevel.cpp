@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
     signal(SIGINT, quit);
     signal(SIGTERM, quit);
 
-    if (argc > 1) {
+    if (argc == 5) {
     	ratName = (char*)malloc((unsigned) (strlen(argv[1]) + 1));
     	ratName[strlen(argv[1])] = 0;
     	strncpy(ratName, argv[1], strlen(argv[1]));
@@ -68,12 +68,12 @@ int main(int argc, char *argv[])
 
     MazeInit(argc, argv);
 
-    if (argc == 1)
-    	NewPosition(M);
-    else {
+    if (argc == 5)
     	M->xlocIs(atoi(argv[2]));
 		M->ylocIs(atoi(argv[3]));
 		M->dirIs(atoi(argv[4]));
+    else {
+		NewPosition(M);
     }
 
     printf("My RatName: %s\n", M->myName_);
@@ -186,14 +186,7 @@ play(void)
 		}
 
 		// check if there is any other player has not send any KeepAliveMessage for more than 10 seconds
-		for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.begin(); it != M->otherRatInfoMap.end();) {
-			if((getCurrentTime() - it->second.lastKeepAliveRecvTime) >= KEEPALIVE_TIMEOUT) {
-				printf("No KeepAliveMessage Received for more than 10 seconds.\nRemove ratId: ");
-				printRatId(it->first.m_ratId);
-				M->otherRatInfoMap.erase(it++);
-			} else
-				it++;	
-		}
+		checkKeepAliveTimeout();
 
 		// remove one entry 5s after receiving HitMessage
 		for (map<uint32_t, VictimRat>::iterator it = M->hitVictimMap.begin(); it != M->hitVictimMap.end();) {
@@ -1207,7 +1200,7 @@ void resolveRatPosConflictPrint() {
 }
 
 void process_recv_LeaveMessage(LeaveMessage *p) {
-	// clear all other rats scores in the screen
+	// clear all other rats scores in the maze
 	int i = 1;
 	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.begin(); it != M->otherRatInfoMap.end(); ++it) {
 		if (strlen(it->second.ratName) > 0) {
@@ -1234,6 +1227,36 @@ void process_recv_LeaveMessage(LeaveMessage *p) {
 		M->myCurrOtherRatIdxIs(M->myCurrOtherRatIdx().value() - 1);	
 		M->otherRatInfoMap.erase(other_ratId);
 		//printf("After remove otherRatInfoMap size: %d\n", (uint32_t)M->otherRatInfoMap.size());
+	}
+}
+
+void checkKeepAliveTimeout() {
+	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.begin(); it != M->otherRatInfoMap.end();) {
+		if((getCurrentTime() - it->second.lastKeepAliveRecvTime) >= KEEPALIVE_TIMEOUT) {
+			// clear all other rats scores in the maze
+			int i = 1;
+			for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.begin(); it != M->otherRatInfoMap.end(); ++it) {
+				if (strlen(it->second.ratName) > 0) {
+					ClearScoreLine(MY_RAT_INDEX + i);
+					++i;
+				}
+			}
+
+			printf("No KeepAliveMessage Received for more than 10 seconds.\nRemove ratId: ");
+			printRatId(it->first.m_ratId);
+
+			// need to clear myCurrOtherRatIdx, so next other rat can reuse this	
+			int i = it->second.idx.value();
+			for (; i < MAX_RATS - 1 && M->rat(i).playing == TRUE; i++) {
+				M->ratIs(M->rat(i + 1), i);
+			}
+
+			MW_RatId other_ratId(p->ratId);
+			ClearRatPosition(M->myCurrOtherRatIdx());
+			M->myCurrOtherRatIdxIs(M->myCurrOtherRatIdx().value() - 1);	
+			M->otherRatInfoMap.erase(it++);
+		} else
+			it++;	
 	}
 }
 
