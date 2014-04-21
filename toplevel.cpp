@@ -1218,6 +1218,7 @@ void process_recv_LeaveMessage(LeaveMessage *p) {
 		}
 
 		M->otherRatInfoMap.erase(it);
+		updateView = TRUE;
 		// printf("After remove otherRatInfoMap size: %d\n", (uint32_t)M->otherRatInfoMap.size());
 		M->myCurrOtherRatIdxIs(M->myCurrOtherRatIdx().value() - 1);	
 	}
@@ -1244,6 +1245,7 @@ void checkKeepAliveTimeout() {
 				M->ratIs(M->rat(i + 1), i);
 			}
 
+			updateView = TRUE;
 			M->myCurrOtherRatIdxIs(M->myCurrOtherRatIdx().value() - 1);	
 			M->otherRatInfoMap.erase(it++);
 		} else
