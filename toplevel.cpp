@@ -706,7 +706,7 @@ void sendLeaveMessage() {
 
 void sendJoinMessage() {
 	JoinMessage joinMsg(M->my_ratId.m_ratId, getMessageId(), strlen(M->myName_), M->myName_);
-	#ifdef _DEBUG_
+	#ifdef DEBUG
 	sendMsgPrint(&joinMsg);
 	#endif
 
@@ -725,7 +725,7 @@ void sendJoinMessage() {
 
 void sendJoinResponseMessage(unsigned char *senderId) {
 	JoinResponseMessage joinResponseMsg(M->my_ratId.m_ratId, getMessageId(), strlen(M->myName_), M->myName_, senderId);
-	#ifdef _DEBUG_
+	#ifdef DEBUG
 	sendMsgPrint(&joinResponseMsg);
 	#endif
 
@@ -808,7 +808,7 @@ void recvMsgPrint(Message *p) {
 
 void printRatId(const unsigned char* ratId) {
 	for (int i = 0 ; i < UUID_SIZE; i++) {
-		printf("%x", ratId[i]);
+		printf("%02x", ratId[i]);
 	}
 	printf("\n");
 }
