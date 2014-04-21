@@ -1171,21 +1171,33 @@ void checkAndResolveRatPosConflict(int otherRatPosX, int otherRatPosY, unsigned 
 			if (MY_X_LOC + 1 < MAZEXMAX && !M->maze_[MY_X_LOC + 1][MY_Y_LOC]) {
 				M->xlocIs(MY_X_LOC + 1);
 				M->ylocIs(MY_Y_LOC);
+				printf("Two rats at the same cell. RatId: ");
+				printRatId(M->my_ratId.m_ratId);
+				printf("sets to new PosX: %u, PosY: %u\n", MY_X_LOC, MY_Y_LOC);
 				return;
 			}
 			if (MY_X_LOC - 1 >= 0 && !M->maze_[MY_X_LOC - 1][MY_Y_LOC]) { // check SOUTH cell
 				M->xlocIs(MY_X_LOC - 1);
 				M->ylocIs(MY_Y_LOC);
+				printf("Two rats at the same cell. RatId: ");
+				printRatId(M->my_ratId.m_ratId);
+				printf("sets to new PosX: %u, PosY: %u\n", MY_X_LOC, MY_Y_LOC);
 				return;
 			}
 			if (MY_Y_LOC + 1 < MAZEYMAX && !M->maze_[MY_X_LOC][MY_Y_LOC + 1]) { // check EAST cell
 				M->xlocIs(MY_X_LOC);
 				M->ylocIs(MY_Y_LOC + 1);
+				printf("Two rats at the same cell. RatId: ");
+				printRatId(M->my_ratId.m_ratId);
+				printf("sets to new PosX: %u, PosY: %u\n", MY_X_LOC, MY_Y_LOC);
 				return;
 			}
 			if (MY_Y_LOC - 1 >= 0 && !M->maze_[MY_X_LOC][MY_Y_LOC - 1]) { // check WEST cell
 				M->xlocIs(MY_X_LOC);
 				M->ylocIs(MY_Y_LOC - 1);
+				printf("Two rats at the same cell. RatId: ");
+				printRatId(M->my_ratId.m_ratId);
+				printf("sets to new PosX: %u, PosY: %u\n", MY_X_LOC, MY_Y_LOC);
 				return;
 			}
 		}
