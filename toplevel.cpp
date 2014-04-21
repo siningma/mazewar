@@ -593,8 +593,9 @@ void ConvertIncoming(Message *p, const char* buf)
 			} else {
 				unsigned char missilePosX = buf[HEADER_SIZE + 8];
 				unsigned char missilePosY = buf[HEADER_SIZE + 9];
-				uint32_t missileSeqNum = 0;
-				memcpy(&missileSeqNum, buf + HEADER_SIZE + 10, 4);
+				uint32_t msg_missileSeqNum = 0;
+				memcpy(&msg_missileSeqNum, buf + HEADER_SIZE + 10, 4);
+				uint32_t missileSeqNum = ntohl(msg_missileSeqNum);
 				p = new KeepAliveMessage(ratId, msgId, ratPosX, ratPosY, ratDir, score, missileFlag, missilePosX, missilePosY, missileSeqNum);
 			}
 	    	
