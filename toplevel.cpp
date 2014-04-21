@@ -68,11 +68,11 @@ int main(int argc, char *argv[])
 
     MazeInit(argc, argv);
 
-    if (argc == 5)
+    if (argc == 5) {
     	M->xlocIs(atoi(argv[2]));
 		M->ylocIs(atoi(argv[3]));
 		M->dirIs(atoi(argv[4]));
-    else {
+	} else {
 		NewPosition(M);
     }
 
