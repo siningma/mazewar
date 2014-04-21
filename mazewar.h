@@ -638,6 +638,7 @@ void joinPhase();
 void playPhase();
 void hitPhase();
 bool checkConflict(int, int);
+void checkAndResolveRatPosConflict(int otherRatPosX, int otherRatPosY, unsigned char* other_ratId);
 
 void process_recv_JoinMessage(JoinMessage *p);
 void process_recv_JoinResponseMessage(JoinResponseMessage *p);

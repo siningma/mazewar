@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     	ratName = (char*)malloc((unsigned) (strlen(argv[1]) + 1));
     	ratName[strlen(argv[1])] = 0;
     	strncpy(ratName, argv[1], strlen(argv[1]));
-    	printf("Welcome to CS244B MazeWar!\n");
+    	printf("Welcome to CS244B MazeWar!\n\n");
     } else {
 	    getName("Welcome to CS244B MazeWar!\n\nYour Name", &ratName);
 	    ratName[strlen(ratName)-1] = 0;
@@ -493,40 +493,6 @@ char *GetRatName(RatIndexType ratId)
 
 /* ----------------------------------------------------------------------- */
 
-int recvPacket(int socket, char* payload_buf, int payload_buf_len, struct sockaddr *src_addr, bool isMsgSentByMe) {
-	int	ret;
-	fd_set	fdmask;
-	FD_ZERO(&fdmask);
-	FD_SET(socket, &fdmask);
-
-	struct timeval timeout;
-	timeout.tv_sec = 0;
-	timeout.tv_usec = 0;
-	while ((ret = select(socket + 1, &fdmask, NULL, NULL, &timeout)) == -1)
-		if (errno != EINTR)
-	  		MWError("select error on events");
-
-	int recvLen = 0;
-	if(FD_ISSET(socket, &fdmask))	{
-		socklen_t fromLen = sizeof(*src_addr);
-		memset(payload_buf, 0, payload_buf_len);
-
-		while(recvLen != payload_buf_len) {
-			int cc = recvfrom(socket, payload_buf + recvLen, payload_buf_len, 0,
-			        src_addr, &fromLen);
-
-		    if (cc < 0 && errno != EINTR) 
-				perror("event recvfrom");
-
-			recvLen += cc;
-		}
-	} else 
-		printf("No payload data receive\n");
-
-	return recvLen;
-}
-
-/* This is just for the sample version, rewrite your own if necessary */
 void ConvertIncoming(Message *p, const char* buf)
 {
 	// receive packet header
@@ -542,6 +508,12 @@ void ConvertIncoming(Message *p, const char* buf)
 	bool isMsgSentByMe = isRatIdEquals(M->my_ratId.m_ratId, ratId);
 	if (isMsgSentByMe)
 		return;
+	if (msgId < M->myCurrRecvMsgId())
+		return;
+
+	M->myCurrRecvMsgIdIs(msgId);
+	printf("Receive msgId: %u, myCurrRecvMsgId: %u\n", msgId, M->myCurrRecvMsgId());
+	
 	/*
 		printf("Recive Message Header\n");
 		printf("Message type: 0x%x\n", msgType);
@@ -1152,8 +1124,11 @@ void process_recv_KeepAliveMessage(KeepAliveMessage *p) {
 		other->missile.y = Loc(p->missilePosY);
 		other->missile.seqNum = p->missileSeqNum;
 		other->score = p->score;
-		M->ratIs(other->rat, other->idx);
 		other->lastKeepAliveRecvTime = getCurrentTime();
+		M->ratIs(other->rat, other->idx);
+
+		// two rats cannot be at the same position. Check position and resolve conflict if needed
+		checkAndResolveRatPosConflict(other.rat.x.value(), other.rat.y.value(), p->ratId);
 	} else {
 		MW_RatId other_ratId(p->ratId);
 		OtherRat other;
@@ -1177,8 +1152,40 @@ void process_recv_KeepAliveMessage(KeepAliveMessage *p) {
 		other.lastKeepAliveRecvTime = getCurrentTime();
 		M->ratIs(other.rat, other.idx);
 		M->otherRatInfoMap.insert(std::make_pair(other_ratId, other));
+
+		// two rats cannot be at the same position. Check position and resolve conflict if needed
+		checkAndResolveRatPosConflict(other.rat.x.value(), other.rat.y.value(), p->ratId);
 	}
+
 	updateView = TRUE;
+}
+
+void checkAndResolveRatPosConflict(int otherRatPosX, int otherRatPosY, unsigned char* other_ratId) {
+	if (MY_X_LOC == otherRatPosX && MY_Y_LOC == otherRatPosY) {
+		// there is position conflict, move rat with smaller ratId
+		if (memcmp(M->my_ratId.m_ratId, other_ratId) < 0) {	// check NORTH cell
+			if (MY_X_LOC + 1 < MAZEXMAX && !M->maze_[MY_X_LOC + 1][MY_Y_LOC]) {
+				M->xlocIs(MY_X_LOC + 1);
+				M->ylocIs(MY_Y_LOC);
+				return;
+			}
+			if (MY_X_LOC - 1 >= 0 && !M->maze_[MY_X_LOC - 1][MY_Y_LOC]) { // check SOUTH cell
+				M->xlocIs(MY_X_LOC - 1);
+				M->ylocIs(MY_Y_LOC);
+				return;
+			}
+			if (MY_Y_LOC + 1 < MAZEYMAX && !M->maze_[MY_X_LOC][MY_Y_LOC + 1]) { // check EAST cell
+				M->xlocIs(MY_X_LOC);
+				M->ylocIs(MY_Y_LOC + 1);
+				return;
+			}
+			if (MY_Y_LOC - 1 >= 0 && !M->maze_[MY_X_LOC][MY_Y_LOC - 1]) { // check WEST cell
+				M->xlocIs(MY_X_LOC);
+				M->ylocIs(MY_Y_LOC - 1);
+				return;
+			}
+		}
+	}
 }
 
 void process_recv_LeaveMessage(LeaveMessage *p) {
