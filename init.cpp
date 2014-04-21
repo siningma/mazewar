@@ -96,10 +96,6 @@ MazeInit(int argc, char	**argv)
 	setRandom();
 
 	InitDisplay(argc, argv);
-
-	NewPosition(M);
-
-	printf("%d X LOC \n",M->xloc().value());
 	/*
 	 * We don't do ShowPosition() or ShowView() here, but let the update
 	 * routine in the window handler do it for the first time when

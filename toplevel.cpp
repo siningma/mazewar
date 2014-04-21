@@ -50,23 +50,37 @@ int main(int argc, char *argv[])
     signal(SIGINT, quit);
     signal(SIGTERM, quit);
 
-    getName("Welcome to CS244B MazeWar!\n\nYour Name", &ratName);
-    ratName[strlen(ratName)-1] = 0;
+    printf("argc: %d\n", argc);
+    if (argc > 1) {
+    	ratName = (char*)malloc((unsigned) (strlen(argv[1]) + 1));
+    	ratName[strlen(argv[1])] = 0;
+    	printf("Welcome to CS244B MazeWar!\n");
+    } else {
+	    getName("Welcome to CS244B MazeWar!\n\nYour Name", &ratName);
+	    ratName[strlen(ratName)-1] = 0;
+	}
 
     M = MazewarInstance::mazewarInstanceNew(string(ratName));
     MazewarInstance* a = M.ptr();
     strncpy(M->myName_, ratName, NAMESIZE);
-    free(ratName);	
-
-    printf("My RatName: %s\n", M->myName_);
-	printf("My RatId: ");
-	printRatId(M->my_ratId.m_ratId);
+    free(ratName);
 
     myStatusPrint();
 
     MazeInit(argc, argv);
 
-    NewPosition(M);
+    if (argc == 1)
+    	NewPosition(M);
+    else {
+    	M->xlocIs(atoi(argv[2]));
+		M->ylocIs(atoi(argv[3]));
+		M->dirIs(atoi(argv[4]));
+    }
+
+    printf("My RatName: %s\n", M->myName_);
+	printf("My RatId: ");
+	printRatId(M->my_ratId.m_ratId);
+    printf("%d X LOC, %d Y LOC, %d Dir\n", MY_X_LOC, MY_Y_LOC, MY_DIR);
 
     /* So you can see what a Rat is supposed to look like, we create
     one rat in the single player mode Mazewar.
@@ -1181,16 +1195,16 @@ void process_recv_LeaveMessage(LeaveMessage *p) {
 	if (it != M->otherRatInfoMap.end()) {
 		// find sent LeaveMessage ratId in my otherRatInfo table
 		// remove this rat info from my table
-		printf("Remove rat with ratId: ");
+		printf("Receive LeaveMessage, remove rat with ratId: ");
 		printRatId(it->first.m_ratId);
 
-		MW_RatId other_ratId(p->ratId);
+		// need to clear myCurrOtherRatIdx, so next other rat can reuse this	
 		int i = it->second.idx.value();
 		for (; i < MAX_RATS - 1 && M->rat(i).playing == TRUE; i++) {
 			M->ratIs(M->rat(i + 1), i);
 		}
 
-		// need to clear myCurrOtherRatIdx, so next other rat can reuse this
+		MW_RatId other_ratId(p->ratId);
 		ClearRatPosition(M->myCurrOtherRatIdx());
 		M->myCurrOtherRatIdxIs(M->myCurrOtherRatIdx().value() - 1);	
 		M->otherRatInfoMap.erase(other_ratId);
