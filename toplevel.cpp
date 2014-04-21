@@ -1128,7 +1128,7 @@ void process_recv_KeepAliveMessage(KeepAliveMessage *p) {
 		M->ratIs(other->rat, other->idx);
 
 		// two rats cannot be at the same position. Check position and resolve conflict if needed
-		checkAndResolveRatPosConflict(other.rat.x.value(), other.rat.y.value(), p->ratId.m_ratId);
+		checkAndResolveRatPosConflict(other->rat.x.value(), other->rat.y.value(), p->ratId);
 	} else {
 		MW_RatId other_ratId(p->ratId);
 		OtherRat other;
@@ -1154,7 +1154,7 @@ void process_recv_KeepAliveMessage(KeepAliveMessage *p) {
 		M->otherRatInfoMap.insert(std::make_pair(other_ratId, other));
 
 		// two rats cannot be at the same position. Check position and resolve conflict if needed
-		checkAndResolveRatPosConflict(other.rat.x.value(), other.rat.y.value(), p->ratId.m_ratId);
+		checkAndResolveRatPosConflict(other.rat.x.value(), other.rat.y.value(), p->ratId);
 	}
 
 	updateView = TRUE;
