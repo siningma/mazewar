@@ -1163,7 +1163,6 @@ void process_recv_KeepAliveMessage(KeepAliveMessage *p) {
 		M->ratIs(other.rat, other.idx);
 		M->otherRatInfoMap.insert(std::make_pair(other_ratId, other));
 	}
-	updateView = TRUE;
 }
 
 void process_recv_LeaveMessage(LeaveMessage *p) {
@@ -1188,8 +1187,9 @@ void process_recv_LeaveMessage(LeaveMessage *p) {
 		for (; i < MAX_RATS - 1 && M->rat(i).playing == TRUE; i++) {
 			M->ratIs(M->rat(i + 1), i);
 		}
-		// need to clear here
 
+		// need to clear myCurrOtherRatIdx, so next other rat can reuse this
+		ClearRatPosition(M->myCurrOtherRatIdx());
 		M->myCurrOtherRatIdxIs(M->myCurrOtherRatIdx().value() - 1);	
 		M->otherRatInfoMap.erase(other_ratId);
 		//printf("After remove otherRatInfoMap size: %d\n", (uint32_t)M->otherRatInfoMap.size());

@@ -355,7 +355,7 @@ protected:
     Loc yPeek_;
     int active_;
     unsigned char my_currPhaseState;
-    RatIndexType currOtherRatIdx;
+    RatIndexType currOtherRatIdx;	// this is the index in mazeRats_ array. this means that idx that will be use for next rat
 };
 extern MazewarInstance::Ptr M;
 
