@@ -1251,7 +1251,6 @@ void checkKeepAliveTimeout() {
 				M->ratIs(M->rat(i + 1), i);
 			}
 
-			MW_RatId other_ratId(p->ratId);
 			ClearRatPosition(M->myCurrOtherRatIdx());
 			M->myCurrOtherRatIdxIs(M->myCurrOtherRatIdx().value() - 1);	
 			M->otherRatInfoMap.erase(it++);
