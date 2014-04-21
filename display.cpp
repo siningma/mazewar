@@ -136,8 +136,8 @@ ShowView(Loc x, Loc y, Direction dir)
 		if (ratLook->visible == TRUE)
 			XORToken(ratIndex);
 	
-		if (ratLook->visible != oldVisible)
-			// UpdateScoreCard(ratIndex);
+		// if (ratLook->visible != oldVisible)
+		//	UpdateScoreCard(ratIndex);
 	}
 }
 
