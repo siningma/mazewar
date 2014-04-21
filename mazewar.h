@@ -569,6 +569,7 @@ void FlipBitmaps(void);
 void bitFlip(BitCell *, int size);
 void SwapBitmaps(void);
 void byteSwap(BitCell *, int size);
+void showMissile(Loc x_loc, Loc y_loc, Direction dir, Loc prev_x, Loc prev_y, bool clear);
 
 
 /* init.c */
