@@ -385,6 +385,9 @@ void shoot()
 	M->missileXLocIs(Loc(MY_X_LOC));
 	M->missileYLocIs(Loc(MY_Y_LOC));
 	M->missileDirIs(Direction(MY_DIR));
+
+	showMissile(MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC, 0, 0, 0, false);
+	updateView = TRUE;
 	// must update here
 	lastMissilePosUpdateTime = getCurrentTime();
 }
@@ -981,13 +984,13 @@ void manageMissiles()
 			printf("Exist: %d, X: %u, Y: %u, dir: %u, SeqNum: %d\n\n", MY_MISSILE_EXIST, MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC, MY_MISSILE_DIR, MY_MISSILE_SEQNUM);
 			#endif
 
-			showMissile(MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC, 0, prevMissileXLoc, prevMissileYLoc, true);
-			updateView = TRUE;
 			sendKeepAliveMessage();
 			lastKeepAliveMsgSendTime = getCurrentTime();
 			// missile hit the wall
 			if (M->maze_[MY_MISSILE_X_LOC][MY_MISSILE_Y_LOC] || MY_MISSILE_EXIST == false) {
 				printf("My missile hit the wall. missilePosX: %u, missilePosY: %u\n", MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC);
+				clearSquare(prevMissileXLoc, prevMissileYLoc);
+				
 				M->missileExistIs(false);
 				M->missileXLocIs(0);
 				M->missileYLocIs(0);
@@ -995,6 +998,9 @@ void manageMissiles()
 				M->missileSeqNumIs(MY_MISSILE_SEQNUM + 1);
 				break;
 			}
+			// show missile if not hit the wall
+			showMissile(MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC, 0, prevMissileXLoc, prevMissileYLoc, true);
+			updateView = TRUE;
 		}
 		lastMissilePosUpdateTime = getCurrentTime();
 	} 
