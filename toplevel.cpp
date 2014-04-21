@@ -1222,8 +1222,8 @@ void process_recv_LeaveMessage(LeaveMessage *p) {
 			M->ratIs(M->rat(i + 1), i);
 		}
 
-		M->otherRatInfoMap.erase(p->ratId);
-		printf("After remove otherRatInfoMap size: %d\n", (uint32_t)M->otherRatInfoMap.size());
+		M->otherRatInfoMap.erase(it);
+		// printf("After remove otherRatInfoMap size: %d\n", (uint32_t)M->otherRatInfoMap.size());
 		M->myCurrOtherRatIdxIs(M->myCurrOtherRatIdx().value() - 1);	
 	}
 }
