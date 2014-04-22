@@ -1177,16 +1177,13 @@ void process_recv_KeepAliveMessage(KeepAliveMessage *p) {
 void checkAndResolveRatPosConflict(int otherRatPosX, int otherRatPosY, unsigned char* other_ratId) {
 	if (MY_X_LOC == otherRatPosX && MY_Y_LOC == otherRatPosY) {
 		// there is position conflict, move rat with smaller ratId
-		printf("Two rats at the same position\n");
 		if (memcmp(M->my_ratId.m_ratId, other_ratId, UUID_SIZE) < 0) {	
-			printf("position conflict happens, resolve conflict\n");
+			printf("Rat position conflict happens. Resolve conflict: \n");
 			std::list<Node> l;
 			Node my_node(MY_X_LOC, MY_Y_LOC);
 			getAdjcentNode(&l, my_node);
-			printf("l size: %d\n", l.size());
 			
 			while(l.size() > 0) {
-				printf("l size: %d\n", l.size());
 				Node node = l.front();
 				node.print();
 				l.pop_front();
@@ -1231,7 +1228,7 @@ void getAdjcentNode(std::list<Node> *list, Node node) {
 }
 
 void resolveRatPosConflictPrint() {
-	printf("Rat Position Conflict. New Rat PosX: %u, PosY: %u, RatId: ", MY_X_LOC, MY_Y_LOC);
+	printf("Rat: %s, New Rat PosX: %u, PosY: %u, RatId: ", M->myName_, MY_X_LOC, MY_Y_LOC);
 	printRatId(M->my_ratId.m_ratId);
 	printf("\n");
 }
