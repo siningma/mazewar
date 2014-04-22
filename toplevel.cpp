@@ -1076,6 +1076,7 @@ void process_recv_JoinMessage(JoinMessage *p) {
 		
 		printf("Receive JoinMessage and store ratName: %s, RatId: ", other.ratName);
 		printRatId(other_ratId.m_ratId);
+		updateView = TRUE;
 	}
 
 	sendJoinResponseMessage(p->ratId);
