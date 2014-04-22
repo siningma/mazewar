@@ -1185,7 +1185,7 @@ void checkAndResolveRatPosConflict(int otherRatPosX, int otherRatPosY, unsigned 
 			
 			while(l.size() > 0) {
 				Node node = l.front();
-				node.print();
+				// node.print();
 				l.pop_front();
 				if (isValidPosition(node.x, node.y)) {
 					M->xlocIs(Loc(node.x));
@@ -1250,28 +1250,12 @@ void process_recv_LeaveMessage(LeaveMessage *p) {
 		printf("Receive LeaveMessage, remove rat with ratId: ");
 		printRatId(it->first.m_ratId);
 
-		// need to clear myCurrOtherRatIdx, so next other rat can reuse this
-		Rat leftRat = M->rat(it->second.idx.value());	
-		leftRat.playing = FALSE;
-		leftRat.x = 1;
-		leftRat.y = 1;
-		leftRat.dir = NORTH;
-		M->ratIs(leftRat, it->second.idx.value());
-
-		for (int i = it->second.idx.value(); i < MAX_RATS - 1; i++) {
-			Rat rat = M->rat(i);
-			Rat copy_rat = M->rat(i + 1);
-			rat.playing = copy_rat.playing;
-			rat.x = copy_rat.x;
-			rat.y = copy_rat.y;
-			rat.dir = copy_rat.dir;
-			M->ratIs(rat, i);
-		}
+		// one player left the game
+		ClearRatPosition(it->second.idx);
 
 		M->otherRatInfoMap.erase(it);
 		updateView = TRUE;
 		// printf("After remove otherRatInfoMap size: %d\n", (uint32_t)M->otherRatInfoMap.size());
-		M->myCurrOtherRatIdxIs(M->myCurrOtherRatIdx().value() - 1);	
 	}
 }
 
@@ -1290,26 +1274,10 @@ void checkKeepAliveTimeout() {
 			printf("No KeepAliveMessage Received for more than 10 seconds.\nRemove ratId: ");
 			printRatId(it->first.m_ratId);
 
-			// need to clear myCurrOtherRatIdx, so next other rat can reuse this	
-			Rat leftRat = M->rat(it->second.idx.value());	
-			leftRat.playing = FALSE;
-			leftRat.x = 1;
-			leftRat.y = 1;
-			leftRat.dir = NORTH;
-			M->ratIs(leftRat, it->second.idx.value());
-
-			for (int i = it->second.idx.value(); i < MAX_RATS - 1; i++) {
-				Rat rat = M->rat(i);
-				Rat copy_rat = M->rat(i + 1);
-				rat.playing = copy_rat.playing;
-				rat.x = copy_rat.x;
-				rat.y = copy_rat.y;
-				rat.dir = copy_rat.dir;
-				M->ratIs(rat, i);
-			}
+			// one player left the game
+			ClearRatPosition(it->second.idx);
 
 			updateView = TRUE;
-			M->myCurrOtherRatIdxIs(M->myCurrOtherRatIdx().value() - 1);	
 			M->otherRatInfoMap.erase(it++);
 		} else
 			it++;	
