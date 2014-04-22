@@ -667,7 +667,7 @@ void process_recv_LeaveMessage(LeaveMessage *p);
 void process_recv_HitMessage(HitMessage *p);
 void process_recv_HitResponseMessage(HitResponseMessage *p);
 bool isValidPosition(int tx, int ty);
-void getAdjcentNode(std::list<Node> *list, Node *node);
+void getAdjcentNode(std::list<Node> *list, Node node);
 
 
 /* winsys.c */
