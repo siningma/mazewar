@@ -1177,11 +1177,12 @@ void process_recv_KeepAliveMessage(KeepAliveMessage *p) {
 void checkAndResolveRatPosConflict(int otherRatPosX, int otherRatPosY, unsigned char* other_ratId) {
 	if (MY_X_LOC == otherRatPosX && MY_Y_LOC == otherRatPosY) {
 		// there is position conflict, move rat with smaller ratId
+		printf("Two rats at the same position\n");
 		if (memcmp(M->my_ratId.m_ratId, other_ratId, UUID_SIZE) < 0) {	
 			printf("position conflict happens, resolve conflict\n");
 			std::list<Node> l;
 			Node my_node(MY_X_LOC, MY_Y_LOC);
-			getAdjcentNode(&l, &my_node);
+			getAdjcentNode(&l, my_node);
 			printf("l size: %d\n", l.size());
 			
 			while(l.size() > 0) {
@@ -1194,7 +1195,7 @@ void checkAndResolveRatPosConflict(int otherRatPosX, int otherRatPosY, unsigned 
 					return;
 				}
 				l.pop_front();
-				getAdjcentNode(&l, &node);
+				getAdjcentNode(&l, node);
 			}
 		}
 	}
@@ -1208,21 +1209,21 @@ bool isValidPosition(int tx, int ty) {
 	return M->maze_[tx][ty] == false;
 }
 
-void getAdjcentNode(std::list<Node> *list, Node *node) {
-	if (node->x + 1 < MAZEXMAX) {
-		Node right(node->x + 1, node->y);
+void getAdjcentNode(std::list<Node> *list, Node node) {
+	if (node.x + 1 < MAZEXMAX) {
+		Node right(node.x + 1, node.y);
 		list->push_back(right);
 	}
-	if (node->x - 1 >= 0) {
-		Node left(node->x - 1, node->y);
+	if (node.x - 1 >= 0) {
+		Node left(node.x - 1, node.y);
 		list->push_back(left);
 	}
-	if (node->y + 1 < MAZEYMAX) {
-		Node down(node->x, node->y + 1);
+	if (node.y + 1 < MAZEYMAX) {
+		Node down(node.x, node.y + 1);
 		list->push_back(down);
 	}
-	if (node->y - 1 >= 0) {
-		Node up(node->x, node->y - 1);
+	if (node.y - 1 >= 0) {
+		Node up(node.x, node.y - 1);
 		list->push_back(up);
 	}
 }
