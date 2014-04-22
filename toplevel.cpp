@@ -1224,8 +1224,14 @@ void process_recv_LeaveMessage(LeaveMessage *p) {
 		printf("Receive LeaveMessage, remove rat with ratId: ");
 		printRatId(it->first.m_ratId);
 
-		// need to clear myCurrOtherRatIdx, so next other rat can reuse this	
-		ClearRatPosition(it->second.idx.value());
+		// need to clear myCurrOtherRatIdx, so next other rat can reuse this
+		Rat leftRat = M->rat(it->second.idx.value());	
+		leftRat.playing = FALSE;
+		leftRat.x = 1;
+		leftRat.y = 1;
+		leftRat.dir = NORTH;
+		M->ratIs(leftRat, it->second.idx.value());
+
 		for (int i = it->second.idx.value(); i < MAX_RATS - 1; i++) {
 			M->ratIs(M->rat(i + 1), i);
 		}
@@ -1253,7 +1259,13 @@ void checkKeepAliveTimeout() {
 			printRatId(it->first.m_ratId);
 
 			// need to clear myCurrOtherRatIdx, so next other rat can reuse this	
-			ClearRatPosition(it->second.idx.value());
+			Rat leftRat = M->rat(it->second.idx.value());	
+			leftRat.playing = FALSE;
+			leftRat.x = 1;
+			leftRat.y = 1;
+			leftRat.dir = NORTH;
+			M->ratIs(leftRat, it->second.idx.value());
+
 			for (int i = it->second.idx.value(); i < MAX_RATS - 1; i++) {
 				M->ratIs(M->rat(i + 1), i);
 			}
