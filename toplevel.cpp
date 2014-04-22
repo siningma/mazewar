@@ -72,13 +72,13 @@ int main(int argc, char *argv[])
     	M->xlocIs(atoi(argv[2]));
 		M->ylocIs(atoi(argv[3]));
 		// match input to direction representation
-		if (strcmp(argv[4], "n"))
+		if (!strcmp(argv[4], "n"))
 			M->dirIs(NORTH);
-		else if (strcmp(argv[4], "s"))
+		else if (!strcmp(argv[4], "s"))
 			M->dirIs(SOUTH);
-		else if (strcmp(argv[4], "e"))
+		else if (!strcmp(argv[4], "e"))
 			M->dirIs(EAST);
-		else if (strcmp(argv[4], "w"))
+		else if (!strcmp(argv[4], "w"))
 			M->dirIs(WEST);
 		else
 			M->dirIs(NORTH);
