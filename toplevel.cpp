@@ -1186,7 +1186,9 @@ void checkAndResolveRatPosConflict(int otherRatPosX, int otherRatPosY, unsigned 
 			printf("l size: %d\n", l.size());
 			
 			while(l.size() > 0) {
+				printf("l size: %d\n", l.size());
 				Node node = l.front();
+				node.print();
 				l.pop_front();
 				if (isValidPosition(node.x, node.y)) {
 					M->xlocIs(Loc(node.x));
