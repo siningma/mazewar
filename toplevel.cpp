@@ -982,7 +982,7 @@ void manageMissiles()
 			// missile hit the wall
 			if (M->maze_[MY_MISSILE_X_LOC][MY_MISSILE_Y_LOC] || MY_MISSILE_EXIST == false) {
 				printf("My missile: %u hits the wall. missilePosX: %u, missilePosY: %u\n", MY_MISSILE_SEQNUM, MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC);
-				printf("My missile previous PosX: %u, PosY: %u\n", prevMissileXLoc, prevMissileYLoc);
+				printf("My missile previous PosX: %u, PosY: %u\n", prevMissileXLoc.value(), prevMissileYLoc.value());
 
 				clearSquare(prevMissileXLoc, prevMissileYLoc);
 				if (prevMissileXLoc == MY_X_LOC && prevMissileYLoc == MY_Y_LOC)
@@ -1180,10 +1180,10 @@ void checkAndResolveRatPosConflict(int otherRatPosX, int otherRatPosY, unsigned 
 		if (memcmp(M->my_ratId.m_ratId, other_ratId, UUID_SIZE) < 0) {	
 			std::list<Node> l;
 			Node my_node(MY_X_LOC, MY_Y_LOC);
-			getAdjcentNode(l, &my_node);
+			getAdjcentNode(&l, &my_node);
 			
 			while(l.size() > 0) {
-				Node node = q.pop_front();
+				Node node = l.pop_front();
 				if (isValidPosition(node.x, node.y) {
 					M->xlocIs(Loc(node.x));
 					M->ylocIs(Loc(node.y));
@@ -1191,7 +1191,7 @@ void checkAndResolveRatPosConflict(int otherRatPosX, int otherRatPosY, unsigned 
 					updateView = TRUE;
 					return;
 				}
-				getAdjcentNode(l, &node);
+				getAdjcentNode(&l, &node);
 			}
 		}
 	}
