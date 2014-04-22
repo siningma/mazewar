@@ -71,7 +71,17 @@ int main(int argc, char *argv[])
     if (argc == 5) {
     	M->xlocIs(atoi(argv[2]));
 		M->ylocIs(atoi(argv[3]));
-		M->dirIs(atoi(argv[4]));
+		// match input to direction representation
+		if (strcmp(argv[4], "n"))
+			M->dirIs(NORTH);
+		else if (strcmp(argv[4], "s"))
+			M->dirIs(SOUTH);
+		else if (strcmp(argv[4], "e"))
+			M->dirIs(EAST);
+		else if (strcmp(argv[4], "w"))
+			M->dirIs(WEST);
+		else
+			M->dirIs(NORTH);
 	} else {
 		NewPosition(M);
     }
@@ -1216,7 +1226,7 @@ void process_recv_LeaveMessage(LeaveMessage *p) {
 
 		// need to clear myCurrOtherRatIdx, so next other rat can reuse this	
 		ClearRatPosition(it->second.idx.value());
-		for (int i = it->second.idx.value(); i < MAX_RATS - 1 && M->rat(i + 1).playing == TRUE; i++) {
+		for (int i = it->second.idx.value(); i < MAX_RATS - 1; i++) {
 			M->ratIs(M->rat(i + 1), i);
 		}
 
@@ -1244,7 +1254,7 @@ void checkKeepAliveTimeout() {
 
 			// need to clear myCurrOtherRatIdx, so next other rat can reuse this	
 			ClearRatPosition(it->second.idx.value());
-			for (int i = it->second.idx.value(); i < MAX_RATS - 1 && M->rat(i + 1).playing == TRUE; i++) {
+			for (int i = it->second.idx.value(); i < MAX_RATS - 1; i++) {
 				M->ratIs(M->rat(i + 1), i);
 			}
 
