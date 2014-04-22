@@ -1120,7 +1120,7 @@ void process_recv_KeepAliveMessage(KeepAliveMessage *p) {
 		if (other->rat.playing == false) {
 			other->idx = M->myCurrOtherRatIdx();
 			if (other->idx.value() >= MAX_RATS) {
-				printf("Cannot have more player, reach maximum. Ignore new user");
+				printf("Cannot have more player, reach maximum. Ignore new user\n");
 				return;
 			}
 
@@ -1152,7 +1152,7 @@ void process_recv_KeepAliveMessage(KeepAliveMessage *p) {
 		if (other.rat.playing == false) {
 			other.idx = M->myCurrOtherRatIdx();
 			if (other.idx.value() >= MAX_RATS) {
-				printf("Cannot have more player, reach maximum. Ignore new user");
+				printf("Cannot have more player, reach maximum. Ignore new user\n");
 				return;
 			}
 
