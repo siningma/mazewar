@@ -1,0 +1,15 @@
+Changelog - 4/20/2014
+
+[UUID]
+In Section 1, we clarified that UUIDs should be generated using the machine's random number generator (as opposed to other methods such as time-based UUIDs). This eliminates any realistic possibility that UUIDs will conflict.
+
+We also specified that UUID fields do not need to be converted to network byte order and provided justification for it: (1) the byte order
+of a UUID does not affect its randomness and (2) UUIDs do not need to be interpreted
+using the same byte order across hosts - individual hosts only need to interpret them in a
+consistent byte order.
+
+[Rat Direction]
+We opted to change the Direction enumeration in our protocol to be the same as the starter code's ( 0 is North, 1 is South, 2 is East, and 3 is West). This makes implementation easier.
+
+[Missile state in KEEPALIVE]
+Missile state is no longer optional in the KEEPALIVE packet even when the Missile Flag is not set. This avoids variable length KEEPALIVE packets and reduces implementation complexity.
