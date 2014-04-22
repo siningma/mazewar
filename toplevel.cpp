@@ -1178,9 +1178,11 @@ void checkAndResolveRatPosConflict(int otherRatPosX, int otherRatPosY, unsigned 
 	if (MY_X_LOC == otherRatPosX && MY_Y_LOC == otherRatPosY) {
 		// there is position conflict, move rat with smaller ratId
 		if (memcmp(M->my_ratId.m_ratId, other_ratId, UUID_SIZE) < 0) {	
+			printf("position conflict happens, resolve conflict\n");
 			std::list<Node> l;
 			Node my_node(MY_X_LOC, MY_Y_LOC);
 			getAdjcentNode(&l, &my_node);
+			printf("l size: %d\n", l.size());
 			
 			while(l.size() > 0) {
 				Node node = l.front();
