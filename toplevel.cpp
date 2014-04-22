@@ -1183,14 +1183,15 @@ void checkAndResolveRatPosConflict(int otherRatPosX, int otherRatPosY, unsigned 
 			getAdjcentNode(&l, &my_node);
 			
 			while(l.size() > 0) {
-				Node node = l.pop_front();
-				if (isValidPosition(node.x, node.y) {
+				Node node = l.front();
+				if (isValidPosition(node.x, node.y)) {
 					M->xlocIs(Loc(node.x));
 					M->ylocIs(Loc(node.y));
 					resolveRatPosConflictPrint();
 					updateView = TRUE;
 					return;
 				}
+				l.pop_front();
 				getAdjcentNode(&l, &node);
 			}
 		}
