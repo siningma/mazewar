@@ -1204,7 +1204,7 @@ void checkAndResolveRatPosConflict(int otherRatPosX, int otherRatPosY, unsigned 
 }
 
 bool isValidPosition(int tx, int ty) {
-	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.begin(); it != M->otherRatInfoMap.end();) {
+	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.begin(); it != M->otherRatInfoMap.end(); ++it) {
 		if (it->second.rat.x == tx && it->second.rat.y == ty)
 			return false;
 	}
