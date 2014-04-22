@@ -1233,7 +1233,13 @@ void process_recv_LeaveMessage(LeaveMessage *p) {
 		M->ratIs(leftRat, it->second.idx.value());
 
 		for (int i = it->second.idx.value(); i < MAX_RATS - 1; i++) {
-			M->ratIs(M->rat(i + 1), i);
+			Rat rat = M->rat(i);
+			Rat copy_rat = M->rat(i + 1);
+			rat.playing = copy_rat.playing;
+			rat.x = copy_rat.x;
+			rat.y = copy_rat.y;
+			rat.dir = copy_rat.dir;
+			M->ratIs(rat, i);
 		}
 
 		M->otherRatInfoMap.erase(it);
@@ -1267,7 +1273,13 @@ void checkKeepAliveTimeout() {
 			M->ratIs(leftRat, it->second.idx.value());
 
 			for (int i = it->second.idx.value(); i < MAX_RATS - 1; i++) {
-				M->ratIs(M->rat(i + 1), i);
+				Rat rat = M->rat(i);
+				Rat copy_rat = M->rat(i + 1);
+				rat.playing = copy_rat.playing;
+				rat.x = copy_rat.x;
+				rat.y = copy_rat.y;
+				rat.dir = copy_rat.dir;
+				M->ratIs(rat, i);
 			}
 
 			updateView = TRUE;
