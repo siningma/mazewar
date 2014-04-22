@@ -984,7 +984,8 @@ void manageMissiles()
 				M->missileYLocIs(0);
 				M->missileDirIs(0);
 				M->missileSeqNumIs(MY_MISSILE_SEQNUM + 1);
-				break;
+				lastMissilePosUpdateTime = getCurrentTime();
+				return;
 			}
 			// show missile if not hit the wall
 			showMissile(MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC, 0, prevMissileXLoc, prevMissileYLoc, true);
@@ -1276,18 +1277,20 @@ void process_recv_HitMessage(HitMessage *p) {
 			M->hitVictimMap.insert(std::make_pair(p->missileSeqNum, victimRat));
 			sendHitResponseMessage(p->ratId, p->missileSeqNum);
 
-			// clear my missile state variables
-			clearSquare(MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC);
-			if (MY_MISSILE_X_LOC == MY_X_LOC && MY_MISSILE_Y_LOC == MY_Y_LOC)
-				ShowPosition(MY_X_LOC, MY_Y_LOC, MY_DIR);
+			// clear my missile image and data if not hit the wall (still exist)
+			if (MY_MISSILE_EXIST == TRUE) {
+				clearSquare(MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC);
+				if (MY_MISSILE_X_LOC == MY_X_LOC && MY_MISSILE_Y_LOC == MY_Y_LOC)
+					ShowPosition(MY_X_LOC, MY_Y_LOC, MY_DIR);
+
+				M->missileExistIs(FALSE);
+				M->missileXLocIs(0);
+				M->missileYLocIs(0);
+				M->missileDirIs(0);
+				M->missileSeqNumIs(MY_MISSILE_SEQNUM + 1);
+			}
 
 			updateView = TRUE;
-
-			M->missileExistIs(false);
-			M->missileXLocIs(0);
-			M->missileYLocIs(0);
-			M->missileDirIs(0);
-			M->missileSeqNumIs(MY_MISSILE_SEQNUM + 1);
 			sendKeepAliveMessage();
 		} else {		
 			// missile sequence number exists and maps to the same player Id, needs to send HitResponseMessage	
