@@ -1124,7 +1124,7 @@ void process_recv_KeepAliveMessage(KeepAliveMessage *p) {
 			M->myCurrOtherRatIdxIs(M->myCurrOtherRatIdx().value() + 1);
 		}
 
-		if (other->rat.x == Loc(p->ratPosX) && other->rat.y == Loc(p->ratPosY) && other->rat.dir == Loc(p->ratDir))
+		if (other->rat.x.value() == p->ratPosX && other->rat.y.value() == p->ratPosY && other->rat.dir.value() == p->ratDir)
 			updateView = FALSE;
 		else
 			updateView = TRUE;
