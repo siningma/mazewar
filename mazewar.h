@@ -272,6 +272,9 @@ public:
 		this->y = other.y;
 		return *this;
 	}
+	void print() {
+		printf("Node: x: %d, y: %d\n", this->x, this->y);
+	}
 };
 
 typedef	RatAppearance			RatApp_type [MAX_RATS];
