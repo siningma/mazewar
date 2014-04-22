@@ -49,6 +49,7 @@ SOFTWARE.
 #include "Nominal.h"
 #include "Exception.h"
 #include <string>
+#include <list>
 #include <map>
 #include <sys/time.h>
 
@@ -251,6 +252,27 @@ typedef struct {
 	MW_RatId victimId;
 	double recvHitMessageTimestamp;
 }	VictimRat;
+
+class Node {
+public:
+	int x;
+	int y;
+	Node(int tx, int ty) {
+		this->x = tx;
+		this->y = ty;
+	}
+	Node(const Node& other) {
+		this->x = other.x;
+		this->y = other.y;
+	}
+	Node& operator= (const Node& other) {
+		if(this == &other)	return *this;
+	
+		this->x = other.x;
+		this->y = other.y;
+		return *this;
+	}
+};
 
 typedef	RatAppearance			RatApp_type [MAX_RATS];
 typedef	RatAppearance *			RatLook;
@@ -644,6 +666,8 @@ void process_recv_KeepAliveMessage(KeepAliveMessage *p);
 void process_recv_LeaveMessage(LeaveMessage *p);
 void process_recv_HitMessage(HitMessage *p);
 void process_recv_HitResponseMessage(HitResponseMessage *p);
+bool isValidPosition(int tx, int ty);
+void getAdjcentNode(std::list<Node> *list, Node *node);
 
 
 /* winsys.c */

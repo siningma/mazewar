@@ -1177,36 +1177,50 @@ void process_recv_KeepAliveMessage(KeepAliveMessage *p) {
 void checkAndResolveRatPosConflict(int otherRatPosX, int otherRatPosY, unsigned char* other_ratId) {
 	if (MY_X_LOC == otherRatPosX && MY_Y_LOC == otherRatPosY) {
 		// there is position conflict, move rat with smaller ratId
-		if (memcmp(M->my_ratId.m_ratId, other_ratId, UUID_SIZE) < 0) {	// check NORTH cell
-			if (MY_X_LOC + 1 < MAZEXMAX && !M->maze_[MY_X_LOC + 1][MY_Y_LOC]) {
-				M->xlocIs(MY_X_LOC + 1);
-				M->ylocIs(MY_Y_LOC);
-				resolveRatPosConflictPrint();
-				updateView = TRUE;
-				return;
-			}
-			if (MY_X_LOC - 1 >= 0 && !M->maze_[MY_X_LOC - 1][MY_Y_LOC]) { // check SOUTH cell
-				M->xlocIs(MY_X_LOC - 1);
-				M->ylocIs(MY_Y_LOC);
-				resolveRatPosConflictPrint();
-				updateView = TRUE;	
-				return;
-			}
-			if (MY_Y_LOC + 1 < MAZEYMAX && !M->maze_[MY_X_LOC][MY_Y_LOC + 1]) { // check EAST cell
-				M->xlocIs(MY_X_LOC);
-				M->ylocIs(MY_Y_LOC + 1);
-				resolveRatPosConflictPrint();
-				updateView = TRUE;
-				return;
-			}
-			if (MY_Y_LOC - 1 >= 0 && !M->maze_[MY_X_LOC][MY_Y_LOC - 1]) { // check WEST cell
-				M->xlocIs(MY_X_LOC);
-				M->ylocIs(MY_Y_LOC - 1);
-				resolveRatPosConflictPrint();
-				updateView = TRUE;
-				return;
+		if (memcmp(M->my_ratId.m_ratId, other_ratId, UUID_SIZE) < 0) {	
+			std::list<Node> l;
+			Node my_node(MY_X_LOC, MY_Y_LOC);
+			getAdjcentNode(l, &my_node);
+			
+			while(l.size() > 0) {
+				Node node = q.pop_front();
+				if (isValidPosition(node.x, node.y) {
+					M->xlocIs(Loc(node.x));
+					M->ylocIs(Loc(node.y));
+					resolveRatPosConflictPrint();
+					updateView = TRUE;
+					return;
+				}
+				getAdjcentNode(l, &node);
 			}
 		}
+	}
+}
+
+bool isValidPosition(int tx, int ty) {
+	for (map<MW_RatId, OtherRat>::iterator it = M->otherRatInfoMap.begin(); it != M->otherRatInfoMap.end();) {
+		if (it->second.rat.x == tx && it->second.rat.y == ty)
+			return false;
+	}
+	return M->maze_[tx][ty] == false;
+}
+
+void getAdjcentNode(std::list<Node> *list, Node *node) {
+	if (node->x + 1 < MAZEXMAX) {
+		Node right(node->x + 1, node->y);
+		list->push_back(right);
+	}
+	if (node->x - 1 >= 0) {
+		Node left(node->x - 1, node->y);
+		list->push_back(left);
+	}
+	if (node->y + 1 < MAZEYMAX) {
+		Node down(node->x, node->y + 1);
+		list->push_back(down);
+	}
+	if (node->y - 1 >= 0) {
+		Node up(node->x, node->y - 1);
+		list->push_back(up);
 	}
 }
 
