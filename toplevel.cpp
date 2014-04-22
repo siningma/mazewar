@@ -972,10 +972,9 @@ void manageMissiles()
 			// missile hit the wall
 			if (M->maze_[MY_MISSILE_X_LOC][MY_MISSILE_Y_LOC] || MY_MISSILE_EXIST == false) {
 				printf("My missile: %u hits the wall. missilePosX: %u, missilePosY: %u\n", MY_MISSILE_SEQNUM, MY_MISSILE_X_LOC, MY_MISSILE_Y_LOC);
-				if (prevMissileXLoc.value() == 0 && prevMissileYLoc.value() == 0) {}
-				else
-					clearSquare(prevMissileXLoc, prevMissileYLoc);
+				printf("My missile previous PosX: %u, PosY: %u\n", prevMissileXLoc, prevMissileYLoc);
 
+				clearSquare(prevMissileXLoc, prevMissileYLoc);
 				if (prevMissileXLoc == MY_X_LOC && prevMissileYLoc == MY_Y_LOC)
 					ShowPosition(MY_X_LOC, MY_Y_LOC, MY_DIR);
 				updateView = TRUE;
