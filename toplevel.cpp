@@ -1124,6 +1124,11 @@ void process_recv_KeepAliveMessage(KeepAliveMessage *p) {
 			M->myCurrOtherRatIdxIs(M->myCurrOtherRatIdx().value() + 1);
 		}
 
+		if (other->rat.x == Loc(p->ratPosX) && other->rat.y == Loc(p->ratPosY) && other->rat.dir == Loc(p->ratDir))
+			updateView = FALSE;
+		else
+			updateView = TRUE;
+
 		other->rat.playing = true;
 		other->rat.x = Loc(p->ratPosX);
 		other->rat.y = Loc(p->ratPosY);
@@ -1164,9 +1169,8 @@ void process_recv_KeepAliveMessage(KeepAliveMessage *p) {
 
 		// two rats cannot be at the same position. Check position and resolve conflict if needed
 		checkAndResolveRatPosConflict(other.rat.x.value(), other.rat.y.value(), p->ratId);
+		updateView = TRUE;
 	}
-
-	updateView = TRUE;
 }
 
 void checkAndResolveRatPosConflict(int otherRatPosX, int otherRatPosY, unsigned char* other_ratId) {
@@ -1177,24 +1181,28 @@ void checkAndResolveRatPosConflict(int otherRatPosX, int otherRatPosY, unsigned 
 				M->xlocIs(MY_X_LOC + 1);
 				M->ylocIs(MY_Y_LOC);
 				resolveRatPosConflictPrint();
+				updateView = TRUE;
 				return;
 			}
 			if (MY_X_LOC - 1 >= 0 && !M->maze_[MY_X_LOC - 1][MY_Y_LOC]) { // check SOUTH cell
 				M->xlocIs(MY_X_LOC - 1);
 				M->ylocIs(MY_Y_LOC);
-				resolveRatPosConflictPrint();	
+				resolveRatPosConflictPrint();
+				updateView = TRUE;	
 				return;
 			}
 			if (MY_Y_LOC + 1 < MAZEYMAX && !M->maze_[MY_X_LOC][MY_Y_LOC + 1]) { // check EAST cell
 				M->xlocIs(MY_X_LOC);
 				M->ylocIs(MY_Y_LOC + 1);
 				resolveRatPosConflictPrint();
+				updateView = TRUE;
 				return;
 			}
 			if (MY_Y_LOC - 1 >= 0 && !M->maze_[MY_X_LOC][MY_Y_LOC - 1]) { // check WEST cell
 				M->xlocIs(MY_X_LOC);
 				M->ylocIs(MY_Y_LOC - 1);
 				resolveRatPosConflictPrint();
+				updateView = TRUE;
 				return;
 			}
 		}
